@@ -686,47 +686,93 @@ function deleteRecord(i) {
 }
 
 // ===== EXPORTS =====
-function exportCSV() {
-  const data = getData();
-  if (!data.length) { showToast('Sin datos'); return; }
-  const rows = [['Fecha','Clientes visitados','Cant. clientes','Total pedidos','Kilómetros','Horas viaje','Notas']];
-  data.forEach(r => {
-    const totalPed = r.clientes.reduce((s,c) => s+c.pedidos.length, 0);
-    rows.push([
-      fmtDate(r.fecha),
-      '"' + r.clientes.map(c=>c.nombre).join(', ') + '"',
-      r.clientes.length, totalPed, r.km, r.horas,
-      '"' + (r.notas||'').replace(/"/g,'""') + '"'
-    ]);
-  });
-  downloadCSV(rows, 'diario_viajante_' + todayStr + '.csv');
+
+// Helper: escapar campo CSV correctamente
+function csvField(val) {
+  const s = String(val === null || val === undefined ? '' : val);
+  // Si tiene comas, comillas o saltos de línea, envolver en comillas
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
 }
 
+// Reporte de giras: una fila por día
+function exportCSV() {
+  const data = getData();
+  if (!data.length) { showToast('Sin datos para exportar'); return; }
+
+  const headers = ['Fecha','Día','Km recorridos','Horas viaje','Cant. clientes','Total pedidos','Clientes visitados','Notas'];
+  const rows = [headers];
+
+  data.forEach(r => {
+    const totalPed = r.clientes.reduce((s,c) => s + c.pedidos.length, 0);
+    const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const partes = r.fecha.split('-');
+    const fechaObj = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+    const diaSemana = diasSemana[fechaObj.getDay()];
+    rows.push([
+      csvField(fmtDate(r.fecha)),
+      csvField(diaSemana),
+      csvField(r.km),
+      csvField(r.horas),
+      csvField(r.clientes.length),
+      csvField(totalPed),
+      csvField(r.clientes.map(c => c.nombre).join(' | ')),
+      csvField(r.notas || '')
+    ]);
+  });
+
+  // Fila de totales
+  const totKm = data.reduce((s,r) => s + (parseFloat(r.km)||0), 0);
+  const totHoras = data.reduce((s,r) => s + (parseFloat(r.horas)||0), 0);
+  const totClientes = data.reduce((s,r) => s + r.clientes.length, 0);
+  const totPedidos = data.reduce((s,r) => s + r.clientes.reduce((ss,c) => ss + c.pedidos.length, 0), 0);
+  rows.push([]);
+  rows.push(['TOTALES','','','','','','','']);
+  rows.push([csvField(data.length + ' días'), '', csvField(totKm.toFixed(1)), csvField(totHoras.toFixed(1)), csvField(totClientes), csvField(totPedidos), '', '']);
+
+  downloadCSV(rows, 'giras_' + todayStr + '.csv');
+}
+
+// Reporte de pedidos: una fila por producto pedido
 function exportPedidosCSV() {
   const data = getData();
-  if (!data.length) { showToast('Sin datos'); return; }
-  const rows = [['Fecha','Cliente','Producto','Cantidad']];
+  if (!data.length) { showToast('Sin datos para exportar'); return; }
+
+  const headers = ['Fecha','Día','Cliente','Producto','Cantidad'];
+  const rows = [headers];
+
   data.forEach(r => {
+    const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const partes = r.fecha.split('-');
+    const fechaObj = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+    const diaSemana = diasSemana[fechaObj.getDay()];
     r.clientes.forEach(c => {
       if (c.pedidos.length === 0) {
-        rows.push([fmtDate(r.fecha), c.nombre, '—', '—']);
+        rows.push([csvField(fmtDate(r.fecha)), csvField(diaSemana), csvField(c.nombre), csvField('(sin pedidos)'), '']);
       } else {
         c.pedidos.forEach(p => {
-          rows.push([fmtDate(r.fecha), c.nombre, p.producto, p.cantidad]);
+          rows.push([csvField(fmtDate(r.fecha)), csvField(diaSemana), csvField(c.nombre), csvField(p.producto), csvField(p.cantidad)]);
         });
       }
     });
   });
-  downloadCSV(rows, 'pedidos_clientes_' + todayStr + '.csv');
+
+  downloadCSV(rows, 'pedidos_' + todayStr + '.csv');
 }
 
 function downloadCSV(rows, filename) {
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  // BOM UTF-8 para que Excel en español lo abra bien
+  const csv = '\uFEFF' + rows.map(r => Array.isArray(r) ? r.join(',') : '').join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
   showToast('✅ CSV descargado');
 }
 
@@ -813,13 +859,43 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ===== GPS TRACKER =====
+// ===== GPS TRACKER con persistencia en segundo plano =====
+// La clave: guardamos todo en localStorage con timestamps reales (Date.now())
+// Así cuando volvés a la app, recalculamos el tiempo real transcurrido
+// y los km se suman correctamente desde el último punto guardado.
+
 let gpsTracking = false;
 let gpsWatchId = null;
-let gpsPoints = [];
-let gpsStartTime = null;
 let gpsTimerInterval = null;
-let gpsTotalKm = 0;
+
+// Estado en memoria (se recarga desde localStorage al volver)
+let gpsState = {
+  active: false,
+  startTime: null,       // timestamp real de inicio
+  pausedMs: 0,           // ms acumulados antes de la última pausa (para futuras pausas)
+  totalKm: 0,
+  points: [],            // [{lat, lng, t}]
+  lastPoint: null,       // último punto guardado (para continuar al volver)
+  lastSaveTime: null     // timestamp de la última vez que se guardó el estado
+};
+
+const GPS_KEY = 'viajante_gps_state';
+
+function saveGpsState() {
+  try { localStorage.setItem(GPS_KEY, JSON.stringify(gpsState)); } catch(e) {}
+}
+
+function loadGpsState() {
+  try {
+    const s = localStorage.getItem(GPS_KEY);
+    if (s) gpsState = JSON.parse(s);
+  } catch(e) {}
+}
+
+function clearGpsState() {
+  try { localStorage.removeItem(GPS_KEY); } catch(e) {}
+  gpsState = { active: false, startTime: null, pausedMs: 0, totalKm: 0, points: [], lastPoint: null, lastSaveTime: null };
+}
 
 function toggleGPS() {
   if (gpsTracking) {
@@ -834,28 +910,48 @@ function startGPS() {
     showToast('Tu dispositivo no soporta GPS');
     return;
   }
-  // En iPhone, el GPS solo funciona con HTTPS o localhost
   if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-    document.getElementById('gps-status').textContent = '⚠️ El GPS requiere HTTPS. Abrí el archivo desde un servidor o la app instalada.';
-    showToast('⚠️ GPS requiere HTTPS en iPhone');
+    document.getElementById('gps-status').textContent = '⚠️ GPS requiere HTTPS. Abrí desde GitHub Pages.';
+    showToast('⚠️ GPS requiere HTTPS');
     return;
   }
 
-  gpsPoints = [];
-  gpsTotalKm = 0;
-  gpsStartTime = Date.now();
+  // Si hay estado previo activo (volvió de otra app), retomarlo
+  loadGpsState();
+  const ahora = Date.now();
+
+  if (gpsState.active && gpsState.startTime) {
+    // Venía corriendo — calculamos km/tiempo perdidos mientras estuvo fuera
+    const ausenciaSeg = Math.round((ahora - gpsState.lastSaveTime) / 1000);
+    const ausenciaMin = Math.round(ausenciaSeg / 60);
+    showToast(`▶ Retomado. Estuviste ${ausenciaMin} min fuera de la app`);
+    // El tiempo ya se cuenta solo porque startTime no cambió
+  } else {
+    // Inicio fresco
+    gpsState = {
+      active: true,
+      startTime: ahora,
+      pausedMs: 0,
+      totalKm: 0,
+      points: [],
+      lastPoint: null,
+      lastSaveTime: ahora
+    };
+    saveGpsState();
+  }
+
+  gpsTracking = true;
 
   document.getElementById('gps-btn').className = 'gps-btn stop';
   document.getElementById('gps-btn-icon').textContent = '⏹';
   document.getElementById('gps-btn-text').textContent = 'Finalizar viaje';
   document.getElementById('gps-status').innerHTML = '<span class="gps-dot"></span>Rastreando tu recorrido...';
-  document.getElementById('gps-km').textContent = '0.0';
-  document.getElementById('gps-pts').textContent = '0';
+  document.getElementById('gps-km').textContent = gpsState.totalKm.toFixed(1);
+  document.getElementById('gps-pts').textContent = gpsState.points.length;
 
-  gpsTracking = true;
-
-  // Timer
+  // Timer — usa el startTime real, así aunque hayas salido el tiempo es correcto
   gpsTimerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
 
   // Watch position
   gpsWatchId = navigator.geolocation.watchPosition(
@@ -865,23 +961,37 @@ function startGPS() {
 
       const newPoint = { lat: latitude, lng: longitude, t: Date.now() };
 
-      if (gpsPoints.length > 0) {
-        const last = gpsPoints[gpsPoints.length - 1];
-        const dist = haversine(last.lat, last.lng, newPoint.lat, newPoint.lng);
-        if (dist < 0.020) return;
-        gpsTotalKm += dist;
+      // Calcular distancia desde el último punto (en memoria o el guardado)
+      const refPoint = gpsState.points.length > 0
+        ? gpsState.points[gpsState.points.length - 1]
+        : gpsState.lastPoint;
+
+      if (refPoint) {
+        const dist = haversine(refPoint.lat, refPoint.lng, newPoint.lat, newPoint.lng);
+        if (dist < 0.020) return; // menos de 20m, ignorar ruido GPS
+        gpsState.totalKm += dist;
       }
 
-      gpsPoints.push(newPoint);
-      document.getElementById('gps-km').textContent = gpsTotalKm.toFixed(1);
-      document.getElementById('gps-pts').textContent = gpsPoints.length;
+      gpsState.points.push(newPoint);
+      gpsState.lastPoint = newPoint;
+      gpsState.lastSaveTime = Date.now();
+
+      // Guardar estado cada nuevo punto para no perder datos
+      saveGpsState();
+
+      document.getElementById('gps-km').textContent = gpsState.totalKm.toFixed(1);
+      document.getElementById('gps-pts').textContent = gpsState.points.length;
     },
     (err) => {
-      const msgs = { 1: 'Permiso de ubicación denegado — activalo en Ajustes > Safari', 2: 'Ubicación no disponible', 3: 'Tiempo de espera agotado' };
+      const msgs = {
+        1: 'Permiso denegado — Ajustes > Safari > Ubicación',
+        2: 'Ubicación no disponible',
+        3: 'Tiempo de espera agotado'
+      };
       document.getElementById('gps-status').textContent = '⚠️ ' + (msgs[err.code] || 'Error GPS');
       stopGPS();
     },
-    { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
   );
 }
 
@@ -891,31 +1001,59 @@ function stopGPS() {
     gpsWatchId = null;
   }
   clearInterval(gpsTimerInterval);
+  gpsTimerInterval = null;
   gpsTracking = false;
+
+  // Calcular totales finales usando el tiempo real transcurrido
+  const ahora = Date.now();
+  const totalMs = gpsState.startTime ? (ahora - gpsState.startTime) : 0;
+  const totalMins = Math.round(totalMs / 60000);
+  const totalHoras = (totalMins / 60).toFixed(1);
+  const kmFinal = gpsState.totalKm.toFixed(1);
+
+  // Rellenar campos del formulario
+  document.getElementById('km').value = kmFinal;
+  document.getElementById('horas').value = totalHoras;
 
   document.getElementById('gps-btn').className = 'gps-btn start';
   document.getElementById('gps-btn-icon').textContent = '▶';
   document.getElementById('gps-btn-text').textContent = 'Iniciar viaje';
+  document.getElementById('gps-tiempo').textContent = '0:00';
+  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${totalMins} min`;
+  showToast(`✅ ${kmFinal} km y ${totalHoras}h registrados`);
 
-  const kmFinal = gpsTotalKm.toFixed(1);
-  const mins = Math.round((Date.now() - gpsStartTime) / 60000);
-  const horas = (mins / 60).toFixed(1);
-
-  // Auto-fill km and hours
-  document.getElementById('km').value = kmFinal;
-  document.getElementById('horas').value = horas;
-
-  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${mins} min`;
-  showToast(`✅ ${kmFinal} km registrados automáticamente`);
+  clearGpsState();
 }
 
 function updateTimer() {
-  if (!gpsStartTime) return;
-  const elapsed = Math.floor((Date.now() - gpsStartTime) / 1000);
+  if (!gpsState.startTime) return;
+  // Usa el timestamp real de inicio — funciona aunque hayas salido de la app
+  const elapsed = Math.floor((Date.now() - gpsState.startTime) / 1000);
   const m = Math.floor(elapsed / 60);
   const s = elapsed % 60;
   document.getElementById('gps-tiempo').textContent = m + ':' + String(s).padStart(2,'0');
+  // Guardar estado cada 30 segundos para no perder el tiempo si el proceso muere
+  if (elapsed % 30 === 0) {
+    gpsState.lastSaveTime = Date.now();
+    saveGpsState();
+  }
 }
+
+// Al cargar la app: verificar si había un viaje activo y retomarlo automáticamente
+(function checkResumeGps() {
+  loadGpsState();
+  if (gpsState.active && gpsState.startTime) {
+    const ausenciaMin = Math.round((Date.now() - (gpsState.lastSaveTime || gpsState.startTime)) / 60000);
+    // Mostrar aviso y botón para retomar
+    const statusEl = document.getElementById('gps-status');
+    if (statusEl) {
+      statusEl.innerHTML = `⚠️ Viaje en curso (${gpsState.totalKm.toFixed(1)} km). <strong>Tocá "Iniciar" para retomar.</strong>`;
+    }
+    const btnText = document.getElementById('gps-btn-text');
+    if (btnText) btnText.textContent = 'Retomar viaje';
+    showToast(`Tenés un viaje en curso — ${gpsState.totalKm.toFixed(1)} km registrados`);
+  }
+})();
 
 // Haversine formula: distance in km between two lat/lng points
 function haversine(lat1, lng1, lat2, lng2) {
