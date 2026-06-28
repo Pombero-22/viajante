@@ -10,8 +10,7 @@
 <meta name="theme-color" content="#2e7d32">
 <meta name="description" content="Diario de giras para viajante de comercio">
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Diario+del+Viajante%22%2C%22short_name%22%3A%22Viajante%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%232e7d32%22%2C%22theme_color%22%3A%22%232e7d32%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D%2527http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527+viewBox%3D%25270+0+100+100%2527%253E%253Crect+width%3D%2527100%2527+height%3D%2527100%2527+fill%3D%2527%25232e7d32%2527%2F%253E%253Ctext+y%3D%2527.9em%2527+font-size%3D%252780%2527%253E%25F0%259F%258C%25BF%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
-<!-- SheetJS para generar Excel real -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Apple touch icon inline SVG via canvas (generado al cargar) -->
 <title>Diario del Viajante</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -262,10 +261,10 @@
 <div class="page" id="page-exportar">
   <div class="card">
     <div class="card-title">📊 Exportar datos</div>
-    <button class="export-btn" onclick="exportPedidosXLSX()">📦 Pedidos por cliente (.xlsx)</button>
-    <button class="export-btn" onclick="exportGirasXLSX()">🛣 Resumen de giras (.xlsx)</button>
+    <button class="export-btn" onclick="exportCSV()">📄 Descargar CSV (Excel)</button>
+    <button class="export-btn" onclick="exportPedidosCSV()">📦 Pedidos por cliente (CSV)</button>
     <button class="export-btn" onclick="exportResumen()">📝 Resumen del mes (.txt)</button>
-    <p class="hint" style="margin-top:4px;">Los archivos .xlsx se abren directo en Excel.</p>
+    <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
   </div>
   <div class="card" id="stats-mes"></div>
 </div>
@@ -686,208 +685,95 @@ function deleteRecord(i) {
   showToast('Eliminado');
 }
 
-// ===== EXPORTS EXCEL (.xlsx) =====
+// ===== EXPORTS =====
 
-const VERDE_BG       = { fgColor: { rgb: '2E7D32' } };
-const VERDE_CLARO_BG = { fgColor: { rgb: 'E8F5E9' } };
-const AZUL_CLARO_BG  = { fgColor: { rgb: 'E3F2FD' } };
-const GRIS_BG        = { fgColor: { rgb: 'F5F5F5' } };
-const NARANJA_BG     = { fgColor: { rgb: 'FFF3E0' } };
-const FAFAFA_BG      = { fgColor: { rgb: 'FAFAFA' } };
-
-function makeBorder() {
-  return {
-    top:    { style: 'thin', color: { rgb: 'BDBDBD' } },
-    bottom: { style: 'thin', color: { rgb: 'BDBDBD' } },
-    left:   { style: 'thin', color: { rgb: 'BDBDBD' } },
-    right:  { style: 'thin', color: { rgb: 'BDBDBD' } }
-  };
+// Helper: escapar campo CSV correctamente
+function csvField(val) {
+  const s = String(val === null || val === undefined ? '' : val);
+  // Si tiene comas, comillas o saltos de línea, envolver en comillas
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
 }
 
-function xlsxCell(v, bold, bgObj, fontSize, colorRgb, border) {
-  const s = {
-    font: { bold: !!bold, sz: fontSize || 11, color: { rgb: colorRgb || '1A1A1A' }, name: 'Calibri' },
-    alignment: { vertical: 'center', wrapText: true },
-    fill: bgObj ? { patternType: 'solid', fgColor: bgObj.fgColor } : { patternType: 'none' }
-  };
-  if (border) s.border = makeBorder();
-  return { v: v, t: typeof v === 'number' ? 'n' : 's', s };
-}
-
-function addr(r, c) { return XLSX.utils.encode_cell({ r, c }); }
-
-function xlsxMerge(ws, r1, c1, r2, c2) {
-  if (!ws['!merges']) ws['!merges'] = [];
-  ws['!merges'].push({ s: { r: r1, c: c1 }, e: { r: r2, c: c2 } });
-}
-
-function setRowH(ws, row, hpt) {
-  if (!ws['!rows']) ws['!rows'] = [];
-  ws['!rows'][row] = { hpt };
-}
-
-// ─────────────────────────────────────────────
-// EXPORT 1: Pedidos por cliente
-// Un bloque por día → dentro, un bloque por cliente → pedidos abajo
-// ─────────────────────────────────────────────
-function exportPedidosXLSX() {
+// Reporte de giras: una fila por día
+function exportCSV() {
   const data = getData();
   if (!data.length) { showToast('Sin datos para exportar'); return; }
-  if (typeof XLSX === 'undefined') { showToast('Cargando librería, intentá de nuevo'); return; }
 
-  const wb = XLSX.utils.book_new();
-  const ws = {};
-  const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  let row = 0;
-
-  // Título principal
-  ws[addr(row,0)] = xlsxCell('DIARIO DEL VIAJANTE — PEDIDOS POR CLIENTE', true, VERDE_BG, 14, 'FFFFFF', false);
-  ws[addr(row,1)] = xlsxCell('', false, VERDE_BG, 14, 'FFFFFF', false);
-  ws[addr(row,2)] = xlsxCell('', false, VERDE_BG, 14, 'FFFFFF', false);
-  xlsxMerge(ws, row, 0, row, 2); setRowH(ws, row, 30); row++;
-
-  // Subtítulo fecha exportación
-  const hoy = new Date();
-  const fexp = 'Exportado el ' + hoy.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  ws[addr(row,0)] = xlsxCell(fexp, false, GRIS_BG, 10, '757575', false);
-  ws[addr(row,1)] = xlsxCell('', false, GRIS_BG, 10, '757575', false);
-  ws[addr(row,2)] = xlsxCell('', false, GRIS_BG, 10, '757575', false);
-  xlsxMerge(ws, row, 0, row, 2); row++;
-  row++; // espacio
+  const headers = ['Fecha','Día','Km recorridos','Horas viaje','Cant. clientes','Total pedidos','Clientes visitados','Notas'];
+  const rows = [headers];
 
   data.forEach(r => {
-    const partes = r.fecha.split('-');
-    const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
-    const diaStr = DIAS[fd.getDay()];
     const totalPed = r.clientes.reduce((s,c) => s + c.pedidos.length, 0);
-
-    // Encabezado día
-    const titdia = diaStr.toUpperCase() + '  ' + fmtDate(r.fecha);
-    ws[addr(row,0)] = xlsxCell('📅  ' + titdia, true, VERDE_BG, 12, 'FFFFFF', false);
-    ws[addr(row,1)] = xlsxCell('', false, VERDE_BG, 12, 'FFFFFF', false);
-    ws[addr(row,2)] = xlsxCell('', false, VERDE_BG, 12, 'FFFFFF', false);
-    xlsxMerge(ws, row, 0, row, 2); setRowH(ws, row, 24); row++;
-
-    // Info del día
-    const info = '   ' + r.km + ' km   |   ' + r.horas + ' horas   |   ' + r.clientes.length + ' clientes   |   ' + totalPed + ' pedidos';
-    ws[addr(row,0)] = xlsxCell(info, false, VERDE_CLARO_BG, 10, '2E7D32', false);
-    ws[addr(row,1)] = xlsxCell('', false, VERDE_CLARO_BG, 10, '2E7D32', false);
-    ws[addr(row,2)] = xlsxCell('', false, VERDE_CLARO_BG, 10, '2E7D32', false);
-    xlsxMerge(ws, row, 0, row, 2); setRowH(ws, row, 18); row++;
-
-    if (r.clientes.length === 0) {
-      ws[addr(row,0)] = xlsxCell('   (sin clientes registrados)', false, null, 10, '9E9E9E', false);
-      xlsxMerge(ws, row, 0, row, 2); row++;
-    }
-
-    r.clientes.forEach(c => {
-      // Nombre cliente — título azul
-      ws[addr(row,0)] = xlsxCell('   ' + c.nombre.toUpperCase(), true, AZUL_CLARO_BG, 11, '1565C0', true);
-      ws[addr(row,1)] = xlsxCell('', true, AZUL_CLARO_BG, 11, '1565C0', true);
-      ws[addr(row,2)] = xlsxCell('', true, AZUL_CLARO_BG, 11, '1565C0', true);
-      xlsxMerge(ws, row, 0, row, 2); setRowH(ws, row, 22); row++;
-
-      if (c.pedidos.length === 0) {
-        ws[addr(row,0)] = xlsxCell('', false, null, 10, null, false);
-        ws[addr(row,1)] = xlsxCell('(sin pedidos registrados)', false, null, 10, '9E9E9E', false);
-        ws[addr(row,2)] = xlsxCell('', false, null, 10, null, false);
-        setRowH(ws, row, 16); row++;
-      } else {
-        // Encabezados columnas
-        ws[addr(row,0)] = xlsxCell('', false, GRIS_BG, 9, '616161', false);
-        ws[addr(row,1)] = xlsxCell('Producto', true, GRIS_BG, 9, '616161', true);
-        ws[addr(row,2)] = xlsxCell('Cantidad', true, GRIS_BG, 9, '616161', true);
-        setRowH(ws, row, 16); row++;
-
-        c.pedidos.forEach((p, pi) => {
-          const bg = pi % 2 === 0 ? null : FAFAFA_BG;
-          ws[addr(row,0)] = xlsxCell('   →', false, bg, 11, 'E65100', false);
-          ws[addr(row,1)] = xlsxCell(p.producto, false, bg, 11, '1A1A1A', true);
-          ws[addr(row,2)] = xlsxCell(p.cantidad, false, bg, 11, '1A1A1A', true);
-          setRowH(ws, row, 18); row++;
-        });
-      }
-      row++; // espacio entre clientes
-    });
-
-    // Notas del día
-    if (r.notas) {
-      ws[addr(row,0)] = xlsxCell('📝  ' + r.notas, false, NARANJA_BG, 10, '795548', false);
-      ws[addr(row,1)] = xlsxCell('', false, NARANJA_BG, 10, '795548', false);
-      ws[addr(row,2)] = xlsxCell('', false, NARANJA_BG, 10, '795548', false);
-      xlsxMerge(ws, row, 0, row, 2); setRowH(ws, row, 18); row++;
-    }
-
-    row += 2; // espacio entre días
+    const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const partes = r.fecha.split('-');
+    const fechaObj = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+    const diaSemana = diasSemana[fechaObj.getDay()];
+    rows.push([
+      csvField(fmtDate(r.fecha)),
+      csvField(diaSemana),
+      csvField(r.km),
+      csvField(r.horas),
+      csvField(r.clientes.length),
+      csvField(totalPed),
+      csvField(r.clientes.map(c => c.nombre).join(' | ')),
+      csvField(r.notas || '')
+    ]);
   });
 
-  ws['!ref'] = XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:row,c:2} });
-  ws['!cols'] = [{ wch: 5 }, { wch: 42 }, { wch: 20 }];
+  // Fila de totales
+  const totKm = data.reduce((s,r) => s + (parseFloat(r.km)||0), 0);
+  const totHoras = data.reduce((s,r) => s + (parseFloat(r.horas)||0), 0);
+  const totClientes = data.reduce((s,r) => s + r.clientes.length, 0);
+  const totPedidos = data.reduce((s,r) => s + r.clientes.reduce((ss,c) => ss + c.pedidos.length, 0), 0);
+  rows.push([]);
+  rows.push(['TOTALES','','','','','','','']);
+  rows.push([csvField(data.length + ' días'), '', csvField(totKm.toFixed(1)), csvField(totHoras.toFixed(1)), csvField(totClientes), csvField(totPedidos), '', '']);
 
-  XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
-  XLSX.writeFile(wb, 'pedidos_viajante_' + todayStr + '.xlsx');
-  showToast('✅ Excel descargado');
+  downloadCSV(rows, 'giras_' + todayStr + '.csv');
 }
 
-// ─────────────────────────────────────────────
-// EXPORT 2: Resumen de giras (una fila por día)
-// ─────────────────────────────────────────────
-function exportGirasXLSX() {
+// Reporte de pedidos: una fila por producto pedido
+function exportPedidosCSV() {
   const data = getData();
   if (!data.length) { showToast('Sin datos para exportar'); return; }
-  if (typeof XLSX === 'undefined') { showToast('Cargando librería, intentá de nuevo'); return; }
 
-  const wb = XLSX.utils.book_new();
-  const ws = {};
-  const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const COLS = ['Fecha','Día','Km','Horas','Clientes','Pedidos','Clientes visitados','Notas'];
-  let row = 0;
+  const headers = ['Fecha','Día','Cliente','Producto','Cantidad'];
+  const rows = [headers];
 
-  // Título
-  COLS.forEach((_, c) => {
-    ws[addr(row,c)] = xlsxCell(c === 0 ? 'RESUMEN DE GIRAS — AGROPECUARIA DEL PARANÁ SA' : '', true, VERDE_BG, 13, 'FFFFFF', false);
-  });
-  xlsxMerge(ws, row, 0, row, COLS.length-1); setRowH(ws, row, 28); row++;
-
-  // Encabezados
-  COLS.forEach((h, c) => {
-    ws[addr(row,c)] = xlsxCell(h, true, VERDE_CLARO_BG, 11, '2E7D32', true);
-  });
-  setRowH(ws, row, 20); row++;
-
-  // Datos
-  data.forEach((r, i) => {
+  data.forEach(r => {
+    const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const partes = r.fecha.split('-');
-    const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
-    const totalPed = r.clientes.reduce((s,c) => s + c.pedidos.length, 0);
-    const bg = i % 2 === 0 ? null : GRIS_BG;
-    const vals = [
-      fmtDate(r.fecha), DIAS[fd.getDay()],
-      parseFloat(r.km)||0, parseFloat(r.horas)||0,
-      r.clientes.length, totalPed,
-      r.clientes.map(c=>c.nombre).join(' | '),
-      r.notas || ''
-    ];
-    vals.forEach((v, c) => { ws[addr(row,c)] = xlsxCell(v, false, bg, 11, null, true); });
-    setRowH(ws, row, 18); row++;
+    const fechaObj = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+    const diaSemana = diasSemana[fechaObj.getDay()];
+    r.clientes.forEach(c => {
+      if (c.pedidos.length === 0) {
+        rows.push([csvField(fmtDate(r.fecha)), csvField(diaSemana), csvField(c.nombre), csvField('(sin pedidos)'), '']);
+      } else {
+        c.pedidos.forEach(p => {
+          rows.push([csvField(fmtDate(r.fecha)), csvField(diaSemana), csvField(c.nombre), csvField(p.producto), csvField(p.cantidad)]);
+        });
+      }
+    });
   });
 
-  // Totales
-  const totKm    = data.reduce((s,r) => s + (parseFloat(r.km)||0), 0);
-  const totHoras  = data.reduce((s,r) => s + (parseFloat(r.horas)||0), 0);
-  const totVisit  = data.reduce((s,r) => s + r.clientes.length, 0);
-  const totPed    = data.reduce((s,r) => s + r.clientes.reduce((ss,c) => ss+c.pedidos.length, 0), 0);
-  row++;
-  const tots = ['TOTALES', data.length+' días', totKm.toFixed(1), totHoras.toFixed(1), totVisit, totPed, '', ''];
-  tots.forEach((v, c) => { ws[addr(row,c)] = xlsxCell(v, true, VERDE_CLARO_BG, 11, '2E7D32', true); });
-  setRowH(ws, row, 20); row++;
+  downloadCSV(rows, 'pedidos_' + todayStr + '.csv');
+}
 
-  ws['!ref'] = XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:row,c:COLS.length-1} });
-  ws['!cols'] = [14,12,8,8,10,10,45,30].map(w => ({ wch: w }));
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Giras');
-  XLSX.writeFile(wb, 'giras_viajante_' + todayStr + '.xlsx');
-  showToast('✅ Excel descargado');
+function downloadCSV(rows, filename) {
+  // BOM UTF-8 para que Excel en español lo abra bien
+  const csv = '\uFEFF' + rows.map(r => Array.isArray(r) ? r.join(',') : '').join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+  showToast('✅ CSV descargado');
 }
 
 function exportResumen() {
