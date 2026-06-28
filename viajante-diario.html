@@ -134,6 +134,16 @@
   .mic-indicator.visible { display: block; animation: pulse-blue 1s infinite; }
   @keyframes pulse-blue { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
+  /* GASTOS */
+  .gasto-item { display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; font-size: 14px; border-left: 3px solid var(--orange); }
+  .gasto-item .g-cat { font-weight: 700; color: var(--orange); min-width: 90px; }
+  .gasto-item .g-desc { flex: 1; color: var(--muted); font-size: 13px; margin: 0 8px; }
+  .gasto-item .g-monto { font-weight: 800; color: var(--text); }
+  .gasto-item button { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px; }
+  .gastos-total { background: var(--orange-pale); border-radius: 8px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; color: var(--orange); }
+  .cat-btn { padding: 8px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: white; font-size: 13px; cursor: pointer; font-weight: 600; color: var(--muted); transition: all 0.15s; }
+  .cat-btn.selected { background: var(--orange); color: white; border-color: var(--orange); }
+
   /* GPS TRACKER */
   .gps-card { background: linear-gradient(135deg, #1a237e, #1565c0); border-radius: 12px; padding: 16px; margin-bottom: 14px; color: white; }
   .gps-card .card-title { color: rgba(255,255,255,0.7); }
@@ -244,6 +254,23 @@
     <textarea class="notes-area" id="notas" placeholder="Observaciones generales, condiciones de campo, etc."></textarea>
   </div>
 
+  <div class="card">
+    <div class="card-title">💸 Gastos del día</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="cat-btns">
+      <button class="cat-btn selected" onclick="selectCat(this,'Combustible')">⛽ Combustible</button>
+      <button class="cat-btn" onclick="selectCat(this,'Comida')">🍽 Comida</button>
+      <button class="cat-btn" onclick="selectCat(this,'Peaje')">🛣 Peaje</button>
+      <button class="cat-btn" onclick="selectCat(this,'Alojamiento')">🏨 Alojamiento</button>
+      <button class="cat-btn" onclick="selectCat(this,'Otro')">📎 Otro</button>
+    </div>
+    <div class="row" style="margin-bottom:8px;">
+      <input type="number" id="gasto-monto" placeholder="Monto $" min="0" step="0.01" style="flex:1;">
+      <input type="text" id="gasto-desc" placeholder="Descripción (opcional)" style="flex:2;">
+      <button class="icon-btn green" onclick="addGasto()">+</button>
+    </div>
+    <div id="gastos-list"></div>
+  </div>
+
   <button class="save-btn" onclick="saveRecord()">💾 Guardar día</button>
 </div>
 
@@ -291,6 +318,47 @@ document.getElementById('header-date').textContent = today.toLocaleDateString('e
 
 // clients = [{nombre, pedidos:[{producto, cantidad}]}]
 let clients = [];
+
+// gastos = [{categoria, monto, descripcion}]
+let gastos = [];
+let gastoCategoria = 'Combustible';
+
+function selectCat(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  gastoCategoria = cat;
+}
+
+function addGasto() {
+  const monto = parseFloat(document.getElementById('gasto-monto').value);
+  if (!monto || monto <= 0) { showToast('Ingresá un monto válido'); return; }
+  const desc = document.getElementById('gasto-desc').value.trim();
+  gastos.push({ categoria: gastoCategoria, monto, descripcion: desc });
+  document.getElementById('gasto-monto').value = '';
+  document.getElementById('gasto-desc').value = '';
+  renderGastos();
+  showToast('✅ Gasto agregado');
+}
+
+function removeGasto(i) {
+  gastos.splice(i, 1);
+  renderGastos();
+}
+
+function renderGastos() {
+  const el = document.getElementById('gastos-list');
+  if (!gastos.length) { el.innerHTML = ''; return; }
+  const total = gastos.reduce((s, g) => s + g.monto, 0);
+  const catIcons = { Combustible:'⛽', Comida:'🍽', Peaje:'🛣', Alojamiento:'🏨', Otro:'📎' };
+  el.innerHTML = gastos.map((g, i) => `
+    <div class="gasto-item">
+      <span class="g-cat">${catIcons[g.categoria]||'📎'} ${g.categoria}</span>
+      <span class="g-desc">${g.descripcion || ''}</span>
+      <span class="g-monto">$${g.monto.toLocaleString('es-AR')}</span>
+      <button onclick="removeGasto(${i})">✕</button>
+    </div>
+  `).join('') + `<div class="gastos-total"><span>Total gastos</span><span>$${total.toLocaleString('es-AR')}</span></div>`;
+}
 
 function fmtDate(s) {
   if (!s) return '';
@@ -542,7 +610,7 @@ function saveRecord() {
 
   const data = getData();
   const idx = data.findIndex(r => r.fecha === fecha);
-  const record = { fecha, km, horas, clientes: JSON.parse(JSON.stringify(clients)), notas, savedAt: new Date().toISOString() };
+  const record = { fecha, km, horas, clientes: JSON.parse(JSON.stringify(clients)), gastos: JSON.parse(JSON.stringify(gastos)), notas, savedAt: new Date().toISOString() };
 
   if (idx >= 0) {
     if (!confirm('Ya hay un registro para esta fecha. ¿Reemplazar?')) return;
@@ -555,7 +623,9 @@ function saveRecord() {
 
   // Reset
   clients = [];
+  gastos = [];
   renderClients();
+  renderGastos();
   ['km','horas','notas'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('vresult-general').classList.remove('visible');
 
@@ -602,6 +672,12 @@ function renderHoy() {
       `).join('')}
     </div>` : ''}
     ${r.notas ? `<div class="card"><div class="card-title">📝 Notas</div><div style="font-size:14px;line-height:1.5;">${r.notas}</div></div>` : ''}
+    ${(r.gastos && r.gastos.length) ? `
+    <div class="card">
+      <div class="card-title">💸 Gastos</div>
+      ${r.gastos.map(g => `<div class="gasto-item"><span class="g-cat">${g.categoria}</span><span class="g-desc">${g.descripcion||''}</span><span class="g-monto">$${g.monto.toLocaleString('es-AR')}</span></div>`).join('')}
+      <div class="gastos-total"><span>Total</span><span>$${r.gastos.reduce((s,g)=>s+g.monto,0).toLocaleString('es-AR')}</span></div>
+    </div>` : ''}
   `;
 }
 
@@ -625,6 +701,7 @@ function renderHistorial() {
           <span>⏱ ${r.horas}h</span>
           <span>👥 ${r.clientes.length} clientes</span>
           <span>📦 ${totalPedidos} pedidos</span>
+          ${(r.gastos && r.gastos.length) ? `<span>💸 $${r.gastos.reduce((s,g)=>s+g.monto,0).toLocaleString('es-AR')}</span>` : ''}
         </div>
         ${clientNames ? `<div class="h-preview">${clientNames}</div>` : ''}
       </div>
@@ -652,6 +729,12 @@ function showDetail(i) {
       </div>
     `).join('')}
     ${r.notas ? `<div style="margin-top:12px;font-size:13px;color:var(--muted);">${r.notas}</div>` : ''}
+    ${(r.gastos && r.gastos.length) ? `
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Gastos del día</div>
+      ${r.gastos.map(g=>`<div class="gasto-item"><span class="g-cat">${g.categoria}</span><span class="g-desc">${g.descripcion||''}</span><span class="g-monto">$${g.monto.toLocaleString('es-AR')}</span></div>`).join('')}
+      <div class="gastos-total"><span>Total gastos</span><span>$${r.gastos.reduce((s,g)=>s+g.monto,0).toLocaleString('es-AR')}</span></div>
+    </div>` : ''}
     <button class="save-btn" style="margin-top:16px;" onclick="loadRecord(${i});closeModal()">✏️ Editar este día</button>
   `;
   document.getElementById('modal-overlay').classList.add('open');
@@ -671,7 +754,9 @@ function loadRecord(i) {
   document.getElementById('horas').value = r.horas;
   document.getElementById('notas').value = r.notas || '';
   clients = JSON.parse(JSON.stringify(r.clientes));
+  gastos = JSON.parse(JSON.stringify(r.gastos || []));
   renderClients();
+  renderGastos();
   showPage('registrar');
   showToast('Registro cargado para editar');
 }
@@ -702,11 +787,12 @@ function exportCSV() {
   const data = getData();
   if (!data.length) { showToast('Sin datos para exportar'); return; }
 
-  const headers = ['Fecha','Día','Km recorridos','Horas viaje','Cant. clientes','Total pedidos','Clientes visitados','Notas'];
+  const headers = ['Fecha','Día','Km recorridos','Horas viaje','Cant. clientes','Total pedidos','Total gastos $','Clientes visitados','Notas'];
   const rows = [headers];
 
   data.forEach(r => {
     const totalPed = r.clientes.reduce((s,c) => s + c.pedidos.length, 0);
+    const totalGastos = (r.gastos||[]).reduce((s,g) => s + g.monto, 0);
     const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const partes = r.fecha.split('-');
     const fechaObj = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
@@ -718,6 +804,7 @@ function exportCSV() {
       csvField(r.horas),
       csvField(r.clientes.length),
       csvField(totalPed),
+      csvField(totalGastos.toFixed(2)),
       csvField(r.clientes.map(c => c.nombre).join(' | ')),
       csvField(r.notas || '')
     ]);
@@ -728,9 +815,10 @@ function exportCSV() {
   const totHoras = data.reduce((s,r) => s + (parseFloat(r.horas)||0), 0);
   const totClientes = data.reduce((s,r) => s + r.clientes.length, 0);
   const totPedidos = data.reduce((s,r) => s + r.clientes.reduce((ss,c) => ss + c.pedidos.length, 0), 0);
+  const totGastos = data.reduce((s,r) => s + (r.gastos||[]).reduce((ss,g)=>ss+g.monto,0), 0);
   rows.push([]);
-  rows.push(['TOTALES','','','','','','','']);
-  rows.push([csvField(data.length + ' días'), '', csvField(totKm.toFixed(1)), csvField(totHoras.toFixed(1)), csvField(totClientes), csvField(totPedidos), '', '']);
+  rows.push(['TOTALES','','','','','','','','']);
+  rows.push([csvField(data.length + ' días'), '', csvField(totKm.toFixed(1)), csvField(totHoras.toFixed(1)), csvField(totClientes), csvField(totPedidos), csvField(totGastos.toFixed(2)), '', '']);
 
   downloadCSV(rows, 'giras_' + todayStr + '.csv');
 }
@@ -790,6 +878,7 @@ function exportResumen() {
   const allVisitas = delMes.flatMap(r=>r.clientes);
   const uniqueClients = [...new Set(allVisitas.map(c=>c.nombre))];
   const totalPedidos = allVisitas.reduce((s,c)=>s+c.pedidos.length,0);
+  const totalGastosMes = delMes.reduce((s,r)=>s+(r.gastos||[]).reduce((ss,g)=>ss+g.monto,0),0);
 
   // Pedidos por cliente
   const pedidosPorCliente = {};
@@ -805,6 +894,7 @@ function exportResumen() {
 ⏱  Total horas viaje: ${totalHoras}h
 👥 Visitas: ${allVisitas.length} (${uniqueClients.length} clientes únicos)
 📦 Total pedidos: ${totalPedidos}
+💸 Total gastos: $${totalGastosMes.toLocaleString('es-AR')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PEDIDOS POR CLIENTE:\n`;
 
@@ -833,21 +923,23 @@ function renderStats() {
   const el = document.getElementById('stats-mes');
   if (!delMes.length) { el.innerHTML = '<p style="color:var(--muted);font-size:14px;text-align:center;">Sin datos de este mes.</p>'; return; }
 
-  const totalKm = delMes.reduce((s,r)=>s+r.km,0);
-  const totalHoras = delMes.reduce((s,r)=>s+r.horas,0);
+  const totalKm2 = delMes.reduce((s,r)=>s+r.km,0);
+  const totalHoras2 = delMes.reduce((s,r)=>s+r.horas,0);
   const totalVisitas = delMes.reduce((s,r)=>s+r.clientes.length,0);
-  const totalPedidos = delMes.reduce((s,r)=>s+r.clientes.reduce((ss,c)=>ss+c.pedidos.length,0),0);
+  const totalPedidos2 = delMes.reduce((s,r)=>s+r.clientes.reduce((ss,c)=>ss+c.pedidos.length,0),0);
+  const totalGastos2 = delMes.reduce((s,r)=>s+(r.gastos||[]).reduce((ss,g)=>ss+g.monto,0),0);
 
   el.innerHTML = `
     <div class="card-title">📊 ${now.toLocaleString('es-AR',{month:'long',year:'numeric'})}</div>
     <div class="grid-2" style="margin-bottom:10px;">
       <div class="stat-box"><div class="val">${delMes.length}</div><div class="lbl">días trabajados</div></div>
-      <div class="stat-box"><div class="val">${totalKm}</div><div class="lbl">km totales</div></div>
+      <div class="stat-box"><div class="val">${totalKm2}</div><div class="lbl">km totales</div></div>
     </div>
-    <div class="grid-2">
+    <div class="grid-2" style="margin-bottom:10px;">
       <div class="stat-box"><div class="val">${totalVisitas}</div><div class="lbl">visitas</div></div>
-      <div class="stat-box"><div class="val">${totalPedidos}</div><div class="lbl">pedidos</div></div>
+      <div class="stat-box"><div class="val">${totalPedidos2}</div><div class="lbl">pedidos</div></div>
     </div>
+    <div class="stat-box" style="background:var(--orange-pale);"><div class="val" style="color:var(--orange);">$${totalGastos2.toLocaleString('es-AR')}</div><div class="lbl">gastos del mes</div></div>
   `;
 }
 
