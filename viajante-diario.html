@@ -1352,7 +1352,7 @@ function initMapaVisitas() {
   buildMapaMesOptions();
 
   if (!leafletMap) {
-    leafletMap = L.map('leaflet-map').setView([-27.0, -54.9], 7.3);
+    leafletMap = L.map('leaflet-map', { preferCanvas: true }).setView([-27.0, -54.9], 7.3);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap',
       maxZoom: 18,
@@ -1481,8 +1481,11 @@ function descargarImagenMapa() {
   btn.textContent = '⏳ Generando imagen...';
   btn.disabled = true;
 
-  // Cerrar popups abiertos para que no tapen el mapa en la foto
+  // Cerrar popups abiertos para que no tapen el mapa en la foto, y dejar
+  // que el mapa termine de asentarse (tiles cargados, sin animación en
+  // curso) antes de capturarlo — evita que los puntos queden corridos.
   leafletMap.closePopup();
+  leafletMap.invalidateSize();
 
   setTimeout(() => {
     html2canvas(document.getElementById('leaflet-map'), {
@@ -1506,7 +1509,7 @@ function descargarImagenMapa() {
       btn.textContent = textoOriginal;
       btn.disabled = false;
     });
-  }, 200);
+  }, 500);
 }
 
 // Enter on client input
