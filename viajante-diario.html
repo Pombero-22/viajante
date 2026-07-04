@@ -14,6 +14,7 @@
 <!-- Leaflet para el mapa de clientes -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <title>Diario del Viajante</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -315,6 +316,7 @@
       <div class="mapa-stat"><div class="v" id="mapa-pendientes">0</div><div class="l">Sin visitar</div></div>
       <div class="mapa-stat"><div class="v" id="mapa-total">0</div><div class="l">Visitas</div></div>
     </div>
+    <button class="export-btn" id="mapa-download-btn" onclick="descargarImagenMapa()" style="margin:0;">📸 Descargar imagen del mapa</button>
   </div>
   <div id="leaflet-map"></div>
   <div id="mapa-client-list"></div>
@@ -332,6 +334,7 @@
     <button class="export-btn" onclick="exportCSV()">📄 Descargar CSV (Excel)</button>
     <button class="export-btn" onclick="exportPedidosCSV()">📦 Pedidos por cliente (CSV)</button>
     <button class="export-btn" onclick="exportResumen()">📝 Resumen del mes (.txt)</button>
+    <button class="export-btn" onclick="exportVisitasCSV()">📍 Historial de visitas (CSV)</button>
     <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
   </div>
   <div class="card" id="stats-mes"></div>
@@ -906,6 +909,35 @@ function downloadCSV(rows, filename) {
   showToast('✅ CSV descargado');
 }
 
+// Historial de visitas registradas en el Mapa: una fila por visita
+function exportVisitasCSV() {
+  const visitas = getVisitas();
+  const clientesPorNombre = {};
+  MAPA_CLIENTES.forEach(c => { clientesPorNombre[c.cliente] = c.localidad; });
+
+  const nombres = Object.keys(visitas);
+  const totalVisitas = nombres.reduce((s, n) => s + (visitas[n] || []).length, 0);
+  if (!totalVisitas) { showToast('Todavía no registraste visitas en el Mapa'); return; }
+
+  const headers = ['Fecha', 'Cliente', 'Localidad'];
+  const rows = [headers];
+  const filas = [];
+  nombres.forEach(nombre => {
+    (visitas[nombre] || []).forEach(fecha => {
+      filas.push({ fecha, nombre, localidad: clientesPorNombre[nombre] || '' });
+    });
+  });
+  filas.sort((a, b) => a.fecha.localeCompare(b.fecha));
+  filas.forEach(f => {
+    rows.push([csvField(fmtDate(f.fecha)), csvField(f.nombre), csvField(f.localidad)]);
+  });
+
+  rows.push([]);
+  rows.push(['TOTAL VISITAS', csvField(totalVisitas), '']);
+
+  downloadCSV(rows, 'historial_visitas_' + todayStr + '.csv');
+}
+
 function exportResumen() {
   const data = getData();
   const now = new Date();
@@ -1324,6 +1356,7 @@ function initMapaVisitas() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap',
       maxZoom: 18,
+      crossOrigin: true,
     }).addTo(leafletMap);
 
     MAPA_CLIENTES.forEach(c => {
@@ -1439,6 +1472,41 @@ function refrescarMapa() {
   refrescarMapaMarkers();
   renderMapaLista(document.getElementById('mapa-buscar').value);
   refrescarMapaStats();
+}
+
+function descargarImagenMapa() {
+  if (!leafletMap) { showToast('Abrí el mapa primero'); return; }
+  const btn = document.getElementById('mapa-download-btn');
+  const textoOriginal = btn.textContent;
+  btn.textContent = '⏳ Generando imagen...';
+  btn.disabled = true;
+
+  // Cerrar popups abiertos para que no tapen el mapa en la foto
+  leafletMap.closePopup();
+
+  setTimeout(() => {
+    html2canvas(document.getElementById('leaflet-map'), {
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+    }).then(canvas => {
+      const mesTxt = mapaMesActual === 'all' ? 'todos-los-meses' : mapaMesActual;
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mapa_visitas_' + mesTxt + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('✅ Imagen descargada');
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }).catch(err => {
+      showToast('⚠️ No se pudo generar la imagen');
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    });
+  }, 200);
 }
 
 // Enter on client input
