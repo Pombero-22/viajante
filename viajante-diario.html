@@ -41,6 +41,54 @@
   .page { display: none; padding: 16px; }
   .page.active { display: block; }
 
+  /* ===== AGENDA ===== */
+  .agenda-semana { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+  .agenda-semana::-webkit-scrollbar { display: none; }
+  .agenda-dia-tab { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--border); background: white; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; text-align: center; }
+  .agenda-dia-tab.hoy { border-color: var(--green); color: var(--green); }
+  .agenda-dia-tab.activo { background: var(--green); color: white; border-color: var(--green); }
+  .agenda-dia-tab .dia-num { font-size: 18px; font-weight: 800; display: block; }
+
+  .agenda-contacto { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; align-items: flex-start; gap: 12px; }
+  .agenda-contacto .ac-semaforo { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .agenda-contacto .ac-semaforo.verde { background: #4caf50; }
+  .agenda-contacto .ac-semaforo.amarillo { background: #ff9800; }
+  .agenda-contacto .ac-semaforo.rojo { background: #f44336; }
+  .agenda-contacto .ac-semaforo.gris { background: #9e9e9e; }
+  .agenda-contacto .ac-body { flex: 1; }
+  .agenda-contacto .ac-nombre { font-weight: 700; font-size: 14px; color: var(--text); }
+  .agenda-contacto .ac-loc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .agenda-contacto .ac-tipo { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-top: 5px; }
+  .agenda-contacto .ac-tipo.visita { background: var(--green-pale); color: var(--green); }
+  .agenda-contacto .ac-tipo.llamado { background: var(--blue-pale); color: var(--blue); }
+  .agenda-contacto .ac-tipo.whatsapp { background: #e8f5e9; color: #1b5e20; }
+  .agenda-contacto .ac-prod { font-size: 12px; color: var(--orange); margin-top: 3px; }
+  .agenda-contacto .ac-ultima { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .agenda-contacto .ac-actions { display: flex; flex-direction: column; gap: 5px; }
+  .ac-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+  .ac-check.done { background: var(--green); border-color: var(--green); color: white; }
+  .ac-del { width: 24px; height: 24px; border-radius: 50%; border: none; background: none; cursor: pointer; color: var(--muted); font-size: 14px; }
+
+  .agenda-add-form { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .agenda-add-form select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; background: white; color: var(--text); margin-bottom: 10px; -webkit-appearance: none; }
+  .tipo-selector { display: flex; gap: 8px; margin-bottom: 10px; }
+  .tipo-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; text-align: center; }
+  .tipo-btn.sel-visita { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+  .tipo-btn.sel-llamado { border-color: var(--blue); background: var(--blue-pale); color: var(--blue); }
+  .tipo-btn.sel-whatsapp { border-color: #1b5e20; background: #e8f5e9; color: #1b5e20; }
+
+  .semaforo-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .semaforo-legend span { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  .olvidados-item { background: white; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .olvidados-item .oi-nombre { font-weight: 700; font-size: 13px; }
+  .olvidados-item .oi-loc { font-size: 12px; color: var(--muted); }
+  .olvidados-item .oi-dias { font-size: 12px; font-weight: 700; color: var(--red); }
+  .agenda-tab-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+  .agenda-tab-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 10px; background: white; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; }
+  .agenda-tab-btn.active { border-color: var(--green); background: var(--green); color: white; }
+
   .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; }
 
@@ -173,6 +221,7 @@
   .mapa-stat .v { font-size: 18px; font-weight: 800; color: var(--green); }
   .mapa-stat .l { font-size: 10px; color: var(--muted); margin-top: 1px; }
   #leaflet-map { height: 42vh; min-height: 260px; width: 100%; }
+  .mc-row-activo { background: var(--green-pale) !important; border-left: 3px solid var(--green); }
   #mapa-client-list { padding: 8px 16px 90px; }
   .mc-row { background: var(--card); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; }
   .mc-row .mc-name { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -213,7 +262,7 @@
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="active" onclick="showPage('registrar')" id="nav-registrar"><span class="ico">📝</span>Registrar</button>
-  <button onclick="showPage('hoy')" id="nav-hoy"><span class="ico">📊</span>Hoy</button>
+  <button onclick="showPage('agenda')" id="nav-agenda"><span class="ico">🗓</span>Agenda</button>
   <button onclick="showPage('mapa')" id="nav-mapa"><span class="ico">📍</span>Mapa</button>
   <button onclick="showPage('historial')" id="nav-historial"><span class="ico">📅</span>Historial</button>
   <button onclick="showPage('exportar')" id="nav-exportar"><span class="ico">⬇️</span>Exportar</button>
@@ -306,6 +355,57 @@
   <div id="hoy-content"></div>
 </div>
 
+<!-- ===== AGENDA ===== -->
+<div class="page" id="page-agenda">
+
+  <!-- Tabs: Semana / Olvidados -->
+  <div class="agenda-tab-btns">
+    <button class="agenda-tab-btn active" id="atab-semana" onclick="agendaTab('semana')">🗓 Esta semana</button>
+    <button class="agenda-tab-btn" id="atab-olvidados" onclick="agendaTab('olvidados')">⚠️ Sin visitar</button>
+  </div>
+
+  <!-- VISTA SEMANA -->
+  <div id="agenda-vista-semana">
+    <!-- Selector de días -->
+    <div class="agenda-semana" id="agenda-dias"></div>
+
+    <!-- Leyenda semáforo -->
+    <div class="semaforo-legend">
+      <span><span class="dot" style="background:#4caf50"></span>Visitado reciente</span>
+      <span><span class="dot" style="background:#ff9800"></span>+15 días</span>
+      <span><span class="dot" style="background:#f44336"></span>+30 días</span>
+      <span><span class="dot" style="background:#9e9e9e"></span>Sin historial</span>
+    </div>
+
+    <!-- Formulario agregar contacto -->
+    <div class="agenda-add-form">
+      <div class="card-title">➕ Agregar contacto al día</div>
+      <select id="agenda-cliente-sel">
+        <option value="">Elegí un cliente...</option>
+      </select>
+      <input type="text" id="agenda-prod" placeholder="Producto de interés (opcional)" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;margin-bottom:10px;">
+      <div class="tipo-selector">
+        <button class="tipo-btn sel-visita" id="tbtn-visita" onclick="selTipo('visita')">🤝 Visita</button>
+        <button class="tipo-btn" id="tbtn-llamado" onclick="selTipo('llamado')">📞 Llamado</button>
+        <button class="tipo-btn" id="tbtn-whatsapp" onclick="selTipo('whatsapp')">💬 WhatsApp</button>
+      </div>
+      <button class="save-btn" style="margin-top:0;" onclick="agregarContactoAgenda()">+ Agregar</button>
+    </div>
+
+    <!-- Lista de contactos del día -->
+    <div id="agenda-contactos-list"></div>
+  </div>
+
+  <!-- VISTA OLVIDADOS -->
+  <div id="agenda-vista-olvidados" style="display:none;">
+    <div class="card" style="padding:12px 16px;">
+      <div class="card-title">⚠️ Clientes sin visitar hace más de 30 días</div>
+      <div id="agenda-olvidados-list"></div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ===== MAPA ===== -->
 <div class="page" id="page-mapa">
   <div class="mapa-controls">
@@ -319,6 +419,19 @@
     <button class="export-btn" id="mapa-download-btn" onclick="descargarImagenMapa()" style="margin:0;">📸 Descargar imagen del mapa</button>
   </div>
   <div id="leaflet-map"></div>
+
+  <!-- Barra de búsqueda lista de clientes -->
+  <div style="padding: 10px 16px 0; position: sticky; top: 56px; z-index: 50; background: var(--bg);">
+    <div style="display:flex; align-items:center; background:white; border:1.5px solid var(--border); border-radius:10px; padding: 8px 12px; gap:8px;">
+      <span style="font-size:18px;">🔍</span>
+      <input id="mapa-lista-buscar" type="text" placeholder="Buscar cliente en la lista..."
+        style="border:none;outline:none;font-size:15px;width:100%;background:transparent;"
+        oninput="renderMapaLista(this.value)">
+      <button id="mapa-lista-clear" onclick="document.getElementById('mapa-lista-buscar').value='';renderMapaLista('');"
+        style="border:none;background:none;font-size:18px;color:var(--muted);cursor:pointer;display:none;">×</button>
+    </div>
+  </div>
+
   <div id="mapa-client-list"></div>
 </div>
 
@@ -1270,7 +1383,7 @@ function haversine(lat1, lng1, lat2, lng2) {
 }
 
 // ===== MAPA DE VISITAS =====
-const MAPA_CLIENTES = [{"cliente": "5 HERMANOS S.A.", "localidad": "San Vicente", "lat": -26.9854037, "lng": -54.4820017}, {"cliente": "ABREU VICTOR NORBERTO", "localidad": "Pozo Azul", "lat": -26.3985597, "lng": -54.5999747}, {"cliente": "ACKERMANN HORACIO JOSE", "localidad": "Comandante Andresito", "lat": -25.658873399999997, "lng": -54.0479569}, {"cliente": "ALONSO VALENTIN", "localidad": "Posadas", "lat": -27.3521374, "lng": -55.9008746}, {"cliente": "ASOCIACION DE PADRES SAN CRISTOBAL", "localidad": "Profundidad", "lat": -27.5616877, "lng": -55.7046304}, {"cliente": "BARTEL ALEJANDRO SEBASTIAN", "localidad": "Jardin America", "lat": -27.029857099999997, "lng": -55.2307281}, {"cliente": "BEREZOSKI OSCAR MIGUEL", "localidad": "San Vicente", "lat": -27.0019037, "lng": -54.4707433697508}, {"cliente": "BERNARDI HELENO", "localidad": "Piñalito Norte", "lat": -25.9317214, "lng": -53.9339295}, {"cliente": "BOCHERT ALFREDO ARNOLDO", "localidad": "Montecarlo", "lat": -26.557170399999997, "lng": -54.7664339}, {"cliente": "BRUERA OMAR DARIO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.04092856937308}, {"cliente": "BUDDENBERG CLAUDIO", "localidad": "Eldorado", "lat": -26.398405599999997, "lng": -54.6090783}, {"cliente": "CARVALLO MARCELO ANIBAL", "localidad": "Posadas", "lat": -27.350879069750803, "lng": -55.8943746}, {"cliente": "CAVIGIOLI MARIO CARLOS", "localidad": "Ruiz de Montoya", "lat": -26.958766899999997, "lng": -55.0529459}, {"cliente": "COOPERATIVA AGROPECUARIA UNION DE LA FRONTERA LTDA", "localidad": "Bernardo de Irigoyen", "lat": -26.2502596, "lng": -53.6476286}, {"cliente": "DE COULON S.A.", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.221535711844574}, {"cliente": "EL PATRON SRL", "localidad": "Consepcion de la Sierra", "lat": -27.970624599999997, "lng": -55.5217305}, {"cliente": "EL YERBALITO S.R.L.", "localidad": "Posadas", "lat": -27.354137400000003, "lng": -55.887018193539454}, {"cliente": "ERNESTO KOCH", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.890874600000004}, {"cliente": "ESTABLECIMIENTO DON GUILLERMO SRL", "localidad": "Eldorado", "lat": -26.396894671666505, "lng": -54.603036898763435}, {"cliente": "ESTANCIA MACACA S.A.", "localidad": "Bernardo de Irigoyen", "lat": -26.253759600000002, "lng": -53.6363702697508}, {"cliente": "FECHNER OMAR EDUARDO", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.595910558145704}, {"cliente": "FIDEICOMISO DON OTTO", "localidad": "Montecarlo", "lat": -26.55495439592978, "lng": -54.761987638136766}, {"cliente": "FIEGE MYRIAN CAROLINA", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2147281}, {"cliente": "FROSCHKE ROBERTO", "localidad": "Montecarlo", "lat": -26.554913688910094, "lng": -54.75614929824502}, {"cliente": "GANADERA AGUAPEY S.A.", "localidad": "Posadas", "lat": -27.3686374, "lng": -55.8896162697508}, {"cliente": "GRAEF ARTURO", "localidad": "Garuhape", "lat": -26.810360999999997, "lng": -54.9562728}, {"cliente": "GRANFORT S.A.", "localidad": "Eldorado", "lat": -26.407200233197447, "lng": -54.59915121125902}, {"cliente": "GUNTHER RICARDO DANIEL", "localidad": "Jardin America", "lat": -27.046928167811863, "lng": -55.223657032188136}, {"cliente": "HASSENRIIK JORGE ERVIN", "localidad": "Comandante Andresito", "lat": -25.66222675979197, "lng": -54.03340278807433}, {"cliente": "IGLESIA EVANGELICA SUIZA", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.0399459}, {"cliente": "JOHANN EVANDRO JAVIER", "localidad": "San Vicente", "lat": -27.0034037, "lng": -54.495858106460545}, {"cliente": "JOHANN MAGNOS", "localidad": "Pozo Azul", "lat": -26.400454332575837, "lng": -54.58981089072791}, {"cliente": "JOHANN MARCELO JOSE", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.584375853405085}, {"cliente": "JOHANN MARCIO ADRIANO", "localidad": "Pozo Azul", "lat": -26.417569388679027, "lng": -54.59563586260882}, {"cliente": "JUNES EDGARDO ABEL", "localidad": "Bernardo de Irigoyen", "lat": -26.2682596, "lng": -53.63377219353945}, {"cliente": "KALITKO ELIAS JOSE", "localidad": "Jardin America", "lat": -27.0528571, "lng": -55.2307281}, {"cliente": "KELLER JUAN ROBERTO", "localidad": "Capiovi", "lat": -26.922217399999997, "lng": -55.0520938}, {"cliente": "KINETZ JORGE DANIEL", "localidad": "Comandante Andresito", "lat": -25.670296548382733, "lng": -54.03805868558119}, {"cliente": "KIPP DANIEL CHIRISTIAL", "localidad": "Puerto Rico", "lat": -26.7963572, "lng": -55.0240801}, {"cliente": "KIPP JORGE", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.75777364596216}, {"cliente": "KIZUR ARIEL SEBASTIAN", "localidad": "Montecarlo", "lat": -26.56491297369033, "lng": -54.753631399210846}, {"cliente": "KONOPACKI RUBEN", "localidad": "Eldorado", "lat": -26.41301546353155, "lng": -54.59692308884509}, {"cliente": "KONOPACKI RUBEN EVALDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.59846833746815}, {"cliente": "KYOCAPUMISZ HECTOR LUIS", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.0381321555334}, {"cliente": "LA IANA SAS", "localidad": "Posadas", "lat": -27.375993806460553, "lng": -55.8928746}, {"cliente": "LACERDA GILBERTO JAVIER", "localidad": "Pozo Azul", "lat": -26.420272295282732, "lng": -54.605615188608525}, {"cliente": "LARRABURU WALTER ROBERTO", "localidad": "Posadas", "lat": -27.372137400000003, "lng": -55.9008746}, {"cliente": "LEITE VIVIANA ELISA", "localidad": "Bernardo de Irigoyen", "lat": -26.270259600000003, "lng": -53.6476286}, {"cliente": "MORGENSTERN ELIO ANDRES", "localidad": "2 de Mayo", "lat": -27.026283799999998, "lng": -54.6755593}, {"cliente": "MUNZ MARINA ESTELA", "localidad": "Eldorado", "lat": -26.41811501817426, "lng": -54.606685143357126}, {"cliente": "MUT GABRIEL", "localidad": "Eldorado", "lat": -26.421027843626536, "lng": -54.61218940363574}, {"cliente": "N.P. FORESTAL SRL", "localidad": "Posadas", "lat": -27.3733957302492, "lng": -55.907374600000004}, {"cliente": "OTTO GERARDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.61968826253185}, {"cliente": "PAULUZEK BRAIAN NAHUEL", "localidad": "Cerro Azul", "lat": -27.6349423, "lng": -55.4970643}, {"cliente": "RENZO MACKOW", "localidad": "Campo Grande", "lat": -27.206181, "lng": -54.9787679}, {"cliente": "RINCON PERDIDO SAS", "localidad": "Comandante Andresito", "lat": -25.68422528757783, "lng": -54.04344917909054}, {"cliente": "SADAÑOSKI ALEJANDRO IVAN", "localidad": "Apostoles", "lat": -27.9141554, "lng": -55.7549371}, {"cliente": "SCHMIDT HECTOR MIGUEL", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.61557354659491}, {"cliente": "SOMERFER MARILU INES", "localidad": "2 de Mayo", "lat": -27.0492838, "lng": -54.6755593}, {"cliente": "STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.826860999999997, "lng": -54.9450144697508}, {"cliente": "STEYER CATALINA", "localidad": "Fracran", "lat": -26.732759899999998, "lng": -54.2973353}, {"cliente": "STEYER JUAN SEBASTIAN", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.2843353}, {"cliente": "STEYER LUIS ALFREDO", "localidad": "Fracran", "lat": -26.758759899999998, "lng": -54.2973353}, {"cliente": "TRINIDAD RAMON ALBERTO", "localidad": "Posadas", "lat": -27.3701374, "lng": -55.91473100646055}, {"cliente": "TROCHE NESTOR FABIAN", "localidad": "San Antonio", "lat": -26.0572781, "lng": -53.7365194}, {"cliente": "TRUMPP AGUSTIN RICARDO", "localidad": "Montecarlo", "lat": -26.569948770842668, "lng": -54.750676975951805}, {"cliente": "WAIDELICH ANDRES EDGARDO", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.75777364596216}, {"cliente": "WAIDELICH CURT", "localidad": "Montecarlo", "lat": -26.577128977760545, "lng": -54.758077661074076}, {"cliente": "WAIDELICH OSCAR MARTIN", "localidad": "Montecarlo", "lat": -26.582205481932572, "lng": -54.760961577706794}, {"cliente": "WILD NESTOR JAVIER", "localidad": "Eldorado", "lat": -26.411951648870424, "lng": -54.618428462426856}, {"cliente": "WIRZ ANA KARENINA", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.9108746}, {"cliente": "WIRZ JUAN BAUTISTA", "localidad": "Posadas", "lat": -27.355637400000003, "lng": -55.9121329302492}, {"cliente": "X CLAUDIA SILVIA", "localidad": "Jardin America", "lat": -27.051170808498984, "lng": -55.24204180849898}, {"cliente": "X HASSENRUCK ALDO", "localidad": "Montecarlo", "lat": -26.5771704, "lng": -54.7664339}, {"cliente": "X HODL NICOLAS ALOIS", "localidad": "Montecarlo", "lat": -26.579386404070217, "lng": -54.77088016186324}, {"cliente": "X KIPP DANIEL", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.01171636528816}, {"cliente": "X OMAR FECHNER", "localidad": "Eldorado", "lat": -26.40683862315668, "lng": -54.621983515363276}, {"cliente": "X STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.828360999999997, "lng": -54.97012920646055}, {"cliente": "X WELKE HENRY CRISTIAN", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2407281}, {"cliente": "X WELKE OMAR", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.23992048815543}, {"cliente": "MULLER SOLEDAD YAMILA", "localidad": "Colonia Aurora", "lat": -27.464846899999998, "lng": -54.5237984}, {"cliente": "MARCHIOTTI MARCOS LUIS", "localidad": "Santa Rita", "lat": -27.5130885, "lng": -54.7280385}, {"cliente": "MIETH LUIS", "localidad": "Santa Rita", "lat": -27.5360885, "lng": -54.7280385}, {"cliente": "FREMAR SRL", "localidad": "Ruiz de Montoya", "lat": -26.984766899999997, "lng": -55.0529459}, {"cliente": "HENN Y CIA", "localidad": "Posadas", "lat": -27.34828099353945, "lng": -55.908874600000004}, {"cliente": "CABAÑA DON JOSE SRL", "localidad": "Virasoro", "lat": -28.0543419, "lng": -56.0139884}, {"cliente": "PUBLIO SPON", "localidad": "Montecarlo", "lat": -26.579427111089903, "lng": -54.776718501754985}, {"cliente": "KRINDGES MARCOS", "localidad": "Puerto Rico", "lat": -26.81930147191, "lng": -55.01467553596332}, {"cliente": "MORAVICKI RODRIGO", "localidad": "Comandante Andresito", "lat": -25.678468329736145, "lng": -54.05077422556842}, {"cliente": "ESTANCIA TOBUNAS", "localidad": "Bernardo de Irigoyen", "lat": -26.2667596, "lng": -53.658886930249196}, {"cliente": "COOPERATIVA MONTECARLO LTDA", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.775094154037845}, {"cliente": "PUERTO NUEVO", "localidad": "Montecarlo", "lat": -26.569427826309667, "lng": -54.77923640078916}, {"cliente": "GERMAN TIETJEN", "localidad": "Montecarlo", "lat": -26.56439202915733, "lng": -54.7821908240482}, {"cliente": "PINDO SA", "localidad": "Puerto Esperanza", "lat": -26.0227203, "lng": -54.6125731}, {"cliente": "PETROVALLE", "localidad": "Aristobulo del Valle", "lat": -27.0956103, "lng": -54.8935263}, {"cliente": "FELISA SRL", "localidad": "Consepcion de la Sierra", "lat": -27.9936246, "lng": -55.5217305}, {"cliente": "WEIDMANN SRL", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.062945899999995}, {"cliente": "WEIDEN SA", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.6222460418543}, {"cliente": "STEYER ALEJANDRO", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.3073353}, {"cliente": "SCHINDLER RUBEN", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.775094154037845}, {"cliente": "FIEBKE WILLAN", "localidad": "Pozo Azul", "lat": -26.402324801981415, "lng": -54.60779301482468}, {"cliente": "SATO RICARDO", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.05778164446661}, {"cliente": "LIMBERGER RAUL FREDY", "localidad": "Puerto Rico", "lat": -26.81444736994375, "lng": -55.02995795252292}, {"cliente": "COOP MMONTE VERDE", "localidad": "Obera", "lat": -27.4867802, "lng": -55.1203326}, {"cliente": "ARIEL HAHM", "localidad": "Capiovi", "lat": -26.9452174, "lng": -55.0520938}, {"cliente": "PES ADRIAN", "localidad": "Colonia Aurora", "lat": -27.4878469, "lng": -54.5237984}, {"cliente": "FREIBERGER JUAN CARLOS", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.03644383471184}, {"cliente": "DROSSLER BRUNO", "localidad": "Bernardo de Irigoyen", "lat": -26.252259600000002, "lng": -53.661485006460545}, {"cliente": "TRUMPP ANDRES", "localidad": "Montecarlo", "lat": -26.557211822239452, "lng": -54.77479013892593}, {"cliente": "ALCANTARA ENRIQUE", "localidad": "Comandante Andresito", "lat": -25.671150437412372, "lng": -54.0637940430701}, {"cliente": "SAN JOSE SRL", "localidad": "9 De Julio", "lat": -26.4299444, "lng": -54.4650556}, {"cliente": "KIMMICH MANUEL", "localidad": "Montecarlo", "lat": -26.552135318067425, "lng": -54.77190622229321}, {"cliente": "AMANN ERNESTO", "localidad": "Comandante Andresito", "lat": -25.66471924986998, "lng": -54.057053219953545}, {"cliente": "AZULA FERNANDO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.054985230626926}, {"cliente": "ASAGUAY SA", "localidad": "Eldorado", "lat": -26.399551039743468, "lng": -54.61372553172044}];
+const MAPA_CLIENTES = [{"cliente": "5 HERMANOS S.A.", "localidad": "San Vicente", "lat": -26.9854037, "lng": -54.4820017}, {"cliente": "ABREU VICTOR NORBERTO", "localidad": "Pozo Azul", "lat": -26.3985597, "lng": -54.5999747}, {"cliente": "ACKERMANN HORACIO JOSE", "localidad": "Comandante Andresito", "lat": -25.658873399999997, "lng": -54.0479569}, {"cliente": "ALONSO VALENTIN", "localidad": "Posadas", "lat": -27.3521374, "lng": -55.9008746}, {"cliente": "ASOCIACION DE PADRES SAN CRISTOBAL", "localidad": "Profundidad", "lat": -27.5616877, "lng": -55.7046304}, {"cliente": "BARTEL ALEJANDRO SEBASTIAN", "localidad": "Jardin America", "lat": -27.029857099999997, "lng": -55.2307281}, {"cliente": "BEREZOSKI OSCAR MIGUEL", "localidad": "San Vicente", "lat": -27.0019037, "lng": -54.4707433697508}, {"cliente": "BERNARDI HELENO", "localidad": "Piñalito Norte", "lat": -25.9317214, "lng": -53.9339295}, {"cliente": "BOCHERT ALFREDO ARNOLDO", "localidad": "Montecarlo", "lat": -26.557170399999997, "lng": -54.7664339}, {"cliente": "BRUERA OMAR DARIO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.04092856937308}, {"cliente": "BUDDENBERG CLAUDIO", "localidad": "Eldorado", "lat": -26.398405599999997, "lng": -54.6090783}, {"cliente": "CARVALLO MARCELO ANIBAL", "localidad": "Posadas", "lat": -27.350879069750803, "lng": -55.8943746}, {"cliente": "CAVIGIOLI MARIO CARLOS", "localidad": "Ruiz de Montoya", "lat": -26.958766899999997, "lng": -55.0529459}, {"cliente": "COOPERATIVA AGROPECUARIA UNION DE LA FRONTERA LTDA", "localidad": "Bernardo de Irigoyen", "lat": -26.2502596, "lng": -53.6476286}, {"cliente": "DE COULON S.A.", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.221535711844574}, {"cliente": "EL PATRON SRL", "localidad": "Consepcion de la Sierra", "lat": -27.970624599999997, "lng": -55.5217305}, {"cliente": "EL YERBALITO S.R.L.", "localidad": "Posadas", "lat": -27.354137400000003, "lng": -55.887018193539454}, {"cliente": "ERNESTO KOCH", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.890874600000004}, {"cliente": "ESTABLECIMIENTO DON GUILLERMO SRL", "localidad": "Eldorado", "lat": -26.396894671666505, "lng": -54.603036898763435}, {"cliente": "ESTANCIA MACACA S.A.", "localidad": "Bernardo de Irigoyen", "lat": -26.253759600000002, "lng": -53.6363702697508}, {"cliente": "FECHNER OMAR EDUARDO", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.595910558145704}, {"cliente": "FIDEICOMISO DON OTTO", "localidad": "Montecarlo", "lat": -26.55495439592978, "lng": -54.761987638136766}, {"cliente": "FIEGE MYRIAN CAROLINA", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2147281}, {"cliente": "FROSCHKE ROBERTO", "localidad": "Montecarlo", "lat": -26.554913688910094, "lng": -54.75614929824502}, {"cliente": "GANADERA AGUAPEY S.A.", "localidad": "Posadas", "lat": -27.3686374, "lng": -55.8896162697508}, {"cliente": "GRAEF ARTURO", "localidad": "Garuhape", "lat": -26.810360999999997, "lng": -54.9562728}, {"cliente": "GRANFORT S.A.", "localidad": "Eldorado", "lat": -26.407200233197447, "lng": -54.59915121125902}, {"cliente": "GUNTHER RICARDO DANIEL", "localidad": "Jardin America", "lat": -27.046928167811863, "lng": -55.223657032188136}, {"cliente": "HASSENRIIK JORGE ERVIN", "localidad": "Comandante Andresito", "lat": -25.66222675979197, "lng": -54.03340278807433}, {"cliente": "IGLESIA EVANGELICA SUIZA", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.0399459}, {"cliente": "JOHANN EVANDRO JAVIER", "localidad": "San Vicente", "lat": -27.0034037, "lng": -54.495858106460545}, {"cliente": "JOHANN MAGNOS", "localidad": "Pozo Azul", "lat": -26.400454332575837, "lng": -54.58981089072791}, {"cliente": "JOHANN MARCELO JOSE", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.584375853405085}, {"cliente": "JOHANN MARCIO ADRIANO", "localidad": "Pozo Azul", "lat": -26.417569388679027, "lng": -54.59563586260882}, {"cliente": "JUNES EDGARDO ABEL", "localidad": "Bernardo de Irigoyen", "lat": -26.2682596, "lng": -53.63377219353945}, {"cliente": "KALITKO ELIAS JOSE", "localidad": "Jardin America", "lat": -27.0528571, "lng": -55.2307281}, {"cliente": "KELLER JUAN ROBERTO", "localidad": "Capiovi", "lat": -26.922217399999997, "lng": -55.0520938}, {"cliente": "KINETZ JORGE DANIEL", "localidad": "Comandante Andresito", "lat": -25.670296548382733, "lng": -54.03805868558119}, {"cliente": "KIPP DANIEL CHIRISTIAL", "localidad": "Puerto Rico", "lat": -26.7963572, "lng": -55.0240801}, {"cliente": "KIPP JORGE", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.75777364596216}, {"cliente": "KIZUR ARIEL SEBASTIAN", "localidad": "Montecarlo", "lat": -26.56491297369033, "lng": -54.753631399210846}, {"cliente": "KONOPACKI RUBEN", "localidad": "Eldorado", "lat": -26.41301546353155, "lng": -54.59692308884509}, {"cliente": "KONOPACKI RUBEN EVALDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.59846833746815}, {"cliente": "KYOCAPUMISZ HECTOR LUIS", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.0381321555334}, {"cliente": "LA IANA SAS", "localidad": "Posadas", "lat": -27.375993806460553, "lng": -55.8928746}, {"cliente": "LACERDA GILBERTO JAVIER", "localidad": "Pozo Azul", "lat": -26.420272295282732, "lng": -54.605615188608525}, {"cliente": "LARRABURU WALTER ROBERTO", "localidad": "Posadas", "lat": -27.372137400000003, "lng": -55.9008746}, {"cliente": "LEITE VIVIANA ELISA", "localidad": "Bernardo de Irigoyen", "lat": -26.270259600000003, "lng": -53.6476286}, {"cliente": "MORGENSTERN ELIO ANDRES", "localidad": "2 de Mayo", "lat": -27.026283799999998, "lng": -54.6755593}, {"cliente": "MUNZ MARINA ESTELA", "localidad": "Eldorado", "lat": -26.41811501817426, "lng": -54.606685143357126}, {"cliente": "MUT GABRIEL", "localidad": "Eldorado", "lat": -26.421027843626536, "lng": -54.61218940363574}, {"cliente": "N.P. FORESTAL SRL", "localidad": "Posadas", "lat": -27.3733957302492, "lng": -55.907374600000004}, {"cliente": "OTTO GERARDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.61968826253185}, {"cliente": "PAULUZEK BRAIAN NAHUEL", "localidad": "Cerro Azul", "lat": -27.6349423, "lng": -55.4970643}, {"cliente": "RENZO MACKOW", "localidad": "Campo Grande", "lat": -27.206181, "lng": -54.9787679}, {"cliente": "RINCON PERDIDO SAS", "localidad": "Comandante Andresito", "lat": -25.68422528757783, "lng": -54.04344917909054}, {"cliente": "SADAÑOSKI ALEJANDRO IVAN", "localidad": "Apostoles", "lat": -27.9141554, "lng": -55.7549371}, {"cliente": "SCHMIDT HECTOR MIGUEL", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.61557354659491}, {"cliente": "SOMERFER MARILU INES", "localidad": "2 de Mayo", "lat": -27.0492838, "lng": -54.6755593}, {"cliente": "STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.826860999999997, "lng": -54.9450144697508}, {"cliente": "STEYER CATALINA", "localidad": "Fracran", "lat": -26.732759899999998, "lng": -54.2973353}, {"cliente": "STEYER JUAN SEBASTIAN", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.2843353}, {"cliente": "STEYER LUIS ALFREDO", "localidad": "Fracran", "lat": -26.758759899999998, "lng": -54.2973353}, {"cliente": "TRINIDAD RAMON ALBERTO", "localidad": "Posadas", "lat": -27.3701374, "lng": -55.91473100646055}, {"cliente": "TROCHE NESTOR FABIAN", "localidad": "San Antonio", "lat": -26.0572781, "lng": -53.7365194}, {"cliente": "TRUMPP AGUSTIN RICARDO", "localidad": "Montecarlo", "lat": -26.569948770842668, "lng": -54.750676975951805}, {"cliente": "WAIDELICH ANDRES EDGARDO", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.75777364596216}, {"cliente": "WAIDELICH CURT", "localidad": "Montecarlo", "lat": -26.577128977760545, "lng": -54.758077661074076}, {"cliente": "WAIDELICH OSCAR MARTIN", "localidad": "Montecarlo", "lat": -26.582205481932572, "lng": -54.760961577706794}, {"cliente": "WILD NESTOR JAVIER", "localidad": "Eldorado", "lat": -26.411951648870424, "lng": -54.618428462426856}, {"cliente": "WIRZ ANA KARENINA", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.9108746}, {"cliente": "WIRZ JUAN BAUTISTA", "localidad": "Posadas", "lat": -27.355637400000003, "lng": -55.9121329302492}, {"cliente": "X CLAUDIA SILVIA", "localidad": "Jardin America", "lat": -27.051170808498984, "lng": -55.24204180849898}, {"cliente": "X HASSENRUCK ALDO", "localidad": "Montecarlo", "lat": -26.5771704, "lng": -54.7664339}, {"cliente": "X HODL NICOLAS ALOIS", "localidad": "Montecarlo", "lat": -26.579386404070217, "lng": -54.77088016186324}, {"cliente": "X KIPP DANIEL", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.01171636528816}, {"cliente": "X OMAR FECHNER", "localidad": "Eldorado", "lat": -26.40683862315668, "lng": -54.621983515363276}, {"cliente": "X STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.828360999999997, "lng": -54.97012920646055}, {"cliente": "X WELKE HENRY CRISTIAN", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2407281}, {"cliente": "X WELKE OMAR", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.23992048815543}, {"cliente": "MULLER SOLEDAD YAMILA", "localidad": "Colonia Aurora", "lat": -27.464846899999998, "lng": -54.5237984}, {"cliente": "MARCHIOTTI MARCOS LUIS", "localidad": "Santa Rita", "lat": -27.5130885, "lng": -54.7280385}, {"cliente": "MIETH LUIS", "localidad": "Santa Rita", "lat": -27.5360885, "lng": -54.7280385}, {"cliente": "FREMAR SRL", "localidad": "Ruiz de Montoya", "lat": -26.984766899999997, "lng": -55.0529459}, {"cliente": "HENN Y CIA", "localidad": "Posadas", "lat": -27.34828099353945, "lng": -55.908874600000004}, {"cliente": "CABAÑA DON JOSE SRL", "localidad": "Virasoro", "lat": -28.0543419, "lng": -56.0139884}, {"cliente": "PUBLIO SPON", "localidad": "Montecarlo", "lat": -26.579427111089903, "lng": -54.776718501754985}, {"cliente": "KRINDGES MARCOS", "localidad": "Puerto Rico", "lat": -26.81930147191, "lng": -55.01467553596332}, {"cliente": "MORAVICKI RODRIGO", "localidad": "Comandante Andresito", "lat": -25.678468329736145, "lng": -54.05077422556842}, {"cliente": "ESTANCIA TOBUNAS", "localidad": "Bernardo de Irigoyen", "lat": -26.2667596, "lng": -53.658886930249196}, {"cliente": "COOPERATIVA MONTECARLO LTDA", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.775094154037845}, {"cliente": "PUERTO NUEVO", "localidad": "Montecarlo", "lat": -26.569427826309667, "lng": -54.77923640078916}, {"cliente": "GERMAN TIETJEN", "localidad": "Montecarlo", "lat": -26.56439202915733, "lng": -54.7821908240482}, {"cliente": "PINDO SA", "localidad": "Puerto Esperanza", "lat": -26.0227203, "lng": -54.6125731}, {"cliente": "PETROVALLE", "localidad": "Aristobulo del Valle", "lat": -27.0956103, "lng": -54.8935263}, {"cliente": "FELISA SRL", "localidad": "Consepcion de la Sierra", "lat": -27.9936246, "lng": -55.5217305}, {"cliente": "WEIDMANN SRL", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.062945899999995}, {"cliente": "WEIDEN SA", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.6222460418543}, {"cliente": "STEYER ALEJANDRO", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.3073353}, {"cliente": "SCHINDLER RUBEN", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.775094154037845}, {"cliente": "FIEBKE WILLAN", "localidad": "Pozo Azul", "lat": -26.402324801981415, "lng": -54.60779301482468}, {"cliente": "SATO RICARDO", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.05778164446661}, {"cliente": "LIMBERGER RAUL FREDY", "localidad": "Puerto Rico", "lat": -26.81444736994375, "lng": -55.02995795252292}, {"cliente": "COOP MMONTE VERDE", "localidad": "Obera", "lat": -27.4867802, "lng": -55.1203326}, {"cliente": "ARIEL HAHM", "localidad": "Capiovi", "lat": -26.9452174, "lng": -55.0520938}, {"cliente": "PES ADRIAN", "localidad": "Colonia Aurora", "lat": -27.4878469, "lng": -54.5237984}, {"cliente": "FREIBERGER JUAN CARLOS", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.03644383471184}, {"cliente": "DROSSLER BRUNO", "localidad": "Bernardo de Irigoyen", "lat": -26.252259600000002, "lng": -53.661485006460545}, {"cliente": "TRUMPP ANDRES", "localidad": "Montecarlo", "lat": -26.557211822239452, "lng": -54.77479013892593}, {"cliente": "ALCANTARA ENRIQUE", "localidad": "Comandante Andresito", "lat": -25.671150437412372, "lng": -54.0637940430701}, {"cliente": "SAN JOSE SRL", "localidad": "9 De Julio", "lat": -26.4299444, "lng": -54.4650556}, {"cliente": "KIMMICH MANUEL", "localidad": "Montecarlo", "lat": -26.552135318067425, "lng": -54.77190622229321}, {"cliente": "AMANN ERNESTO", "localidad": "Comandante Andresito", "lat": -25.66471924986998, "lng": -54.057053219953545}, {"cliente": "AZULA FERNANDO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.054985230626926}, {"cliente": "ASAGUAY SA", "localidad": "Eldorado", "lat": -26.399551039743468, "lng": -54.61372553172044}, {"cliente": "COFRA", "localidad": "Leandro N. Alem", "lat": -27.6018, "lng": -55.3227}];
 const VISITAS_KEY = 'viajante_visitas_mapa';
 
 let mapaVisitas = {}; // { cliente: ['YYYY-MM-DD', ...] }
@@ -1394,6 +1507,9 @@ function seleccionarClienteMapa(cliente) {
   leafletMap.flyTo([c.lat, c.lng], Math.max(leafletMap.getZoom(), 11), { duration: 0.5 });
   mapaMarkers[cliente].bindPopup(mapaPopupHtml(c)).openPopup();
   renderMapaLista(document.getElementById('mapa-buscar').value);
+
+  // Scroll automático al mapa
+  document.getElementById('leaflet-map').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function registrarVisita(cliente) {
@@ -1423,27 +1539,48 @@ function renderMapaLista(filtro) {
   const cont = document.getElementById('mapa-client-list');
   cont.innerHTML = '';
   const q = (filtro || '').trim().toLowerCase();
+
+  // Mostrar/ocultar botón de limpiar
+  const clearBtn = document.getElementById('mapa-lista-clear');
+  if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+
   const ordenados = MAPA_CLIENTES.slice().sort((a,b) => {
     const ca = visitasDeCliente(a.cliente, mapaMesActual).length;
     const cb = visitasDeCliente(b.cliente, mapaMesActual).length;
     if (cb !== ca) return cb - ca;
     return a.cliente.localeCompare(b.cliente);
   });
+
+  let count = 0;
   ordenados.forEach(c => {
     if (q && !c.cliente.toLowerCase().includes(q) && !c.localidad.toLowerCase().includes(q)) return;
+    count++;
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
+    const esActivo = c.cliente === mapaClienteActivo;
     const row = document.createElement('div');
-    row.className = 'mc-row';
+    row.className = 'mc-row' + (esActivo ? ' mc-row-activo' : '');
+    // Resaltar texto buscado
+    let nombreHTML = c.cliente;
+    let locHTML = c.localidad;
+    if (q) {
+      const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+      nombreHTML = c.cliente.replace(re, '<mark style="background:#fff9c4;border-radius:2px;">$1</mark>');
+      locHTML = c.localidad.replace(re, '<mark style="background:#fff9c4;border-radius:2px;">$1</mark>');
+    }
     row.innerHTML = `
       <div>
-        <div class="mc-name">${c.cliente}</div>
-        <div class="mc-loc">${c.localidad}</div>
+        <div class="mc-name">${nombreHTML}</div>
+        <div class="mc-loc">${locHTML}</div>
       </div>
       <div class="mc-badge ${n>0?'visited':''}">${n}</div>
     `;
     row.onclick = () => seleccionarClienteMapa(c.cliente);
     cont.appendChild(row);
   });
+
+  if (count === 0 && q) {
+    cont.innerHTML = `<div style="text-align:center;padding:30px 16px;color:var(--muted);font-size:14px;">Sin resultados para "<strong>${filtro}</strong>"</div>`;
+  }
 }
 
 function refrescarMapaMarkers() {
@@ -1577,6 +1714,436 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(swUrl).catch(() => {
     // SW blob no funciona en file:// — no pasa nada, la app igual funciona
   });
+}
+
+// ===== AGENDA =====
+const AGENDA_KEY = 'viajante_agenda_v2';
+
+// ── Zonas y rutina semanal ──
+const ZONAS = {
+  SUR:    { nombre: 'Zona Sur',    emoji: '🟢', localidades: ['posadas','gobernador roca','jardin america','jardín america','puerto rico','montecarlo','capiovi','garuhape','garuhapé','ruiz de montoya','consepcion de la sierra','concepcion de la sierra','cerro azul','santa rita','colonia aurora'] },
+  CENTRO: { nombre: 'Zona Centro', emoji: '🟡', localidades: ['apostoles','apóstoles','obera','oberá','colonia aurora','san vicente','el soberbio','campo grande','2 de mayo','dos de mayo','profundidad','azara'] },
+  NORTE:  { nombre: 'Zona Norte',  emoji: '🔵', localidades: ['eldorado','pozo azul','bernardo de irigoyen','comandante andresito','wanda','san pedro','fracran','fracrán','9 de julio','puerto esperanza','puerto wanda','aristobulo del valle','aristóbulo del valle'] }
+};
+
+// Día de semana (1=lun...5=vie) → modo/zona
+const RUTINA_DIA = {
+  1: { tipo: 'contacto', label: '📞 Llamados y WhatsApp', zona: null },
+  2: { tipo: 'ruta',     label: '🚗 Zona Sur',            zona: 'SUR' },
+  3: { tipo: 'ruta',     label: '🚗 Zona Norte',          zona: 'NORTE' },
+  4: { tipo: 'ruta',     label: '🚗 Zona Centro',         zona: 'CENTRO' },
+  5: { tipo: 'admin',    label: '📋 Administración',      zona: null },
+  6: { tipo: 'libre',    label: '🏖 Sábado',              zona: null },
+  0: { tipo: 'libre',    label: '🏖 Domingo',             zona: null }
+};
+
+function getZonaDeLocalidad(localidad) {
+  if (!localidad) return null;
+  const l = localidad.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for (const [key, z] of Object.entries(ZONAS)) {
+    if (z.localidades.some(loc => l.includes(loc.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))) return key;
+  }
+  return null;
+}
+
+function getAgenda() {
+  try { return JSON.parse(localStorage.getItem(AGENDA_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveAgenda(a) {
+  try { localStorage.setItem(AGENDA_KEY, JSON.stringify(a)); } catch(e) { showToast('⚠️ Sin espacio'); }
+}
+
+// Estado de la agenda
+let agendaDiaActivo = null;  // 'YYYY-MM-DD'
+let agendaTipoSel = 'visita';
+
+// Días de la semana actuales (lunes a domingo)
+function getSemanaActual() {
+  const hoy = new Date();
+  const dow = hoy.getDay(); // 0=dom
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - (dow === 0 ? 6 : dow - 1));
+  const dias = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    const str = d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+    dias.push({ str, d });
+  }
+  return dias;
+}
+
+const NOMBRES_DIA = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function renderAgendaDias() {
+  const dias = getSemanaActual();
+  const hoyStr = todayStr;
+  if (!agendaDiaActivo) agendaDiaActivo = hoyStr;
+
+  const agenda = getAgenda();
+  const el = document.getElementById('agenda-dias');
+  el.innerHTML = dias.map(({ str, d }) => {
+    const dow = d.getDay();
+    const nombre = NOMBRES_DIA[dow];
+    const num = d.getDate();
+    const esHoy = str === hoyStr;
+    const esActivo = str === agendaDiaActivo;
+    const rutina = RUTINA_DIA[dow];
+    const cantContactos = (agenda[str] || []).length;
+    const emoji = rutina.zona ? ZONAS[rutina.zona].emoji : (rutina.tipo === 'contacto' ? '📞' : rutina.tipo === 'admin' ? '📋' : '');
+    return `
+      <button class="agenda-dia-tab ${esHoy ? 'hoy' : ''} ${esActivo ? 'activo' : ''}"
+        onclick="selDiaAgenda('${str}')">
+        <span style="font-size:10px;">${nombre}</span>
+        <span class="dia-num">${num}</span>
+        <span style="font-size:11px;">${emoji}</span>
+        ${cantContactos > 0 ? `<span style="font-size:10px;background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 5px;">${cantContactos}</span>` : ''}
+      </button>
+    `;
+  }).join('');
+}
+
+function selDiaAgenda(str) {
+  agendaDiaActivo = str;
+  renderAgendaDias();
+  renderContactosDia();
+}
+
+// Último contacto de un cliente en el Diario
+function ultimaVisita(nombreCliente) {
+  const data = getData();
+  let ultima = null;
+  data.forEach(r => {
+    r.clientes.forEach(c => {
+      if (c.nombre.toLowerCase().trim() === nombreCliente.toLowerCase().trim()) {
+        if (!ultima || r.fecha > ultima) ultima = r.fecha;
+      }
+    });
+  });
+  return ultima; // 'YYYY-MM-DD' o null
+}
+
+function semaforo(nombreCliente) {
+  const ult = ultimaVisita(nombreCliente);
+  if (!ult) return 'gris';
+  const diasAtras = Math.floor((new Date(todayStr) - new Date(ult)) / 86400000);
+  if (diasAtras <= 14) return 'verde';
+  if (diasAtras <= 30) return 'amarillo';
+  return 'rojo';
+}
+
+function ultimaVisitaTexto(nombreCliente) {
+  const ult = ultimaVisita(nombreCliente);
+  if (!ult) return 'Sin visitas registradas';
+  const diasAtras = Math.floor((new Date(todayStr) - new Date(ult)) / 86400000);
+  if (diasAtras === 0) return 'Visitado hoy';
+  if (diasAtras === 1) return 'Visitado ayer';
+  return `Última visita: hace ${diasAtras} días (${fmtDate(ult)})`;
+}
+
+function renderContactosDia() {
+  const agenda = getAgenda();
+  const contactos = agenda[agendaDiaActivo] || [];
+  const el = document.getElementById('agenda-contactos-list');
+
+  const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const partes = agendaDiaActivo.split('-');
+  const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
+  const dow = fd.getDay();
+  const titulo = diasSemana[dow] + ' ' + fmtDate(agendaDiaActivo);
+  const rutina = RUTINA_DIA[dow];
+  const tipoLabel = { visita: '🤝 Visita', llamado: '📞 Llamado', whatsapp: '💬 WhatsApp' };
+
+  // Banner de rutina del día
+  const bannerColor = rutina.tipo === 'ruta' ? 'var(--green)' : rutina.tipo === 'contacto' ? 'var(--blue)' : '#795548';
+  let bannerExtra = '';
+  if (rutina.zona) {
+    const z = ZONAS[rutina.zona];
+    bannerExtra = `<div style="font-size:11px;opacity:0.85;margin-top:3px;">${z.localidades.slice(0,5).map(l => l.charAt(0).toUpperCase()+l.slice(1)).join(' · ')}...</div>`;
+  }
+
+  // Sugerencias de clientes de la zona del día (solo si es día de ruta y no hay muchos ya)
+  let sugerenciasHTML = '';
+  if (rutina.zona && contactos.length < 3) {
+    const zonaClave = rutina.zona;
+    const clientesZona = MAPA_CLIENTES
+      .filter(mc => getZonaDeLocalidad(mc.localidad) === zonaClave)
+      .filter(mc => !contactos.some(c => c.cliente === mc.cliente))
+      .map(mc => ({
+        ...mc,
+        sem: semaforo(mc.cliente),
+        ult: ultimaVisita(mc.cliente)
+      }))
+      // Primero rojos, después grises, después amarillos, después verdes
+      .sort((a, b) => {
+        const orden = { rojo: 0, gris: 1, amarillo: 2, verde: 3 };
+        return (orden[a.sem] ?? 4) - (orden[b.sem] ?? 4);
+      })
+      .slice(0, 5);
+
+    if (clientesZona.length > 0) {
+      sugerenciasHTML = `
+        <div class="card" style="margin-bottom:10px;padding:12px 14px;">
+          <div class="card-title">💡 Sugeridos para hoy — ${ZONAS[zonaClave].nombre}</div>
+          ${clientesZona.map(mc => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+              <div class="ac-semaforo ${mc.sem}" style="width:10px;height:10px;border-radius:50%;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:13px;">${mc.cliente}</div>
+                <div style="font-size:11px;color:var(--muted);">📍 ${mc.localidad} · ${ultimaVisitaTexto(mc.cliente)}</div>
+              </div>
+              <button onclick="agregarSugerido('${mc.cliente.replace(/'/g,"\\'")}','${mc.localidad.replace(/'/g,"\\'")}')"
+                style="background:var(--green);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">
+                + Agregar
+              </button>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+  }
+
+  const headerHTML = `
+    <div style="background:${bannerColor};color:white;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+      <div style="font-weight:700;font-size:14px;">${rutina.label}</div>
+      <div style="font-size:12px;opacity:0.9;margin-top:2px;">${titulo}</div>
+      ${bannerExtra}
+    </div>`;
+
+  if (contactos.length === 0) {
+    el.innerHTML = headerHTML + sugerenciasHTML + `
+      <div class="card" style="text-align:center;padding:24px 16px;color:var(--muted);">
+        <div style="font-size:32px;margin-bottom:8px;">📋</div>
+        <div style="font-size:13px;">No hay contactos planificados.<br>Agregá uno arriba o usá las sugerencias.</div>
+      </div>`;
+    return;
+  }
+
+  // Ordenar: pendientes primero (rojos arriba), completados al final
+  const ordenados = [...contactos].map((c, i) => ({ ...c, _i: i }));
+  ordenados.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const orden = { rojo: 0, gris: 1, amarillo: 2, verde: 3 };
+    return (orden[semaforo(a.cliente)] ?? 4) - (orden[semaforo(b.cliente)] ?? 4);
+  });
+
+  const hechos = contactos.filter(c => c.done).length;
+
+  el.innerHTML = headerHTML + sugerenciasHTML + `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="card-title" style="margin:0;">📋 ${contactos.length} contacto${contactos.length>1?'s':''}</div>
+      <div style="font-size:12px;color:var(--muted);">${hechos}/${contactos.length} hechos</div>
+    </div>
+    ${ordenados.map((c) => {
+      const sem = semaforo(c.cliente);
+      const ultTxt = ultimaVisitaTexto(c.cliente);
+      return `
+        <div class="agenda-contacto" style="${c.done ? 'opacity:0.5;' : ''}">
+          <div class="ac-semaforo ${sem}"></div>
+          <div class="ac-body">
+            <div class="ac-nombre" style="${c.done ? 'text-decoration:line-through;' : ''}">${c.cliente}</div>
+            <div class="ac-loc">📍 ${c.localidad || ''}</div>
+            <span class="ac-tipo ${c.tipo}">${tipoLabel[c.tipo] || c.tipo}</span>
+            ${c.producto ? `<div class="ac-prod">🎯 ${c.producto}</div>` : ''}
+            <div class="ac-ultima">${ultTxt}</div>
+          </div>
+          <div class="ac-actions">
+            <button class="ac-check ${c.done ? 'done' : ''}" onclick="toggleDoneAgenda('${agendaDiaActivo}', ${c._i})">
+              ${c.done ? '✓' : ''}
+            </button>
+            <button class="ac-del" onclick="eliminarContactoAgenda('${agendaDiaActivo}', ${c._i})">×</button>
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function agregarSugerido(cliente, localidad) {
+  const agenda = getAgenda();
+  if (!agenda[agendaDiaActivo]) agenda[agendaDiaActivo] = [];
+  if (agenda[agendaDiaActivo].some(c => c.cliente === cliente)) { showToast('Ya está en la agenda'); return; }
+  const dow = new Date(agendaDiaActivo.replace(/-/g,'/')).getDay();
+  const rutina = RUTINA_DIA[dow];
+  agenda[agendaDiaActivo].push({
+    cliente, localidad,
+    tipo: rutina.tipo === 'contacto' ? 'llamado' : 'visita',
+    producto: '', done: false, agregado: Date.now()
+  });
+  saveAgenda(agenda);
+  renderAgendaDias();
+  renderContactosDia();
+  showToast('✅ ' + cliente + ' agregado');
+}
+
+function selTipo(tipo) {
+  agendaTipoSel = tipo;
+  ['visita','llamado','whatsapp'].forEach(t => {
+    const btn = document.getElementById('tbtn-' + t);
+    btn.className = 'tipo-btn' + (t === tipo ? ' sel-' + t : '');
+  });
+}
+
+function poblarSelectClientes() {
+  const sel = document.getElementById('agenda-cliente-sel');
+  const nombres = new Set();
+  getData().forEach(r => r.clientes.forEach(c => nombres.add(c.nombre)));
+  MAPA_CLIENTES.forEach(c => nombres.add(c.cliente));
+
+  // Si hay día activo con zona, mostrar primero los de esa zona
+  let zonaActiva = null;
+  if (agendaDiaActivo) {
+    const partes = agendaDiaActivo.split('-');
+    const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
+    const rutina = RUTINA_DIA[fd.getDay()];
+    zonaActiva = rutina ? rutina.zona : null;
+  }
+
+  const todos = [...nombres].sort();
+  if (zonaActiva) {
+    const deZona = todos.filter(n => {
+      const mc = MAPA_CLIENTES.find(c => c.cliente === n);
+      return mc && getZonaDeLocalidad(mc.localidad) === zonaActiva;
+    });
+    const otros = todos.filter(n => !deZona.includes(n));
+    sel.innerHTML = '<option value="">Elegí un cliente...</option>' +
+      (deZona.length ? `<optgroup label="⭐ ${ZONAS[zonaActiva].nombre}">${deZona.map(n => `<option value="${n}">${n}</option>`).join('')}</optgroup>` : '') +
+      (otros.length ? `<optgroup label="Otros clientes">${otros.map(n => `<option value="${n}">${n}</option>`).join('')}</optgroup>` : '');
+  } else {
+    sel.innerHTML = '<option value="">Elegí un cliente...</option>' +
+      todos.map(n => `<option value="${n}">${n}</option>`).join('');
+  }
+}
+
+function getLocalidadCliente(nombre) {
+  const mc = MAPA_CLIENTES.find(c => c.cliente === nombre);
+  return mc ? mc.localidad : '';
+}
+
+function agregarContactoAgenda() {
+  const sel = document.getElementById('agenda-cliente-sel');
+  const prod = document.getElementById('agenda-prod').value.trim();
+  const cliente = sel.value;
+  if (!cliente) { showToast('Elegí un cliente'); return; }
+  if (!agendaDiaActivo) { showToast('Seleccioná un día'); return; }
+
+  const agenda = getAgenda();
+  if (!agenda[agendaDiaActivo]) agenda[agendaDiaActivo] = [];
+
+  // Evitar duplicados
+  if (agenda[agendaDiaActivo].some(c => c.cliente === cliente)) {
+    showToast('Ya está en este día'); return;
+  }
+
+  agenda[agendaDiaActivo].push({
+    cliente,
+    localidad: getLocalidadCliente(cliente),
+    tipo: agendaTipoSel,
+    producto: prod,
+    done: false,
+    agregado: Date.now()
+  });
+
+  saveAgenda(agenda);
+  sel.value = '';
+  document.getElementById('agenda-prod').value = '';
+  renderAgendaDias();
+  renderContactosDia();
+  showToast('✅ Agregado a la agenda');
+}
+
+function toggleDoneAgenda(fecha, idx) {
+  const agenda = getAgenda();
+  if (agenda[fecha] && agenda[fecha][idx] !== undefined) {
+    agenda[fecha][idx].done = !agenda[fecha][idx].done;
+    saveAgenda(agenda);
+    renderContactosDia();
+    renderAgendaDias();
+  }
+}
+
+function eliminarContactoAgenda(fecha, idx) {
+  const agenda = getAgenda();
+  if (agenda[fecha]) {
+    agenda[fecha].splice(idx, 1);
+    if (agenda[fecha].length === 0) delete agenda[fecha];
+    saveAgenda(agenda);
+    renderAgendaDias();
+    renderContactosDia();
+  }
+}
+
+function agendaTab(tab) {
+  document.getElementById('atab-semana').classList.toggle('active', tab === 'semana');
+  document.getElementById('atab-olvidados').classList.toggle('active', tab === 'olvidados');
+  document.getElementById('agenda-vista-semana').style.display = tab === 'semana' ? '' : 'none';
+  document.getElementById('agenda-vista-olvidados').style.display = tab === 'olvidados' ? '' : 'none';
+  if (tab === 'olvidados') renderOlvidados();
+}
+
+function renderOlvidados() {
+  const el = document.getElementById('agenda-olvidados-list');
+  const porZona = { SUR: [], CENTRO: [], NORTE: [], SIN_ZONA: [] };
+
+  MAPA_CLIENTES.forEach(mc => {
+    const ult = ultimaVisita(mc.cliente);
+    let diasAtras = null;
+    if (ult) {
+      diasAtras = Math.floor((new Date(todayStr) - new Date(ult)) / 86400000);
+      if (diasAtras <= 30) return;
+    }
+    const zona = getZonaDeLocalidad(mc.localidad) || 'SIN_ZONA';
+    porZona[zona].push({ nombre: mc.cliente, localidad: mc.localidad, diasAtras });
+  });
+
+  const total = Object.values(porZona).reduce((s, a) => s + a.length, 0);
+  if (total === 0) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px;">✅ Todos los clientes fueron visitados recientemente.</div>';
+    return;
+  }
+
+  const ordenar = arr => arr.sort((a, b) => {
+    if (a.diasAtras === null && b.diasAtras === null) return a.nombre.localeCompare(b.nombre);
+    if (a.diasAtras === null) return -1;
+    if (b.diasAtras === null) return 1;
+    return b.diasAtras - a.diasAtras;
+  });
+
+  const zonasDef = [
+    { key: 'SUR',      label: '🟢 Zona Sur    — Martes',   dia: 'Martes' },
+    { key: 'NORTE',    label: '🔵 Zona Norte  — Miércoles',dia: 'Miércoles' },
+    { key: 'CENTRO',   label: '🟡 Zona Centro — Jueves',   dia: 'Jueves' },
+    { key: 'SIN_ZONA', label: '⚫ Sin zona asignada',      dia: '' }
+  ];
+
+  el.innerHTML = zonasDef.map(z => {
+    const arr = ordenar(porZona[z.key]);
+    if (!arr.length) return '';
+    return `
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">${z.label}</div>
+      ${arr.map(r => `
+        <div class="olvidados-item">
+          <div>
+            <div class="oi-nombre">${r.nombre}</div>
+            <div class="oi-loc">📍 ${r.localidad}</div>
+          </div>
+          <div class="oi-dias">${r.diasAtras === null ? 'Sin visitas' : r.diasAtras + ' días'}</div>
+        </div>
+      `).join('')}
+    `;
+  }).join('');
+}
+
+// Hook en showPage para inicializar la Agenda
+const _showPageOrig = showPage;
+function showPage(name) {
+  _showPageOrig(name);
+  if (name === 'agenda') {
+    poblarSelectClientes();
+    renderAgendaDias();
+    renderContactosDia();
+  }
 }
 
 // ===== APPLE TOUCH ICON (generado dinámicamente) =====
