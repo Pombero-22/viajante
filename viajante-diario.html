@@ -1425,12 +1425,12 @@ function startGPS() {
   gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       const { latitude, longitude, accuracy, speed } = pos.coords;
-      // Antes se descartaba todo punto con precisión peor a 100m. En tramos
-      // rurales/de ruta el GPS a veces reporta peor precisión y se perdían
-      // pedazos enteros de recorrido. Ahora aceptamos hasta 150m.
-      if (accuracy > 150) return;
+      // Antes se descartaba todo punto con precisión peor a 100m, después 150m.
+      // En tramos rurales/forestados el GPS reporta peor precisión seguido y se
+      // perdían pedazos enteros de recorrido. Ahora aceptamos hasta 200m.
+      if (accuracy > 200) return;
 
-      const newPoint = { lat: latitude, lng: longitude, t: Date.now(), spd: (typeof speed === 'number' ? speed : null) };
+      const newPoint = { lat: latitude, lng: longitude, t: Date.now(), spd: (typeof speed === 'number' && speed >= 0 ? speed : null) };
 
       // Calcular distancia desde el último punto (en memoria o el guardado)
       const refPoint = gpsState.points.length > 0
@@ -1447,16 +1447,33 @@ function startGPS() {
         // las curvas.
         if (dist < 0.008) return;
 
-        // Si pasó mucho tiempo entre dos lecturas (por ejemplo, la app
-        // quedó en segundo plano y iOS espació el GPS), la recta entre esos
-        // dos puntos puede cortar curvas de la ruta real. Si la velocidad
-        // que reporta el GPS sugiere que se recorrió más distancia que esa
-        // línea recta, usamos esa estimación (con un tope para evitar
-        // valores disparatados por errores de señal).
+        // Si pasó mucho tiempo entre dos lecturas (la app quedó en segundo
+        // plano mientras se usaba otra app de navegación, o el celular se
+        // bloqueó), la recta entre esos dos puntos corta curvas y subestima
+        // bastante el camino real recorrido. Para compensar, estimamos la
+        // distancia como velocidad × tiempo transcurrido. La velocidad
+        // instantánea del GPS (speed) casi nunca está disponible justo
+        // después de un corte de señal, así que si falta usamos la
+        // velocidad promedio del viaje hasta ahora como respaldo. El tope
+        // es una velocidad máxima físicamente razonable (160 km/h), no la
+        // distancia en línea recta — esa es precisamente la que subestima
+        // en rutas con curvas y no sirve como techo de esta corrección.
         const dtSec = (newPoint.t - refPoint.t) / 1000;
-        if (dtSec > 8 && typeof newPoint.spd === 'number' && newPoint.spd > 0) {
-          const estBySpeed = (newPoint.spd * dtSec) / 1000; // km
-          if (estBySpeed > dist) dist = Math.min(estBySpeed, dist * 2.5);
+        if (dtSec > 8) {
+          let velKmS = null; // km por segundo
+          if (typeof newPoint.spd === 'number' && newPoint.spd > 0) {
+            velKmS = newPoint.spd / 1000;
+          } else if (typeof refPoint.spd === 'number' && refPoint.spd > 0) {
+            velKmS = refPoint.spd / 1000;
+          } else if (gpsState.startTime && refPoint.t > gpsState.startTime) {
+            const segTranscurridos = (refPoint.t - gpsState.startTime) / 1000;
+            if (segTranscurridos > 0) velKmS = gpsState.totalKm / segTranscurridos;
+          }
+          if (velKmS) {
+            const techoKmS = 160 / 3600;
+            const estBySpeed = Math.min(velKmS, techoKmS) * dtSec;
+            dist = Math.max(dist, estBySpeed);
+          }
         }
 
         gpsState.totalKm += dist;
