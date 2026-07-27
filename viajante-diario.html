@@ -71,6 +71,23 @@
 
   .agenda-add-form { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   .agenda-add-form select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; background: white; color: var(--text); margin-bottom: 10px; -webkit-appearance: none; }
+
+  /* Buscador de clientes (Agenda) */
+  .ac-search-wrap { position: relative; margin-bottom: 10px; }
+  .ac-search-wrap input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; background: white; color: var(--text); -webkit-appearance: none; }
+  .ac-search-wrap input:focus { outline: none; border-color: var(--green); }
+  .ac-search-results { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: white; border: 1.5px solid var(--border); border-radius: 8px; max-height: 260px; overflow-y: auto; z-index: 30; display: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+  .ac-search-results.open { display: block; }
+  .ac-search-group { padding: 6px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: var(--muted); background: var(--bg); }
+  .ac-search-item { padding: 10px 14px; cursor: pointer; border-top: 1px solid var(--border); }
+  .ac-search-item:first-child { border-top: none; }
+  .ac-search-item:active { background: var(--green-pale); }
+  .ac-search-item .ac-search-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .ac-search-item .ac-search-loc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .ac-search-item mark { background: #fff9c4; border-radius: 2px; }
+  .ac-search-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 13px; }
+  .ac-search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--muted); font-size: 18px; cursor: pointer; display: none; }
+  .ac-search-clear.visible { display: block; }
   .tipo-selector { display: flex; gap: 8px; margin-bottom: 10px; }
   .tipo-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; text-align: center; }
   .tipo-btn.sel-visita { border-color: var(--green); background: var(--green-pale); color: var(--green); }
@@ -381,9 +398,14 @@
     <!-- Formulario agregar contacto -->
     <div class="agenda-add-form">
       <div class="card-title">➕ Agregar contacto al día</div>
-      <select id="agenda-cliente-sel">
-        <option value="">Elegí un cliente...</option>
-      </select>
+      <div class="ac-search-wrap">
+        <input type="text" id="agenda-cliente-buscar" placeholder="🔍 Buscar cliente..." autocomplete="off"
+          oninput="filtrarClientesAgenda(this.value)"
+          onfocus="filtrarClientesAgenda(this.value)"
+          onblur="setTimeout(cerrarResultadosAgenda, 150)">
+        <button type="button" class="ac-search-clear" id="agenda-cliente-clear" onclick="limpiarClienteAgenda()">×</button>
+        <div class="ac-search-results" id="agenda-cliente-resultados"></div>
+      </div>
       <input type="text" id="agenda-prod" placeholder="Producto de interés (opcional)" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;margin-bottom:10px;">
       <div class="tipo-selector">
         <button class="tipo-btn sel-visita" id="tbtn-visita" onclick="selTipo('visita')">🤝 Visita</button>
@@ -2264,35 +2286,26 @@ function selTipo(tipo) {
   });
 }
 
+let agendaClienteSeleccionado = '';
+let agendaZonaActiva = null;
+let agendaClientesTodos = [];
+
 function poblarSelectClientes() {
-  const sel = document.getElementById('agenda-cliente-sel');
   const nombres = new Set();
   getData().forEach(r => r.clientes.forEach(c => nombres.add(c.nombre)));
   MAPA_CLIENTES.forEach(c => nombres.add(c.cliente));
 
   // Si hay día activo con zona, mostrar primero los de esa zona
-  let zonaActiva = null;
+  agendaZonaActiva = null;
   if (agendaDiaActivo) {
     const partes = agendaDiaActivo.split('-');
     const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
     const rutina = RUTINA_DIA[fd.getDay()];
-    zonaActiva = rutina ? rutina.zona : null;
+    agendaZonaActiva = rutina ? rutina.zona : null;
   }
 
-  const todos = [...nombres].sort();
-  if (zonaActiva) {
-    const deZona = todos.filter(n => {
-      const mc = MAPA_CLIENTES.find(c => c.cliente === n);
-      return mc && getZonaDeLocalidad(mc.localidad) === zonaActiva;
-    });
-    const otros = todos.filter(n => !deZona.includes(n));
-    sel.innerHTML = '<option value="">Elegí un cliente...</option>' +
-      (deZona.length ? `<optgroup label="⭐ ${ZONAS[zonaActiva].nombre}">${deZona.map(n => `<option value="${n}">${n}</option>`).join('')}</optgroup>` : '') +
-      (otros.length ? `<optgroup label="Otros clientes">${otros.map(n => `<option value="${n}">${n}</option>`).join('')}</optgroup>` : '');
-  } else {
-    sel.innerHTML = '<option value="">Elegí un cliente...</option>' +
-      todos.map(n => `<option value="${n}">${n}</option>`).join('');
-  }
+  agendaClientesTodos = [...nombres].sort();
+  limpiarClienteAgenda();
 }
 
 function getLocalidadCliente(nombre) {
@@ -2300,10 +2313,93 @@ function getLocalidadCliente(nombre) {
   return mc ? mc.localidad : '';
 }
 
+function normalizarBusqueda(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function resaltar(texto, q) {
+  if (!q) return texto;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return texto.replace(re, '<mark>$1</mark>');
+}
+
+function filtrarClientesAgenda(valor) {
+  const q = normalizarBusqueda(valor);
+  const cont = document.getElementById('agenda-cliente-resultados');
+  const clearBtn = document.getElementById('agenda-cliente-clear');
+  clearBtn.classList.toggle('visible', !!valor);
+
+  // Si el texto coincide exactamente con el cliente ya elegido, no lo tratamos como filtro nuevo
+  if (valor && valor === agendaClienteSeleccionado) {
+    cont.classList.remove('open');
+    return;
+  }
+  if (agendaClienteSeleccionado && valor !== agendaClienteSeleccionado) {
+    agendaClienteSeleccionado = '';
+  }
+
+  const coincide = (n) => {
+    if (!q) return true;
+    if (normalizarBusqueda(n).includes(q)) return true;
+    const loc = getLocalidadCliente(n);
+    return loc && normalizarBusqueda(loc).includes(q);
+  };
+
+  const filtrados = agendaClientesTodos.filter(coincide);
+
+  const renderItem = (n) => {
+    const loc = getLocalidadCliente(n);
+    return `
+      <div class="ac-search-item" onmousedown="event.preventDefault();seleccionarClienteAgenda('${n.replace(/'/g,"\\'")}')">
+        <div class="ac-search-name">${resaltar(n, valor)}</div>
+        ${loc ? `<div class="ac-search-loc">📍 ${resaltar(loc, valor)}</div>` : ''}
+      </div>
+    `;
+  };
+
+  if (!filtrados.length) {
+    cont.innerHTML = '<div class="ac-search-empty">Sin resultados</div>';
+  } else if (!q && agendaZonaActiva) {
+    const deZona = filtrados.filter(n => {
+      const loc = getLocalidadCliente(n);
+      return loc && getZonaDeLocalidad(loc) === agendaZonaActiva;
+    });
+    const otros = filtrados.filter(n => !deZona.includes(n));
+    cont.innerHTML =
+      (deZona.length ? `<div class="ac-search-group">⭐ ${ZONAS[agendaZonaActiva].nombre}</div>${deZona.map(renderItem).join('')}` : '') +
+      (otros.length ? `<div class="ac-search-group">Otros clientes</div>${otros.map(renderItem).join('')}` : '');
+  } else {
+    cont.innerHTML = filtrados.map(renderItem).join('');
+  }
+
+  cont.classList.add('open');
+}
+
+function seleccionarClienteAgenda(nombre) {
+  agendaClienteSeleccionado = nombre;
+  const input = document.getElementById('agenda-cliente-buscar');
+  input.value = nombre;
+  document.getElementById('agenda-cliente-clear').classList.add('visible');
+  cerrarResultadosAgenda();
+}
+
+function cerrarResultadosAgenda() {
+  const cont = document.getElementById('agenda-cliente-resultados');
+  if (cont) cont.classList.remove('open');
+}
+
+function limpiarClienteAgenda() {
+  agendaClienteSeleccionado = '';
+  const input = document.getElementById('agenda-cliente-buscar');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('agenda-cliente-clear');
+  if (clearBtn) clearBtn.classList.remove('visible');
+  cerrarResultadosAgenda();
+}
+
 function agregarContactoAgenda() {
-  const sel = document.getElementById('agenda-cliente-sel');
   const prod = document.getElementById('agenda-prod').value.trim();
-  const cliente = sel.value;
+  const cliente = agendaClienteSeleccionado;
   if (!cliente) { showToast('Elegí un cliente'); return; }
   if (!agendaDiaActivo) { showToast('Seleccioná un día'); return; }
 
@@ -2325,7 +2421,7 @@ function agregarContactoAgenda() {
   });
 
   saveAgenda(agenda);
-  sel.value = '';
+  limpiarClienteAgenda();
   document.getElementById('agenda-prod').value = '';
   renderAgendaDias();
   renderContactosDia();
