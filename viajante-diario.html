@@ -2000,7 +2000,7 @@ if (isIos() && !isInStandaloneMode()) {
 if ('serviceWorker' in navigator) {
   // Registrar SW inline usando blob URL
   const swCode = `
-    const CACHE = 'viajante-v1';
+    const CACHE = 'viajante-v2';
     self.addEventListener('install', e => {
       self.skipWaiting();
     });
@@ -2011,8 +2011,25 @@ if ('serviceWorker' in navigator) {
       self.clients.claim();
     });
     self.addEventListener('fetch', e => {
-      // Cache-first para archivos propios
       if (e.request.method !== 'GET') return;
+
+      // Documento principal: red primero, así una actualización nueva se ve
+      // apenas hay conexión. Si falla (sin internet), usamos la última
+      // copia guardada para que la app siga funcionando offline.
+      if (e.request.mode === 'navigate') {
+        e.respondWith(
+          fetch(e.request).then(resp => {
+            if (resp && resp.status === 200) {
+              const clone = resp.clone();
+              caches.open(CACHE).then(c => c.put(e.request, clone));
+            }
+            return resp;
+          }).catch(() => caches.match(e.request))
+        );
+        return;
+      }
+
+      // Resto de archivos (librerías externas): cache-first, cambian poco.
       e.respondWith(
         caches.match(e.request).then(cached => {
           if (cached) return cached;
