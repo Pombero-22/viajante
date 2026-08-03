@@ -509,10 +509,72 @@
     <button class="export-btn" onclick="exportVisitasCSV()">📍 Historial de visitas (CSV)</button>
     <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
   </div>
+  <div class="card">
+    <div class="card-title">💾 Backup completo</div>
+    <button class="export-btn" onclick="descargarBackupCompleto()">💾 Descargar backup (JSON)</button>
+    <input type="file" id="backup-file-input" accept="application/json" style="display:none;" onchange="restaurarBackupCompleto(event)">
+    <button class="export-btn" style="border-color:var(--muted);color:var(--muted);" onclick="document.getElementById('backup-file-input').click();">📤 Restaurar backup</button>
+    <p class="hint" style="margin-top:4px;">Guarda TODO lo registrado (historial, gastos, visitas, agenda y clientes agregados) en un solo archivo. Guardalo en Drive, iCloud o mandátelo por mail. Si perdés el teléfono o se borra el caché, lo restaurás con "Restaurar backup".</p>
+  </div>
   <div class="card" id="stats-mes"></div>
 </div>
 
 <script>
+// ===== BACKUP COMPLETO =====
+const BACKUP_KEYS = [
+  'viajante_v2',
+  'viajante_gastos_sueltos',
+  'viajante_clientes_extra',
+  'viajante_visitas_mapa',
+  'viajante_agenda_v2',
+];
+
+function descargarBackupCompleto() {
+  const backup = { fecha: new Date().toISOString(), datos: {} };
+  BACKUP_KEYS.forEach(k => { backup.datos[k] = localStorage.getItem(k) || null; });
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fecha = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = 'backup_viajante_' + fecha + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Backup descargado');
+}
+
+function restaurarBackupCompleto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if (!backup.datos) throw new Error('Formato inválido');
+
+      const ok = confirm('Esto va a REEMPLAZAR todos los datos actuales de la app por los del backup del ' + (backup.fecha ? backup.fecha.slice(0,10) : '(fecha desconocida)') + '. ¿Continuar?');
+      if (!ok) return;
+
+      BACKUP_KEYS.forEach(k => {
+        if (backup.datos[k] !== null && backup.datos[k] !== undefined) {
+          localStorage.setItem(k, backup.datos[k]);
+        }
+      });
+
+      showToast('✅ Backup restaurado, recargando...');
+      setTimeout(() => location.reload(), 1200);
+    } catch (err) {
+      showToast('⚠️ Archivo de backup inválido');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
 // ===== STORAGE =====
 function getData() {
   try { return JSON.parse(localStorage.getItem('viajante_v2') || '[]'); }
@@ -1686,10 +1748,11 @@ function initMapaVisitas() {
 
   if (!leafletMap) {
     leafletMap = L.map('leaflet-map', { preferCanvas: true }).setView([-27.0, -54.9], 7.3);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap',
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
       maxZoom: 18,
       crossOrigin: true,
+      subdomains: 'abcd',
     }).addTo(leafletMap);
 
     MAPA_CLIENTES.forEach(c => {
