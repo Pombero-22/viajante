@@ -1492,7 +1492,7 @@ function startGPS() {
       // perdían pedazos enteros de recorrido. Ahora aceptamos hasta 200m.
       if (accuracy > 200) return;
 
-      const newPoint = { lat: latitude, lng: longitude, t: Date.now(), spd: (typeof speed === 'number' && speed >= 0 ? speed : null) };
+      const newPoint = { lat: latitude, lng: longitude, t: Date.now(), spd: (typeof speed === 'number' && speed >= 0 ? speed : null), acc: accuracy };
 
       // Calcular distancia desde el último punto (en memoria o el guardado)
       const refPoint = gpsState.points.length > 0
@@ -1501,39 +1501,53 @@ function startGPS() {
 
       if (refPoint) {
         let dist = haversine(refPoint.lat, refPoint.lng, newPoint.lat, newPoint.lng);
-        // Antes se ignoraba todo movimiento menor a 20m (para filtrar ruido
-        // GPS al estar detenido). Eso también recortaba las curvas: en ruta
-        // con curvas, la línea recta entre dos puntos separados por 20m+
-        // corta camino real. Bajamos el umbral a 8m — sigue filtrando el
-        // ruido típico de un GPS quieto, pero capta muchos más puntos en
-        // las curvas.
-        if (dist < 0.008) return;
+
+        // Umbral mínimo DINÁMICO: antes era un valor fijo de 8m, pero con
+        // hasta 200m de margen de error aceptado, un simple rebote de señal
+        // (parado en un cliente, zona con árboles/edificios) puede reportar
+        // un "salto" de 50-100m sin que el vehículo se haya movido, y ese
+        // salto se sumaba entero como km recorridos — esta fue la causa
+        // principal de que 170km reales se contaran como 300km. Ahora el
+        // umbral crece junto con el error de precisión reportado por los
+        // dos puntos: cuanto peor la señal, más movimiento real hace falta
+        // para contarlo.
+        const refAcc = typeof refPoint.acc === 'number' ? refPoint.acc : 20;
+        const minDistKm = Math.max(0.008, ((refAcc + accuracy) / 1000) * 0.6);
+        if (dist < minDistKm) return;
+
+        const dtSec = (newPoint.t - refPoint.t) / 1000;
+
+        // Filtro de velocidad implausible: en lecturas seguidas (sin corte
+        // de señal), si la distancia implica ir a más de 180 km/h es un
+        // salto por error de posición (multipath, rebote urbano), no un
+        // desplazamiento real — se descarta el punto en vez de sumarlo.
+        if (dtSec > 0 && dtSec <= 8) {
+          const impliedKmH = (dist / dtSec) * 3600;
+          if (impliedKmH > 180) return;
+        }
 
         // Si pasó mucho tiempo entre dos lecturas (la app quedó en segundo
         // plano mientras se usaba otra app de navegación, o el celular se
         // bloqueó), la recta entre esos dos puntos corta curvas y subestima
-        // bastante el camino real recorrido. Para compensar, estimamos la
-        // distancia como velocidad × tiempo transcurrido. La velocidad
-        // instantánea del GPS (speed) casi nunca está disponible justo
-        // después de un corte de señal, así que si falta usamos la
-        // velocidad promedio del viaje hasta ahora como respaldo. El tope
-        // es una velocidad máxima físicamente razonable (160 km/h), no la
-        // distancia en línea recta — esa es precisamente la que subestima
-        // en rutas con curvas y no sirve como techo de esta corrección.
-        const dtSec = (newPoint.t - refPoint.t) / 1000;
+        // el camino real. Para compensar, estimamos con velocidad × tiempo,
+        // pero SOLO con la velocidad instantánea que reporta el GPS (y solo
+        // si esa lectura tiene buena precisión). Se sacó el respaldo que
+        // usaba el promedio de velocidad del viaje: si el viaje ya venía
+        // sobreestimado, ese promedio también estaba inflado, y usarlo para
+        // "rellenar" el siguiente corte inflaba aún más el total — un
+        // efecto de retroalimentación que fue la segunda causa del problema.
         if (dtSec > 8) {
           let velKmS = null; // km por segundo
-          if (typeof newPoint.spd === 'number' && newPoint.spd > 0) {
+          if (typeof newPoint.spd === 'number' && newPoint.spd > 0 && accuracy < 50) {
             velKmS = newPoint.spd / 1000;
-          } else if (typeof refPoint.spd === 'number' && refPoint.spd > 0) {
+          } else if (typeof refPoint.spd === 'number' && refPoint.spd > 0 && refAcc < 50) {
             velKmS = refPoint.spd / 1000;
-          } else if (gpsState.startTime && refPoint.t > gpsState.startTime) {
-            const segTranscurridos = (refPoint.t - gpsState.startTime) / 1000;
-            if (segTranscurridos > 0) velKmS = gpsState.totalKm / segTranscurridos;
           }
           if (velKmS) {
             const techoKmS = 160 / 3600;
-            const estBySpeed = Math.min(velKmS, techoKmS) * dtSec;
+            // No extrapolar más de 10 minutos de corte de señal de una sola vez
+            const dtCapped = Math.min(dtSec, 600);
+            const estBySpeed = Math.min(velKmS, techoKmS) * dtCapped;
             dist = Math.max(dist, estBySpeed);
           }
         }
@@ -1580,7 +1594,57 @@ function releaseWakeLock() {
   try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch(e) {}
 }
 
-function stopGPS() {
+// Ajusta el recorrido GPS pegándolo a las calles/rutas reales (map matching)
+// usando el servidor público y gratuito de OSRM. Esto corrige tanto el
+// ruido de posición como las curvas cortadas por puntos muy espaciados,
+// dando una distancia bastante más cercana al cuentakilómetros real.
+// No requiere cuenta ni API key. Si no hay internet, el viaje tiene pocos
+// puntos, o el servicio no responde a tiempo, devuelve null y la app sigue
+// con el cálculo local de siempre — nunca deja al usuario sin km cargado.
+async function matchRouteOSRM(points) {
+  try {
+    if (!points || points.length < 2) return null;
+
+    // El servidor público tiene un límite práctico de puntos por consulta.
+    // Si el viaje acumuló muchos, los reducimos a 100 tomándolos espaciados
+    // de forma pareja, conservando siempre el primero y el último.
+    let sample = points;
+    if (points.length > 100) {
+      const step = (points.length - 1) / 99;
+      sample = [];
+      for (let i = 0; i < 100; i++) sample.push(points[Math.round(i * step)]);
+    }
+
+    const coords = sample.map(p => `${p.lng},${p.lat}`).join(';');
+    const timestamps = sample.map(p => Math.round(p.t / 1000)).join(';');
+    // Radio de búsqueda por punto: cuanto peor la precisión GPS reportada,
+    // más margen le damos a OSRM para encontrar la calle correcta.
+    const radiuses = sample.map(p => {
+      const r = typeof p.acc === 'number' ? p.acc : 20;
+      return Math.min(Math.max(r, 10), 100);
+    }).join(';');
+
+    const url = `https://router.project-osrm.org/match/v1/driving/${coords}` +
+      `?geometries=geojson&overview=false&annotations=false` +
+      `&radiuses=${radiuses}&timestamps=${timestamps}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!resp.ok) return null;
+
+    const data = await resp.json();
+    if (data.code !== 'Ok' || !Array.isArray(data.matchings) || data.matchings.length === 0) return null;
+
+    const totalMeters = data.matchings.reduce((sum, m) => sum + (m.distance || 0), 0);
+    return totalMeters > 0 ? totalMeters / 1000 : null; // km
+  } catch (e) {
+    return null; // sin señal de datos, timeout, o el servicio no respondió
+  }
+}
+
+async function stopGPS() {
   if (gpsWatchId !== null) {
     navigator.geolocation.clearWatch(gpsWatchId);
     gpsWatchId = null;
@@ -1595,18 +1659,27 @@ function stopGPS() {
   const totalMs = gpsState.startTime ? (ahora - gpsState.startTime) : 0;
   const totalMins = Math.round(totalMs / 60000);
   const totalHoras = (totalMins / 60).toFixed(1);
-  const kmFinal = gpsState.totalKm.toFixed(1);
-
-  // Rellenar campos del formulario
-  document.getElementById('km').value = kmFinal;
-  document.getElementById('horas').value = totalHoras;
 
   document.getElementById('gps-btn').className = 'gps-btn start';
   document.getElementById('gps-btn-icon').textContent = '▶';
   document.getElementById('gps-btn-text').textContent = 'Iniciar viaje';
   document.getElementById('gps-tiempo').textContent = '0:00';
-  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${totalMins} min`;
-  showToast(`✅ ${kmFinal} km y ${totalHoras}h registrados`);
+  document.getElementById('gps-status').textContent = '📍 Ajustando distancia con el mapa...';
+
+  // Guardamos estos datos antes de limpiar el estado del viaje
+  const puntosViaje = gpsState.points.slice();
+  const kmLocal = gpsState.totalKm;
+
+  const kmOSRM = await matchRouteOSRM(puntosViaje);
+  const usandoOSRM = (kmOSRM !== null && kmOSRM > 0);
+  const kmFinal = (usandoOSRM ? kmOSRM : kmLocal).toFixed(1);
+  const fuente = usandoOSRM ? '🗺️ ajustado a rutas (OSRM)' : '📡 estimado por GPS';
+
+  // Rellenar campos del formulario
+  document.getElementById('km').value = kmFinal;
+  document.getElementById('horas').value = totalHoras;
+  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${totalMins} min (${fuente})`;
+  showToast(`✅ ${kmFinal} km y ${totalHoras}h registrados (${fuente})`);
 
   clearGpsState();
 }
