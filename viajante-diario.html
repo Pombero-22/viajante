@@ -397,6 +397,7 @@
       <div class="mapa-stat"><div class="v" id="mapa-pendientes">0</div><div class="l">Sin visitar</div></div>
       <div class="mapa-stat"><div class="v" id="mapa-total">0</div><div class="l">Visitas</div></div>
     </div>
+    <button class="export-btn" id="mapa-nuevo-cliente-btn" onclick="abrirNuevoClienteModal()" style="margin:0;background:var(--green);color:white;border-color:var(--green);">➕ Agregar cliente nuevo</button>
     <button class="export-btn" id="mapa-download-btn" onclick="descargarImagenMapa()" style="margin:0;">📸 Descargar imagen del mapa</button>
   </div>
   <div id="leaflet-map"></div>
@@ -1691,6 +1692,101 @@ function refrescarMapa() {
   refrescarMapaMarkers();
   renderMapaLista(document.getElementById('mapa-buscar').value);
   refrescarMapaStats();
+}
+
+// ===== NUEVO CLIENTE (desde la app) =====
+function abrirNuevoClienteModal() {
+  document.getElementById('modal-content').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">➕ Nuevo cliente</div>
+    <label>Nombre del cliente</label>
+    <input type="text" id="nc-nombre" placeholder="Nombre o razón social">
+    <label>Localidad</label>
+    <input type="text" id="nc-localidad" placeholder="Ej: Eldorado" list="nc-localidades">
+    <datalist id="nc-localidades">
+      ${[...new Set(MAPA_CLIENTES.map(c => c.localidad))].sort().map(l => `<option value="${l}">`).join('')}
+    </datalist>
+    <label>Ubicación</label>
+    <button type="button" class="icon-btn blue" style="width:100%;margin-bottom:8px;" onclick="usarUbicacionNuevoCliente()">📍 Usar mi ubicación actual</button>
+    <div id="nc-ubicacion-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;">Sin ubicación capturada. Podés ingresarla manualmente abajo.</div>
+    <div class="row">
+      <input type="number" step="any" id="nc-lat" placeholder="Latitud">
+      <input type="number" step="any" id="nc-lng" placeholder="Longitud">
+    </div>
+    <button class="save-btn" style="margin-top:16px;" onclick="guardarNuevoCliente()">✅ Guardar cliente</button>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function usarUbicacionNuevoCliente() {
+  if (!navigator.geolocation) { showToast('Tu dispositivo no soporta GPS'); return; }
+  const statusEl = document.getElementById('nc-ubicacion-status');
+  statusEl.textContent = '⏳ Obteniendo ubicación...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      document.getElementById('nc-lat').value = pos.coords.latitude;
+      document.getElementById('nc-lng').value = pos.coords.longitude;
+      statusEl.textContent = `📍 Ubicación capturada (±${Math.round(pos.coords.accuracy)}m)`;
+    },
+    () => { statusEl.textContent = '⚠️ No se pudo obtener la ubicación. Ingresala manualmente.'; },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+function guardarNuevoCliente() {
+  const nombre = document.getElementById('nc-nombre').value.trim();
+  const localidad = document.getElementById('nc-localidad').value.trim();
+  const lat = parseFloat(document.getElementById('nc-lat').value);
+  const lng = parseFloat(document.getElementById('nc-lng').value);
+
+  if (!nombre) { showToast('Ingresá el nombre del cliente'); return; }
+  if (!localidad) { showToast('Ingresá la localidad'); return; }
+  if (isNaN(lat) || isNaN(lng)) { showToast('Capturá o ingresá la ubicación'); return; }
+  if (MAPA_CLIENTES.some(c => c.cliente.toLowerCase() === nombre.toLowerCase())) {
+    showToast('Ya existe un cliente con ese nombre'); return;
+  }
+
+  const nuevo = { cliente: nombre, localidad, lat, lng, custom: true };
+  MAPA_CLIENTES.push(nuevo);
+
+  const extra = getClientesExtra();
+  extra.push(nuevo);
+  saveClientesExtra(extra);
+
+  if (leafletMap) {
+    const marker = L.circleMarker([nuevo.lat, nuevo.lng], {
+      radius: 6, fillColor: '#9e9e9e', color: '#bbb', weight: 1, fillOpacity: 0.9,
+    }).addTo(leafletMap);
+    marker.on('click', () => seleccionarClienteMapa(nuevo.cliente));
+    mapaMarkers[nuevo.cliente] = marker;
+    refrescarMapa();
+  }
+
+  closeModal();
+  showToast('✅ Cliente agregado: ' + nombre);
+}
+
+function eliminarClienteExtra(nombre) {
+  if (!confirm('¿Eliminar el cliente "' + nombre + '"? Se perderá su historial de visitas.')) return;
+
+  const idx = MAPA_CLIENTES.findIndex(c => c.cliente === nombre);
+  if (idx !== -1) MAPA_CLIENTES.splice(idx, 1);
+
+  if (mapaMarkers[nombre]) {
+    leafletMap.removeLayer(mapaMarkers[nombre]);
+    delete mapaMarkers[nombre];
+  }
+  if (mapaClienteActivo === nombre) mapaClienteActivo = null;
+  if (mapaLabelMarkers[nombre]) {
+    try { leafletMap.removeLayer(mapaLabelMarkers[nombre]); } catch(e) {}
+    delete mapaLabelMarkers[nombre];
+  }
+
+  delete mapaVisitas[nombre];
+  saveVisitas();
+  saveClientesExtra(getClientesExtra().filter(c => c.cliente !== nombre));
+  refrescarMapa();
+  showToast('Cliente eliminado');
 }
 
 function descargarImagenMapa() {
