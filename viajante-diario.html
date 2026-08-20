@@ -41,71 +41,6 @@
   .page { display: none; padding: 16px; }
   .page.active { display: block; }
 
-  /* ===== AGENDA ===== */
-  .agenda-semana { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
-  .agenda-semana::-webkit-scrollbar { display: none; }
-  .agenda-dia-tab { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--border); background: white; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; text-align: center; }
-  .agenda-dia-tab.hoy { border-color: var(--green); color: var(--green); }
-  .agenda-dia-tab.activo { background: var(--green); color: white; border-color: var(--green); }
-  .agenda-dia-tab .dia-num { font-size: 18px; font-weight: 800; display: block; }
-
-  .agenda-contacto { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; align-items: flex-start; gap: 12px; }
-  .agenda-contacto .ac-semaforo { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
-  .agenda-contacto .ac-semaforo.verde { background: #4caf50; }
-  .agenda-contacto .ac-semaforo.amarillo { background: #ff9800; }
-  .agenda-contacto .ac-semaforo.rojo { background: #f44336; }
-  .agenda-contacto .ac-semaforo.gris { background: #9e9e9e; }
-  .agenda-contacto .ac-body { flex: 1; }
-  .agenda-contacto .ac-nombre { font-weight: 700; font-size: 14px; color: var(--text); }
-  .agenda-contacto .ac-loc { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .agenda-contacto .ac-tipo { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-top: 5px; }
-  .agenda-contacto .ac-tipo.visita { background: var(--green-pale); color: var(--green); }
-  .agenda-contacto .ac-tipo.llamado { background: var(--blue-pale); color: var(--blue); }
-  .agenda-contacto .ac-tipo.whatsapp { background: #e8f5e9; color: #1b5e20; }
-  .agenda-contacto .ac-prod { font-size: 12px; color: var(--orange); margin-top: 3px; }
-  .agenda-contacto .ac-ultima { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .agenda-contacto .ac-actions { display: flex; flex-direction: column; gap: 5px; }
-  .ac-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
-  .ac-check.done { background: var(--green); border-color: var(--green); color: white; }
-  .ac-del { width: 24px; height: 24px; border-radius: 50%; border: none; background: none; cursor: pointer; color: var(--muted); font-size: 14px; }
-
-  .agenda-add-form { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .agenda-add-form select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; background: white; color: var(--text); margin-bottom: 10px; -webkit-appearance: none; }
-
-  /* Buscador de clientes (Agenda) */
-  .ac-search-wrap { position: relative; margin-bottom: 10px; }
-  .ac-search-wrap input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; background: white; color: var(--text); -webkit-appearance: none; }
-  .ac-search-wrap input:focus { outline: none; border-color: var(--green); }
-  .ac-search-results { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: white; border: 1.5px solid var(--border); border-radius: 8px; max-height: 260px; overflow-y: auto; z-index: 30; display: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
-  .ac-search-results.open { display: block; }
-  .ac-search-group { padding: 6px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: var(--muted); background: var(--bg); }
-  .ac-search-item { padding: 10px 14px; cursor: pointer; border-top: 1px solid var(--border); }
-  .ac-search-item:first-child { border-top: none; }
-  .ac-search-item:active { background: var(--green-pale); }
-  .ac-search-item .ac-search-name { font-size: 14px; font-weight: 600; color: var(--text); }
-  .ac-search-item .ac-search-loc { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .ac-search-item mark { background: #fff9c4; border-radius: 2px; }
-  .ac-search-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 13px; }
-  .ac-search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--muted); font-size: 18px; cursor: pointer; display: none; }
-  .ac-search-clear.visible { display: block; }
-  .tipo-selector { display: flex; gap: 8px; margin-bottom: 10px; }
-  .tipo-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; text-align: center; }
-  .tipo-btn.sel-visita { border-color: var(--green); background: var(--green-pale); color: var(--green); }
-  .tipo-btn.sel-llamado { border-color: var(--blue); background: var(--blue-pale); color: var(--blue); }
-  .tipo-btn.sel-whatsapp { border-color: #1b5e20; background: #e8f5e9; color: #1b5e20; }
-
-  .semaforo-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
-  .semaforo-legend span { display: flex; align-items: center; gap: 4px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-
-  .olvidados-item { background: white; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-  .olvidados-item .oi-nombre { font-weight: 700; font-size: 13px; }
-  .olvidados-item .oi-loc { font-size: 12px; color: var(--muted); }
-  .olvidados-item .oi-dias { font-size: 12px; font-weight: 700; color: var(--red); }
-  .agenda-tab-btns { display: flex; gap: 8px; margin-bottom: 14px; }
-  .agenda-tab-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 10px; background: white; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; }
-  .agenda-tab-btn.active { border-color: var(--green); background: var(--green); color: white; }
-
   .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; }
 
@@ -251,6 +186,11 @@
   .popup-inner .count { font-size: 12px; margin-bottom: 10px; color: var(--text); }
   .popup-inner button { background: var(--green); color: white; border: none; border-radius: 6px; padding: 9px 12px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; }
   .popup-inner .undo-btn { background: none; color: var(--red); text-decoration: underline; padding: 6px; margin-top: 4px; font-weight: 600; }
+
+  /* Leyenda semanas mapa */
+  .mapa-leyenda { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 16px; background: white; border-bottom: 1px solid var(--border); }
+  .mapa-leyenda-item { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--muted); }
+  .mapa-leyenda-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(0,0,0,0.15); }
 </style>
 </head>
 <body>
@@ -375,34 +315,24 @@
 
 <!-- ===== AGENDA ===== -->
 <div class="page" id="page-agenda">
-
-  <!-- Tabs: Semana / Olvidados -->
   <div class="agenda-tab-btns">
     <button class="agenda-tab-btn active" id="atab-semana" onclick="agendaTab('semana')">🗓 Esta semana</button>
     <button class="agenda-tab-btn" id="atab-olvidados" onclick="agendaTab('olvidados')">⚠️ Sin visitar</button>
   </div>
-
-  <!-- VISTA SEMANA -->
   <div id="agenda-vista-semana">
-    <!-- Selector de días -->
     <div class="agenda-semana" id="agenda-dias"></div>
-
-    <!-- Leyenda semáforo -->
     <div class="semaforo-legend">
       <span><span class="dot" style="background:#4caf50"></span>Visitado reciente</span>
       <span><span class="dot" style="background:#ff9800"></span>+15 días</span>
       <span><span class="dot" style="background:#f44336"></span>+30 días</span>
       <span><span class="dot" style="background:#9e9e9e"></span>Sin historial</span>
     </div>
-
-    <!-- Formulario agregar contacto -->
     <div class="agenda-add-form">
       <div class="card-title">➕ Agregar contacto al día</div>
       <div class="ac-search-wrap">
         <input type="text" id="agenda-cliente-buscar" placeholder="🔍 Buscar cliente..." autocomplete="off"
-          oninput="filtrarClientesAgenda(this.value)"
-          onfocus="filtrarClientesAgenda(this.value)"
-          onblur="setTimeout(cerrarResultadosAgenda, 150)">
+          oninput="filtrarClientesAgenda(this.value)" onfocus="filtrarClientesAgenda(this.value)"
+          onblur="setTimeout(cerrarResultadosAgenda,150)">
         <button type="button" class="ac-search-clear" id="agenda-cliente-clear" onclick="limpiarClienteAgenda()">×</button>
         <div class="ac-search-results" id="agenda-cliente-resultados"></div>
       </div>
@@ -414,19 +344,14 @@
       </div>
       <button class="save-btn" style="margin-top:0;" onclick="agregarContactoAgenda()">+ Agregar</button>
     </div>
-
-    <!-- Lista de contactos del día -->
     <div id="agenda-contactos-list"></div>
   </div>
-
-  <!-- VISTA OLVIDADOS -->
   <div id="agenda-vista-olvidados" style="display:none;">
     <div class="card" style="padding:12px 16px;">
       <div class="card-title">⚠️ Clientes sin visitar hace más de 30 días</div>
       <div id="agenda-olvidados-list"></div>
     </div>
   </div>
-
 </div>
 
 <!-- ===== GASTOS ===== -->
@@ -449,14 +374,12 @@
     </div>
     <button class="save-btn" onclick="agregarGastoSuelto()">💾 Agregar gasto</button>
   </div>
-
   <div class="card">
     <div class="card-title">📊 Resumen</div>
     <select id="gs-mes" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;background:white;color:var(--text);" onchange="renderGastosSueltos()"></select>
     <div class="grid-2" id="gs-resumen-cats" style="gap:10px;"></div>
     <div class="gastos-total" style="margin-top:10px;"><span>Total del período</span><span id="gs-total-periodo">$0</span></div>
   </div>
-
   <div class="card">
     <div class="card-title">💸 Historial de gastos</div>
     <button class="export-btn" onclick="exportGastosSueltosCSV()">📥 Descargar gastos (CSV)</button>
@@ -474,14 +397,22 @@
       <div class="mapa-stat"><div class="v" id="mapa-pendientes">0</div><div class="l">Sin visitar</div></div>
       <div class="mapa-stat"><div class="v" id="mapa-total">0</div><div class="l">Visitas</div></div>
     </div>
-    <button class="export-btn" id="mapa-nuevo-cliente-btn" onclick="abrirNuevoClienteModal()" style="margin:0;background:var(--green);color:white;">➕ Agregar cliente nuevo</button>
     <button class="export-btn" id="mapa-download-btn" onclick="descargarImagenMapa()" style="margin:0;">📸 Descargar imagen del mapa</button>
   </div>
   <div id="leaflet-map"></div>
 
-  <!-- Barra de búsqueda lista de clientes -->
-  <div style="padding: 10px 16px 0; position: sticky; top: 56px; z-index: 50; background: var(--bg);">
-    <div style="display:flex; align-items:center; background:white; border:1.5px solid var(--border); border-radius:10px; padding: 8px 12px; gap:8px;">
+  <!-- Leyenda de colores por semana -->
+  <div class="mapa-leyenda" id="mapa-leyenda">
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#9e9e9e;"></div>Sin visitar</div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#e53935;"></div>Semana 1</div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#f9a825;"></div>Semana 2</div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#43a047;"></div>Semana 3</div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#1e88e5;"></div>Semana 4+</div>
+  </div>
+
+  <!-- Barra de búsqueda lista -->
+  <div style="padding:10px 16px 0;background:var(--bg);">
+    <div style="display:flex;align-items:center;background:white;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;gap:8px;">
       <span style="font-size:18px;">🔍</span>
       <input id="mapa-lista-buscar" type="text" placeholder="Buscar cliente en la lista..."
         style="border:none;outline:none;font-size:15px;width:100%;background:transparent;"
@@ -509,72 +440,10 @@
     <button class="export-btn" onclick="exportVisitasCSV()">📍 Historial de visitas (CSV)</button>
     <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
   </div>
-  <div class="card">
-    <div class="card-title">💾 Backup completo</div>
-    <button class="export-btn" onclick="descargarBackupCompleto()">💾 Descargar backup (JSON)</button>
-    <input type="file" id="backup-file-input" accept="application/json" style="display:none;" onchange="restaurarBackupCompleto(event)">
-    <button class="export-btn" style="border-color:var(--muted);color:var(--muted);" onclick="document.getElementById('backup-file-input').click();">📤 Restaurar backup</button>
-    <p class="hint" style="margin-top:4px;">Guarda TODO lo registrado (historial, gastos, visitas, agenda y clientes agregados) en un solo archivo. Guardalo en Drive, iCloud o mandátelo por mail. Si perdés el teléfono o se borra el caché, lo restaurás con "Restaurar backup".</p>
-  </div>
   <div class="card" id="stats-mes"></div>
 </div>
 
 <script>
-// ===== BACKUP COMPLETO =====
-const BACKUP_KEYS = [
-  'viajante_v2',
-  'viajante_gastos_sueltos',
-  'viajante_clientes_extra',
-  'viajante_visitas_mapa',
-  'viajante_agenda_v2',
-];
-
-function descargarBackupCompleto() {
-  const backup = { fecha: new Date().toISOString(), datos: {} };
-  BACKUP_KEYS.forEach(k => { backup.datos[k] = localStorage.getItem(k) || null; });
-
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const fecha = new Date().toISOString().slice(0, 10);
-  a.href = url;
-  a.download = 'backup_viajante_' + fecha + '.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('✅ Backup descargado');
-}
-
-function restaurarBackupCompleto(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const backup = JSON.parse(e.target.result);
-      if (!backup.datos) throw new Error('Formato inválido');
-
-      const ok = confirm('Esto va a REEMPLAZAR todos los datos actuales de la app por los del backup del ' + (backup.fecha ? backup.fecha.slice(0,10) : '(fecha desconocida)') + '. ¿Continuar?');
-      if (!ok) return;
-
-      BACKUP_KEYS.forEach(k => {
-        if (backup.datos[k] !== null && backup.datos[k] !== undefined) {
-          localStorage.setItem(k, backup.datos[k]);
-        }
-      });
-
-      showToast('✅ Backup restaurado, recargando...');
-      setTimeout(() => location.reload(), 1200);
-    } catch (err) {
-      showToast('⚠️ Archivo de backup inválido');
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
 // ===== STORAGE =====
 function getData() {
   try { return JSON.parse(localStorage.getItem('viajante_v2') || '[]'); }
@@ -644,146 +513,16 @@ function fmtDate(s) {
   return `${d}/${m}/${y}`;
 }
 
-// ===== GASTOS SUELTOS (independientes de un día de gira) =====
-const GASTOS_SUELTOS_KEY = 'viajante_gastos_sueltos';
-function getGastosSueltos() {
-  try { return JSON.parse(localStorage.getItem(GASTOS_SUELTOS_KEY) || '[]'); }
-  catch(e) { return []; }
-}
-function saveGastosSueltos(arr) {
-  try { localStorage.setItem(GASTOS_SUELTOS_KEY, JSON.stringify(arr)); }
-  catch(e) { showToast('⚠️ Sin espacio para guardar el gasto.'); }
-}
-
-const GASTO_CAT_ICONS = { Combustible:'⛽', Comida:'🍽', Peaje:'🛣', Alojamiento:'🏨', Otro:'📎' };
-let gastoSueltoCategoria = 'Combustible';
-let gastosMesActual = 'all';
-
-function selectGastoSueltoCat(btn, cat) {
-  document.querySelectorAll('#gs-cat-btns .cat-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  gastoSueltoCategoria = cat;
-}
-
-function agregarGastoSuelto() {
-  const fecha = document.getElementById('gs-fecha').value;
-  const monto = parseFloat(document.getElementById('gs-monto').value);
-  const desc = document.getElementById('gs-desc').value.trim();
-
-  if (!fecha) { showToast('Elegí una fecha'); return; }
-  if (!monto || monto <= 0) { showToast('Ingresá un monto válido'); return; }
-
-  const arr = getGastosSueltos();
-  arr.push({ id: Date.now(), fecha, categoria: gastoSueltoCategoria, monto, descripcion: desc });
-  saveGastosSueltos(arr);
-
-  document.getElementById('gs-monto').value = '';
-  document.getElementById('gs-desc').value = '';
-  showToast('✅ Gasto agregado');
-
-  buildGastosMesOptions();
-  renderGastosSueltos();
-}
-
-function eliminarGastoSuelto(id) {
-  if (!confirm('¿Eliminar este gasto?')) return;
-  saveGastosSueltos(getGastosSueltos().filter(g => g.id !== id));
-  buildGastosMesOptions();
-  renderGastosSueltos();
-  showToast('Gasto eliminado');
-}
-
-function gastosMonthKey(fecha) { return fecha.slice(0,7); }
-function gastosMonthLabel(key) {
-  if (key === 'all') return 'Todos los meses';
-  const [y,m] = key.split('-');
-  const nombres = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  return nombres[parseInt(m,10)-1] + ' ' + y;
-}
-
-function buildGastosMesOptions() {
-  const sel = document.getElementById('gs-mes');
-  const prevValue = sel.value || gastosMesActual;
-  const keys = new Set(getGastosSueltos().map(g => gastosMonthKey(g.fecha)));
-  keys.add(gastosMonthKey(todayStr));
-  const ordenados = Array.from(keys).sort().reverse();
-  sel.innerHTML = '<option value="all">Todos los meses</option>' +
-    ordenados.map(k => `<option value="${k}">${gastosMonthLabel(k)}</option>`).join('');
-  sel.value = (prevValue === 'all' || ordenados.includes(prevValue)) ? prevValue : 'all';
-  gastosMesActual = sel.value;
-}
-
-function initGastosSueltos() {
-  if (!document.getElementById('gs-fecha').value) {
-    document.getElementById('gs-fecha').value = todayStr;
-  }
-  buildGastosMesOptions();
-  renderGastosSueltos();
-}
-
-function renderGastosSueltos() {
-  const sel = document.getElementById('gs-mes');
-  gastosMesActual = sel.value;
-  const todos = getGastosSueltos().filter(g => gastosMesActual === 'all' || gastosMonthKey(g.fecha) === gastosMesActual);
-  const ordenados = todos.slice().sort((a,b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
-
-  const porCat = {};
-  todos.forEach(g => { porCat[g.categoria] = (porCat[g.categoria] || 0) + g.monto; });
-  const resumenEl = document.getElementById('gs-resumen-cats');
-  const cats = Object.keys(porCat);
-  resumenEl.innerHTML = cats.length ? cats.map(c => `
-    <div class="stat-box" style="background:var(--orange-pale);">
-      <div class="val" style="color:var(--orange);font-size:18px;">$${porCat[c].toLocaleString('es-AR')}</div>
-      <div class="lbl">${GASTO_CAT_ICONS[c] || '📎'} ${c}</div>
-    </div>
-  `).join('') : '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:10px;">Sin gastos en este período</div>';
-
-  const total = todos.reduce((s,g) => s + g.monto, 0);
-  document.getElementById('gs-total-periodo').textContent = '$' + total.toLocaleString('es-AR');
-
-  const listaEl = document.getElementById('gs-lista');
-  listaEl.innerHTML = ordenados.length ? ordenados.map(g => `
-    <div class="gasto-item">
-      <span class="g-cat">${GASTO_CAT_ICONS[g.categoria] || '📎'} ${g.categoria}</span>
-      <span class="g-desc">${fmtDate(g.fecha)}${g.descripcion ? ' · ' + g.descripcion : ''}</span>
-      <span class="g-monto">$${g.monto.toLocaleString('es-AR')}</span>
-      <button onclick="eliminarGastoSuelto(${g.id})">✕</button>
-    </div>
-  `).join('') : '<div class="empty-state" style="padding:20px;"><div class="ico">💸</div><div>No hay gastos cargados en este período.</div></div>';
-}
-
-function exportGastosSueltosCSV() {
-  const todos = getGastosSueltos().filter(g => gastosMesActual === 'all' || gastosMonthKey(g.fecha) === gastosMesActual);
-  if (!todos.length) { showToast('No hay gastos para exportar'); return; }
-
-  const ordenados = todos.slice().sort((a,b) => a.fecha.localeCompare(b.fecha));
-  const headers = ['Fecha', 'Categoría', 'Monto', 'Descripción'];
-  const rows = [headers];
-  ordenados.forEach(g => {
-    rows.push([csvField(fmtDate(g.fecha)), csvField(g.categoria), csvField(g.monto.toFixed(2)), csvField(g.descripcion || '')]);
-  });
-
-  const total = todos.reduce((s,g) => s + g.monto, 0);
-  rows.push([]);
-  rows.push(['', '', csvField(total.toFixed(2)), csvField('TOTAL')]);
-
-  const sufijo = gastosMesActual === 'all' ? 'todos' : gastosMesActual;
-  downloadCSV(rows, `gastos_${sufijo}.csv`);
-}
-
 // ===== NAVIGATION =====
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
-  const pageEl = document.getElementById('page-' + name);
-  const navEl = document.getElementById('nav-' + name);
-  if (pageEl) pageEl.classList.add('active');
-  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
   if (name === 'hoy') renderHoy();
   if (name === 'historial') renderHistorial();
   if (name === 'exportar') renderStats();
   if (name === 'mapa') initMapaVisitas();
-  if (name === 'gastos') initGastosSueltos();
 }
 
 // ===== CLIENTS =====
@@ -1487,12 +1226,12 @@ function startGPS() {
   gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       const { latitude, longitude, accuracy, speed } = pos.coords;
-      // Antes se descartaba todo punto con precisión peor a 100m, después 150m.
-      // En tramos rurales/forestados el GPS reporta peor precisión seguido y se
-      // perdían pedazos enteros de recorrido. Ahora aceptamos hasta 200m.
-      if (accuracy > 200) return;
+      // Antes se descartaba todo punto con precisión peor a 100m. En tramos
+      // rurales/de ruta el GPS a veces reporta peor precisión y se perdían
+      // pedazos enteros de recorrido. Ahora aceptamos hasta 150m.
+      if (accuracy > 150) return;
 
-      const newPoint = { lat: latitude, lng: longitude, t: Date.now(), spd: (typeof speed === 'number' && speed >= 0 ? speed : null), acc: accuracy };
+      const newPoint = { lat: latitude, lng: longitude, t: Date.now(), spd: (typeof speed === 'number' ? speed : null) };
 
       // Calcular distancia desde el último punto (en memoria o el guardado)
       const refPoint = gpsState.points.length > 0
@@ -1501,55 +1240,24 @@ function startGPS() {
 
       if (refPoint) {
         let dist = haversine(refPoint.lat, refPoint.lng, newPoint.lat, newPoint.lng);
+        // Antes se ignoraba todo movimiento menor a 20m (para filtrar ruido
+        // GPS al estar detenido). Eso también recortaba las curvas: en ruta
+        // con curvas, la línea recta entre dos puntos separados por 20m+
+        // corta camino real. Bajamos el umbral a 8m — sigue filtrando el
+        // ruido típico de un GPS quieto, pero capta muchos más puntos en
+        // las curvas.
+        if (dist < 0.008) return;
 
-        // Umbral mínimo DINÁMICO: antes era un valor fijo de 8m, pero con
-        // hasta 200m de margen de error aceptado, un simple rebote de señal
-        // (parado en un cliente, zona con árboles/edificios) puede reportar
-        // un "salto" de 50-100m sin que el vehículo se haya movido, y ese
-        // salto se sumaba entero como km recorridos — esta fue la causa
-        // principal de que 170km reales se contaran como 300km. Ahora el
-        // umbral crece junto con el error de precisión reportado por los
-        // dos puntos: cuanto peor la señal, más movimiento real hace falta
-        // para contarlo.
-        const refAcc = typeof refPoint.acc === 'number' ? refPoint.acc : 20;
-        const minDistKm = Math.max(0.008, ((refAcc + accuracy) / 1000) * 0.6);
-        if (dist < minDistKm) return;
-
+        // Si pasó mucho tiempo entre dos lecturas (por ejemplo, la app
+        // quedó en segundo plano y iOS espació el GPS), la recta entre esos
+        // dos puntos puede cortar curvas de la ruta real. Si la velocidad
+        // que reporta el GPS sugiere que se recorrió más distancia que esa
+        // línea recta, usamos esa estimación (con un tope para evitar
+        // valores disparatados por errores de señal).
         const dtSec = (newPoint.t - refPoint.t) / 1000;
-
-        // Filtro de velocidad implausible: en lecturas seguidas (sin corte
-        // de señal), si la distancia implica ir a más de 180 km/h es un
-        // salto por error de posición (multipath, rebote urbano), no un
-        // desplazamiento real — se descarta el punto en vez de sumarlo.
-        if (dtSec > 0 && dtSec <= 8) {
-          const impliedKmH = (dist / dtSec) * 3600;
-          if (impliedKmH > 180) return;
-        }
-
-        // Si pasó mucho tiempo entre dos lecturas (la app quedó en segundo
-        // plano mientras se usaba otra app de navegación, o el celular se
-        // bloqueó), la recta entre esos dos puntos corta curvas y subestima
-        // el camino real. Para compensar, estimamos con velocidad × tiempo,
-        // pero SOLO con la velocidad instantánea que reporta el GPS (y solo
-        // si esa lectura tiene buena precisión). Se sacó el respaldo que
-        // usaba el promedio de velocidad del viaje: si el viaje ya venía
-        // sobreestimado, ese promedio también estaba inflado, y usarlo para
-        // "rellenar" el siguiente corte inflaba aún más el total — un
-        // efecto de retroalimentación que fue la segunda causa del problema.
-        if (dtSec > 8) {
-          let velKmS = null; // km por segundo
-          if (typeof newPoint.spd === 'number' && newPoint.spd > 0 && accuracy < 50) {
-            velKmS = newPoint.spd / 1000;
-          } else if (typeof refPoint.spd === 'number' && refPoint.spd > 0 && refAcc < 50) {
-            velKmS = refPoint.spd / 1000;
-          }
-          if (velKmS) {
-            const techoKmS = 160 / 3600;
-            // No extrapolar más de 10 minutos de corte de señal de una sola vez
-            const dtCapped = Math.min(dtSec, 600);
-            const estBySpeed = Math.min(velKmS, techoKmS) * dtCapped;
-            dist = Math.max(dist, estBySpeed);
-          }
+        if (dtSec > 8 && typeof newPoint.spd === 'number' && newPoint.spd > 0) {
+          const estBySpeed = (newPoint.spd * dtSec) / 1000; // km
+          if (estBySpeed > dist) dist = Math.min(estBySpeed, dist * 2.5);
         }
 
         gpsState.totalKm += dist;
@@ -1594,57 +1302,7 @@ function releaseWakeLock() {
   try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch(e) {}
 }
 
-// Ajusta el recorrido GPS pegándolo a las calles/rutas reales (map matching)
-// usando el servidor público y gratuito de OSRM. Esto corrige tanto el
-// ruido de posición como las curvas cortadas por puntos muy espaciados,
-// dando una distancia bastante más cercana al cuentakilómetros real.
-// No requiere cuenta ni API key. Si no hay internet, el viaje tiene pocos
-// puntos, o el servicio no responde a tiempo, devuelve null y la app sigue
-// con el cálculo local de siempre — nunca deja al usuario sin km cargado.
-async function matchRouteOSRM(points) {
-  try {
-    if (!points || points.length < 2) return null;
-
-    // El servidor público tiene un límite práctico de puntos por consulta.
-    // Si el viaje acumuló muchos, los reducimos a 100 tomándolos espaciados
-    // de forma pareja, conservando siempre el primero y el último.
-    let sample = points;
-    if (points.length > 100) {
-      const step = (points.length - 1) / 99;
-      sample = [];
-      for (let i = 0; i < 100; i++) sample.push(points[Math.round(i * step)]);
-    }
-
-    const coords = sample.map(p => `${p.lng},${p.lat}`).join(';');
-    const timestamps = sample.map(p => Math.round(p.t / 1000)).join(';');
-    // Radio de búsqueda por punto: cuanto peor la precisión GPS reportada,
-    // más margen le damos a OSRM para encontrar la calle correcta.
-    const radiuses = sample.map(p => {
-      const r = typeof p.acc === 'number' ? p.acc : 20;
-      return Math.min(Math.max(r, 10), 100);
-    }).join(';');
-
-    const url = `https://router.project-osrm.org/match/v1/driving/${coords}` +
-      `?geometries=geojson&overview=false&annotations=false` +
-      `&radiuses=${radiuses}&timestamps=${timestamps}`;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
-    const resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!resp.ok) return null;
-
-    const data = await resp.json();
-    if (data.code !== 'Ok' || !Array.isArray(data.matchings) || data.matchings.length === 0) return null;
-
-    const totalMeters = data.matchings.reduce((sum, m) => sum + (m.distance || 0), 0);
-    return totalMeters > 0 ? totalMeters / 1000 : null; // km
-  } catch (e) {
-    return null; // sin señal de datos, timeout, o el servicio no respondió
-  }
-}
-
-async function stopGPS() {
+function stopGPS() {
   if (gpsWatchId !== null) {
     navigator.geolocation.clearWatch(gpsWatchId);
     gpsWatchId = null;
@@ -1659,27 +1317,18 @@ async function stopGPS() {
   const totalMs = gpsState.startTime ? (ahora - gpsState.startTime) : 0;
   const totalMins = Math.round(totalMs / 60000);
   const totalHoras = (totalMins / 60).toFixed(1);
+  const kmFinal = gpsState.totalKm.toFixed(1);
+
+  // Rellenar campos del formulario
+  document.getElementById('km').value = kmFinal;
+  document.getElementById('horas').value = totalHoras;
 
   document.getElementById('gps-btn').className = 'gps-btn start';
   document.getElementById('gps-btn-icon').textContent = '▶';
   document.getElementById('gps-btn-text').textContent = 'Iniciar viaje';
   document.getElementById('gps-tiempo').textContent = '0:00';
-  document.getElementById('gps-status').textContent = '📍 Ajustando distancia con el mapa...';
-
-  // Guardamos estos datos antes de limpiar el estado del viaje
-  const puntosViaje = gpsState.points.slice();
-  const kmLocal = gpsState.totalKm;
-
-  const kmOSRM = await matchRouteOSRM(puntosViaje);
-  const usandoOSRM = (kmOSRM !== null && kmOSRM > 0);
-  const kmFinal = (usandoOSRM ? kmOSRM : kmLocal).toFixed(1);
-  const fuente = usandoOSRM ? '🗺️ ajustado a rutas (OSRM)' : '📡 estimado por GPS';
-
-  // Rellenar campos del formulario
-  document.getElementById('km').value = kmFinal;
-  document.getElementById('horas').value = totalHoras;
-  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${totalMins} min (${fuente})`;
-  showToast(`✅ ${kmFinal} km y ${totalHoras}h registrados (${fuente})`);
+  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${totalMins} min`;
+  showToast(`✅ ${kmFinal} km y ${totalHoras}h registrados`);
 
   clearGpsState();
 }
@@ -1725,20 +1374,6 @@ function haversine(lat1, lng1, lat2, lng2) {
 
 // ===== MAPA DE VISITAS =====
 const MAPA_CLIENTES = [{"cliente": "5 HERMANOS S.A.", "localidad": "San Vicente", "lat": -26.9854037, "lng": -54.4820017}, {"cliente": "ABREU VICTOR NORBERTO", "localidad": "Pozo Azul", "lat": -26.3985597, "lng": -54.5999747}, {"cliente": "ACKERMANN HORACIO JOSE", "localidad": "Comandante Andresito", "lat": -25.658873399999997, "lng": -54.0479569}, {"cliente": "ALONSO VALENTIN", "localidad": "Posadas", "lat": -27.3521374, "lng": -55.9008746}, {"cliente": "ASOCIACION DE PADRES SAN CRISTOBAL", "localidad": "Profundidad", "lat": -27.5616877, "lng": -55.7046304}, {"cliente": "BARTEL ALEJANDRO SEBASTIAN", "localidad": "Jardin America", "lat": -27.029857099999997, "lng": -55.2307281}, {"cliente": "BEREZOSKI OSCAR MIGUEL", "localidad": "San Vicente", "lat": -27.0019037, "lng": -54.4707433697508}, {"cliente": "BERNARDI HELENO", "localidad": "Piñalito Norte", "lat": -25.9317214, "lng": -53.9339295}, {"cliente": "BOCHERT ALFREDO ARNOLDO", "localidad": "Montecarlo", "lat": -26.557170399999997, "lng": -54.7664339}, {"cliente": "BRUERA OMAR DARIO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.04092856937308}, {"cliente": "BUDDENBERG CLAUDIO", "localidad": "Eldorado", "lat": -26.398405599999997, "lng": -54.6090783}, {"cliente": "CARVALLO MARCELO ANIBAL", "localidad": "Posadas", "lat": -27.350879069750803, "lng": -55.8943746}, {"cliente": "CAVIGIOLI MARIO CARLOS", "localidad": "Ruiz de Montoya", "lat": -26.958766899999997, "lng": -55.0529459}, {"cliente": "COOPERATIVA AGROPECUARIA UNION DE LA FRONTERA LTDA", "localidad": "Bernardo de Irigoyen", "lat": -26.2502596, "lng": -53.6476286}, {"cliente": "DE COULON S.A.", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.221535711844574}, {"cliente": "EL PATRON SRL", "localidad": "Consepcion de la Sierra", "lat": -27.970624599999997, "lng": -55.5217305}, {"cliente": "EL YERBALITO S.R.L.", "localidad": "Posadas", "lat": -27.354137400000003, "lng": -55.887018193539454}, {"cliente": "ERNESTO KOCH", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.890874600000004}, {"cliente": "ESTABLECIMIENTO DON GUILLERMO SRL", "localidad": "Eldorado", "lat": -26.396894671666505, "lng": -54.603036898763435}, {"cliente": "ESTANCIA MACACA S.A.", "localidad": "Bernardo de Irigoyen", "lat": -26.253759600000002, "lng": -53.6363702697508}, {"cliente": "FECHNER OMAR EDUARDO", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.595910558145704}, {"cliente": "FIDEICOMISO DON OTTO", "localidad": "Montecarlo", "lat": -26.55495439592978, "lng": -54.761987638136766}, {"cliente": "FIEGE MYRIAN CAROLINA", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2147281}, {"cliente": "FROSCHKE ROBERTO", "localidad": "Montecarlo", "lat": -26.554913688910094, "lng": -54.75614929824502}, {"cliente": "GANADERA AGUAPEY S.A.", "localidad": "Posadas", "lat": -27.3686374, "lng": -55.8896162697508}, {"cliente": "GRAEF ARTURO", "localidad": "Garuhape", "lat": -26.810360999999997, "lng": -54.9562728}, {"cliente": "GRANFORT S.A.", "localidad": "Eldorado", "lat": -26.407200233197447, "lng": -54.59915121125902}, {"cliente": "GUNTHER RICARDO DANIEL", "localidad": "Jardin America", "lat": -27.046928167811863, "lng": -55.223657032188136}, {"cliente": "HASSENRIIK JORGE ERVIN", "localidad": "Comandante Andresito", "lat": -25.66222675979197, "lng": -54.03340278807433}, {"cliente": "IGLESIA EVANGELICA SUIZA", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.0399459}, {"cliente": "JOHANN EVANDRO JAVIER", "localidad": "San Vicente", "lat": -27.0034037, "lng": -54.495858106460545}, {"cliente": "JOHANN MAGNOS", "localidad": "Pozo Azul", "lat": -26.400454332575837, "lng": -54.58981089072791}, {"cliente": "JOHANN MARCELO JOSE", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.584375853405085}, {"cliente": "JOHANN MARCIO ADRIANO", "localidad": "Pozo Azul", "lat": -26.417569388679027, "lng": -54.59563586260882}, {"cliente": "JUNES EDGARDO ABEL", "localidad": "Bernardo de Irigoyen", "lat": -26.2682596, "lng": -53.63377219353945}, {"cliente": "KALITKO ELIAS JOSE", "localidad": "Jardin America", "lat": -27.0528571, "lng": -55.2307281}, {"cliente": "KELLER JUAN ROBERTO", "localidad": "Capiovi", "lat": -26.922217399999997, "lng": -55.0520938}, {"cliente": "KINETZ JORGE DANIEL", "localidad": "Comandante Andresito", "lat": -25.670296548382733, "lng": -54.03805868558119}, {"cliente": "KIPP DANIEL CHIRISTIAL", "localidad": "Puerto Rico", "lat": -26.7963572, "lng": -55.0240801}, {"cliente": "KIPP JORGE", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.75777364596216}, {"cliente": "KIZUR ARIEL SEBASTIAN", "localidad": "Montecarlo", "lat": -26.56491297369033, "lng": -54.753631399210846}, {"cliente": "KONOPACKI RUBEN", "localidad": "Eldorado", "lat": -26.41301546353155, "lng": -54.59692308884509}, {"cliente": "KONOPACKI RUBEN EVALDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.59846833746815}, {"cliente": "KYOCAPUMISZ HECTOR LUIS", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.0381321555334}, {"cliente": "LA IANA SAS", "localidad": "Posadas", "lat": -27.375993806460553, "lng": -55.8928746}, {"cliente": "LACERDA GILBERTO JAVIER", "localidad": "Pozo Azul", "lat": -26.420272295282732, "lng": -54.605615188608525}, {"cliente": "LARRABURU WALTER ROBERTO", "localidad": "Posadas", "lat": -27.372137400000003, "lng": -55.9008746}, {"cliente": "LEITE VIVIANA ELISA", "localidad": "Bernardo de Irigoyen", "lat": -26.270259600000003, "lng": -53.6476286}, {"cliente": "MORGENSTERN ELIO ANDRES", "localidad": "2 de Mayo", "lat": -27.026283799999998, "lng": -54.6755593}, {"cliente": "MUNZ MARINA ESTELA", "localidad": "Eldorado", "lat": -26.41811501817426, "lng": -54.606685143357126}, {"cliente": "MUT GABRIEL", "localidad": "Eldorado", "lat": -26.421027843626536, "lng": -54.61218940363574}, {"cliente": "N.P. FORESTAL SRL", "localidad": "Posadas", "lat": -27.3733957302492, "lng": -55.907374600000004}, {"cliente": "OTTO GERARDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.61968826253185}, {"cliente": "PAULUZEK BRAIAN NAHUEL", "localidad": "Cerro Azul", "lat": -27.6349423, "lng": -55.4970643}, {"cliente": "RENZO MACKOW", "localidad": "Campo Grande", "lat": -27.206181, "lng": -54.9787679}, {"cliente": "RINCON PERDIDO SAS", "localidad": "Comandante Andresito", "lat": -25.68422528757783, "lng": -54.04344917909054}, {"cliente": "SADAÑOSKI ALEJANDRO IVAN", "localidad": "Apostoles", "lat": -27.9141554, "lng": -55.7549371}, {"cliente": "SCHMIDT HECTOR MIGUEL", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.61557354659491}, {"cliente": "SOMERFER MARILU INES", "localidad": "2 de Mayo", "lat": -27.0492838, "lng": -54.6755593}, {"cliente": "STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.826860999999997, "lng": -54.9450144697508}, {"cliente": "STEYER CATALINA", "localidad": "Fracran", "lat": -26.732759899999998, "lng": -54.2973353}, {"cliente": "STEYER JUAN SEBASTIAN", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.2843353}, {"cliente": "STEYER LUIS ALFREDO", "localidad": "Fracran", "lat": -26.758759899999998, "lng": -54.2973353}, {"cliente": "TRINIDAD RAMON ALBERTO", "localidad": "Posadas", "lat": -27.3701374, "lng": -55.91473100646055}, {"cliente": "TROCHE NESTOR FABIAN", "localidad": "San Antonio", "lat": -26.0572781, "lng": -53.7365194}, {"cliente": "TRUMPP AGUSTIN RICARDO", "localidad": "Montecarlo", "lat": -26.569948770842668, "lng": -54.750676975951805}, {"cliente": "WAIDELICH ANDRES EDGARDO", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.75777364596216}, {"cliente": "WAIDELICH CURT", "localidad": "Montecarlo", "lat": -26.577128977760545, "lng": -54.758077661074076}, {"cliente": "WAIDELICH OSCAR MARTIN", "localidad": "Montecarlo", "lat": -26.582205481932572, "lng": -54.760961577706794}, {"cliente": "WILD NESTOR JAVIER", "localidad": "Eldorado", "lat": -26.411951648870424, "lng": -54.618428462426856}, {"cliente": "WIRZ ANA KARENINA", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.9108746}, {"cliente": "WIRZ JUAN BAUTISTA", "localidad": "Posadas", "lat": -27.355637400000003, "lng": -55.9121329302492}, {"cliente": "X CLAUDIA SILVIA", "localidad": "Jardin America", "lat": -27.051170808498984, "lng": -55.24204180849898}, {"cliente": "X HASSENRUCK ALDO", "localidad": "Montecarlo", "lat": -26.5771704, "lng": -54.7664339}, {"cliente": "X HODL NICOLAS ALOIS", "localidad": "Montecarlo", "lat": -26.579386404070217, "lng": -54.77088016186324}, {"cliente": "X KIPP DANIEL", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.01171636528816}, {"cliente": "X OMAR FECHNER", "localidad": "Eldorado", "lat": -26.40683862315668, "lng": -54.621983515363276}, {"cliente": "X STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.828360999999997, "lng": -54.97012920646055}, {"cliente": "X WELKE HENRY CRISTIAN", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2407281}, {"cliente": "X WELKE OMAR", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.23992048815543}, {"cliente": "MULLER SOLEDAD YAMILA", "localidad": "Colonia Aurora", "lat": -27.464846899999998, "lng": -54.5237984}, {"cliente": "MARCHIOTTI MARCOS LUIS", "localidad": "Santa Rita", "lat": -27.5130885, "lng": -54.7280385}, {"cliente": "MIETH LUIS", "localidad": "Santa Rita", "lat": -27.5360885, "lng": -54.7280385}, {"cliente": "FREMAR SRL", "localidad": "Ruiz de Montoya", "lat": -26.984766899999997, "lng": -55.0529459}, {"cliente": "HENN Y CIA", "localidad": "Posadas", "lat": -27.34828099353945, "lng": -55.908874600000004}, {"cliente": "CABAÑA DON JOSE SRL", "localidad": "Virasoro", "lat": -28.0543419, "lng": -56.0139884}, {"cliente": "PUBLIO SPON", "localidad": "Montecarlo", "lat": -26.579427111089903, "lng": -54.776718501754985}, {"cliente": "KRINDGES MARCOS", "localidad": "Puerto Rico", "lat": -26.81930147191, "lng": -55.01467553596332}, {"cliente": "MORAVICKI RODRIGO", "localidad": "Comandante Andresito", "lat": -25.678468329736145, "lng": -54.05077422556842}, {"cliente": "ESTANCIA TOBUNAS", "localidad": "Bernardo de Irigoyen", "lat": -26.2667596, "lng": -53.658886930249196}, {"cliente": "COOPERATIVA MONTECARLO LTDA", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.775094154037845}, {"cliente": "PUERTO NUEVO", "localidad": "Montecarlo", "lat": -26.569427826309667, "lng": -54.77923640078916}, {"cliente": "GERMAN TIETJEN", "localidad": "Montecarlo", "lat": -26.56439202915733, "lng": -54.7821908240482}, {"cliente": "PINDO SA", "localidad": "Puerto Esperanza", "lat": -26.0227203, "lng": -54.6125731}, {"cliente": "PETROVALLE", "localidad": "Aristobulo del Valle", "lat": -27.0956103, "lng": -54.8935263}, {"cliente": "FELISA SRL", "localidad": "Consepcion de la Sierra", "lat": -27.9936246, "lng": -55.5217305}, {"cliente": "WEIDMANN SRL", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.062945899999995}, {"cliente": "WEIDEN SA", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.6222460418543}, {"cliente": "STEYER ALEJANDRO", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.3073353}, {"cliente": "SCHINDLER RUBEN", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.775094154037845}, {"cliente": "FIEBKE WILLAN", "localidad": "Pozo Azul", "lat": -26.402324801981415, "lng": -54.60779301482468}, {"cliente": "SATO RICARDO", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.05778164446661}, {"cliente": "LIMBERGER RAUL FREDY", "localidad": "Puerto Rico", "lat": -26.81444736994375, "lng": -55.02995795252292}, {"cliente": "COOP MMONTE VERDE", "localidad": "Obera", "lat": -27.4867802, "lng": -55.1203326}, {"cliente": "ARIEL HAHM", "localidad": "Capiovi", "lat": -26.9452174, "lng": -55.0520938}, {"cliente": "PES ADRIAN", "localidad": "Colonia Aurora", "lat": -27.4878469, "lng": -54.5237984}, {"cliente": "FREIBERGER JUAN CARLOS", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.03644383471184}, {"cliente": "DROSSLER BRUNO", "localidad": "Bernardo de Irigoyen", "lat": -26.252259600000002, "lng": -53.661485006460545}, {"cliente": "TRUMPP ANDRES", "localidad": "Montecarlo", "lat": -26.557211822239452, "lng": -54.77479013892593}, {"cliente": "ALCANTARA ENRIQUE", "localidad": "Comandante Andresito", "lat": -25.671150437412372, "lng": -54.0637940430701}, {"cliente": "SAN JOSE SRL", "localidad": "9 De Julio", "lat": -26.4299444, "lng": -54.4650556}, {"cliente": "KIMMICH MANUEL", "localidad": "Montecarlo", "lat": -26.552135318067425, "lng": -54.77190622229321}, {"cliente": "AMANN ERNESTO", "localidad": "Comandante Andresito", "lat": -25.66471924986998, "lng": -54.057053219953545}, {"cliente": "AZULA FERNANDO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.054985230626926}, {"cliente": "ASAGUAY SA", "localidad": "Eldorado", "lat": -26.399551039743468, "lng": -54.61372553172044}, {"cliente": "COFRA", "localidad": "Leandro N. Alem", "lat": -27.6018, "lng": -55.3227}];
-// Clientes agregados desde la app (además de la lista base de arriba)
-const CLIENTES_EXTRA_KEY = 'viajante_clientes_extra';
-function getClientesExtra() {
-  try { return JSON.parse(localStorage.getItem(CLIENTES_EXTRA_KEY) || '[]'); }
-  catch(e) { return []; }
-}
-function saveClientesExtra(arr) {
-  try { localStorage.setItem(CLIENTES_EXTRA_KEY, JSON.stringify(arr)); }
-  catch(e) { showToast('⚠️ Sin espacio para guardar el cliente.'); }
-}
-getClientesExtra().forEach(c => {
-  if (!MAPA_CLIENTES.some(x => x.cliente === c.cliente)) MAPA_CLIENTES.push(c);
-});
-
 const VISITAS_KEY = 'viajante_visitas_mapa';
 
 let mapaVisitas = {}; // { cliente: ['YYYY-MM-DD', ...] }
@@ -1772,12 +1407,74 @@ function visitasDeCliente(cliente, mes) {
   if (mes === 'all') return fechas;
   return fechas.filter(f => mapaMonthKey(f) === mes);
 }
-function mapaRadio(n) { return n === 0 ? 6 : Math.min(9 + n*4, 24); }
-function mapaColor(n) {
-  if (n === 0) return '#C9CDC6';
-  if (n === 1) return '#e65100';
-  if (n <= 3) return '#4caf50';
-  return '#2e7d32';
+function mapaRadio(n) { return n === 0 ? 6 : Math.min(9 + n*3, 22); }
+
+// Color según semana del mes en que fue la ÚLTIMA visita
+// Semana 1 (días 1-7) → rojo, Semana 2 (8-14) → amarillo,
+// Semana 3 (15-21) → verde, Semana 4+ (22+) → azul
+// Sin visitas → gris
+const SEMANA_COLORES = ['#9e9e9e', '#e53935', '#f9a825', '#43a047', '#1e88e5'];
+
+function getSemanaDelMes(fechaStr) {
+  if (!fechaStr) return 0;
+  const dia = parseInt(fechaStr.split('-')[2], 10);
+  if (dia <= 7)  return 1;
+  if (dia <= 14) return 2;
+  if (dia <= 21) return 3;
+  return 4;
+}
+
+function mapaColor(cliente, mes) {
+  const fechas = visitasDeCliente(cliente, mes);
+  if (!fechas.length) return SEMANA_COLORES[0];
+  // Última visita (la más reciente)
+  const ultima = fechas.slice().sort().pop();
+  const semana = getSemanaDelMes(ultima);
+  return SEMANA_COLORES[semana];
+}
+
+// Capa de etiquetas con nombres (solo clientes visitados)
+let mapaLabelMarkers = {};
+
+function crearLabelMarker(c, color) {
+  // Leaflet divIcon con el nombre del cliente
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="
+      background:${color};
+      color:white;
+      font-size:10px;
+      font-weight:700;
+      padding:2px 6px;
+      border-radius:8px;
+      white-space:nowrap;
+      box-shadow:0 1px 4px rgba(0,0,0,0.3);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      max-width:120px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-top:2px;
+    ">${c.cliente.split(' ')[0]}</div>`,
+    iconAnchor: [0, 0],
+    iconSize: null
+  });
+  return L.marker([c.lat + 0.003, c.lng], { icon, interactive: false, zIndexOffset: -100 });
+}
+
+function actualizarLabels() {
+  // Eliminar labels existentes
+  Object.values(mapaLabelMarkers).forEach(m => { try { leafletMap.removeLayer(m); } catch(e) {} });
+  mapaLabelMarkers = {};
+
+  // Agregar solo para clientes visitados en el período seleccionado
+  MAPA_CLIENTES.forEach(c => {
+    const n = visitasDeCliente(c.cliente, mapaMesActual).length;
+    if (n === 0) return;
+    const color = mapaColor(c.cliente, mapaMesActual);
+    const label = crearLabelMarker(c, color);
+    label.addTo(leafletMap);
+    mapaLabelMarkers[c.cliente] = label;
+  });
 }
 
 function buildMapaMesOptions() {
@@ -1801,14 +1498,27 @@ function buildMapaMesOptions() {
 function mapaPopupHtml(c) {
   const fechas = visitasDeCliente(c.cliente, mapaMesActual).slice().sort().reverse();
   const totalAll = (mapaVisitas[c.cliente] || []).length;
-  const listado = fechas.length
-    ? fechas.map(f => f.split('-').reverse().join('/')).join(' · ')
-    : ('Sin visitas' + (mapaMesActual !== 'all' ? ' este mes.' : '.'));
+
+  const listadoFechas = fechas.map(f => {
+    const semana = getSemanaDelMes(f);
+    const color = SEMANA_COLORES[semana];
+    const partes = f.split('-').reverse().join('/');
+    return `<span style="display:inline-flex;align-items:center;gap:3px;margin-right:4px;margin-bottom:2px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span>
+      <span style="font-size:11px;">Sem.${semana} · ${partes}</span>
+    </span>`;
+  }).join('');
+
+  const sinVisitas = mapaMesActual !== 'all' ? 'Sin visitas este mes.' : 'Sin visitas.';
+
   return `
     <div class="popup-inner">
       <h3>${c.cliente}</h3>
-      <div class="loc">${c.localidad}</div>
-      <div class="count"><b>${fechas.length}</b> visita(s) ${mapaMesActual==='all' ? '' : 'en ' + mapaMonthLabel(mapaMesActual)} &middot; <b>${totalAll}</b> en total<br><span style="color:#757575;font-size:11px;">${listado}</span></div>
+      <div class="loc">📍 ${c.localidad}</div>
+      <div class="count">
+        <b>${fechas.length}</b> visita(s) ${mapaMesActual==='all' ? '' : 'en ' + mapaMonthLabel(mapaMesActual)} &middot; <b>${totalAll}</b> en total<br>
+        <div style="margin-top:4px;">${fechas.length ? listadoFechas : sinVisitas}</div>
+      </div>
       <button onclick="registrarVisita('${c.cliente.replace(/'/g,"\\'")}')">✓ Registrar visita hoy</button>
       ${fechas.length ? `<button class="undo-btn" onclick="deshacerVisita('${c.cliente.replace(/'/g,"\\'")}')">Deshacer última visita</button>` : ''}
     </div>
@@ -1821,11 +1531,10 @@ function initMapaVisitas() {
 
   if (!leafletMap) {
     leafletMap = L.map('leaflet-map', { preferCanvas: true }).setView([-27.0, -54.9], 7.3);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
       maxZoom: 18,
       crossOrigin: true,
-      subdomains: 'abcd',
     }).addTo(leafletMap);
 
     MAPA_CLIENTES.forEach(c => {
@@ -1863,7 +1572,6 @@ function seleccionarClienteMapa(cliente) {
   leafletMap.flyTo([c.lat, c.lng], Math.max(leafletMap.getZoom(), 11), { duration: 0.5 });
   mapaMarkers[cliente].bindPopup(mapaPopupHtml(c)).openPopup();
   renderMapaLista(document.getElementById('mapa-buscar').value);
-
   // Scroll automático al mapa
   document.getElementById('leaflet-map').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -1896,7 +1604,7 @@ function renderMapaLista(filtro) {
   cont.innerHTML = '';
   const q = (filtro || '').trim().toLowerCase();
 
-  // Mostrar/ocultar botón de limpiar
+  // Mostrar/ocultar botón limpiar
   const clearBtn = document.getElementById('mapa-lista-clear');
   if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
 
@@ -1913,8 +1621,10 @@ function renderMapaLista(filtro) {
     count++;
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
     const esActivo = c.cliente === mapaClienteActivo;
+    const color = mapaColor(c.cliente, mapaMesActual);
     const row = document.createElement('div');
     row.className = 'mc-row' + (esActivo ? ' mc-row-activo' : '');
+
     // Resaltar texto buscado
     let nombreHTML = c.cliente;
     let locHTML = c.localidad;
@@ -1923,14 +1633,25 @@ function renderMapaLista(filtro) {
       nombreHTML = c.cliente.replace(re, '<mark style="background:#fff9c4;border-radius:2px;">$1</mark>');
       locHTML = c.localidad.replace(re, '<mark style="background:#fff9c4;border-radius:2px;">$1</mark>');
     }
+
+    // Indicador de semana si fue visitado
+    const semIndicador = n > 0
+      ? `<div style="display:flex;align-items:center;gap:4px;margin-top:2px;font-size:11px;color:var(--muted);">
+           <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;"></span>
+           Sem.${getSemanaDelMes(visitasDeCliente(c.cliente, mapaMesActual).slice().sort().pop())}
+         </div>`
+      : '';
+
+    const semana = n > 0 ? getSemanaDelMes(visitasDeCliente(c.cliente, mapaMesActual).slice().sort().pop()) : 0;
     row.innerHTML = `
-      <div>
+      <div style="flex:1;">
         <div class="mc-name">${nombreHTML}${c.custom ? ' <span style="font-size:10px;color:var(--blue);font-weight:700;">· agregado</span>' : ''}</div>
         <div class="mc-loc">${locHTML}</div>
+        ${n > 0 ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:3px;"><span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block;"></span>Semana ${semana}</div>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
-        <div class="mc-badge ${n>0?'visited':''}">${n}</div>
-        ${c.custom ? `<button onclick="event.stopPropagation();eliminarClienteExtra('${c.cliente.replace(/'/g,"\\'")}')" style="border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px 4px;">🗑</button>` : ''}
+        <div class="mc-badge ${n>0?'visited':''}" style="${n>0?'background:'+color+';color:white;':''}">${n}</div>
+        ${c.custom ? `<button onclick="event.stopPropagation();eliminarClienteExtra('${c.cliente.replace(/'/g,"\'")}')" style="border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px 4px;">🗑</button>` : ''}
       </div>
     `;
     row.onclick = () => seleccionarClienteMapa(c.cliente);
@@ -1947,9 +1668,11 @@ function refrescarMapaMarkers() {
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
     const m = mapaMarkers[c.cliente];
     if (!m) return;
+    const color = mapaColor(c.cliente, mapaMesActual);
     m.setRadius(mapaRadio(n));
-    m.setStyle({ fillColor: mapaColor(n) });
+    m.setStyle({ fillColor: color, color: n > 0 ? 'white' : '#bbb', weight: n > 0 ? 1.5 : 1 });
   });
+  actualizarLabels();
 }
 
 function refrescarMapaStats() {
@@ -1968,101 +1691,6 @@ function refrescarMapa() {
   refrescarMapaMarkers();
   renderMapaLista(document.getElementById('mapa-buscar').value);
   refrescarMapaStats();
-}
-
-// ===== NUEVO CLIENTE (desde la app) =====
-function abrirNuevoClienteModal() {
-  document.getElementById('modal-content').innerHTML = `
-    <button class="modal-close" onclick="closeModal()">×</button>
-    <div class="modal-title">➕ Nuevo cliente</div>
-    <label>Nombre del cliente</label>
-    <input type="text" id="nc-nombre" placeholder="Nombre o razón social">
-    <label>Localidad</label>
-    <input type="text" id="nc-localidad" placeholder="Ej: Eldorado" list="nc-localidades">
-    <datalist id="nc-localidades">
-      ${[...new Set(MAPA_CLIENTES.map(c => c.localidad))].sort().map(l => `<option value="${l}">`).join('')}
-    </datalist>
-    <label>Ubicación</label>
-    <button type="button" class="icon-btn blue" style="width:100%;margin-bottom:8px;" onclick="usarUbicacionNuevoCliente()">📍 Usar mi ubicación actual</button>
-    <div id="nc-ubicacion-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;">Sin ubicación capturada todavía. Podés ingresarla manualmente abajo.</div>
-    <div class="row">
-      <input type="number" step="any" id="nc-lat" placeholder="Latitud">
-      <input type="number" step="any" id="nc-lng" placeholder="Longitud">
-    </div>
-    <button class="save-btn" style="margin-top:16px;" onclick="guardarNuevoCliente()">✅ Guardar cliente</button>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function usarUbicacionNuevoCliente() {
-  if (!navigator.geolocation) { showToast('Tu dispositivo no soporta GPS'); return; }
-  const statusEl = document.getElementById('nc-ubicacion-status');
-  statusEl.textContent = '⏳ Obteniendo ubicación...';
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      document.getElementById('nc-lat').value = pos.coords.latitude;
-      document.getElementById('nc-lng').value = pos.coords.longitude;
-      statusEl.textContent = `📍 Ubicación capturada (±${Math.round(pos.coords.accuracy)}m)`;
-    },
-    () => { statusEl.textContent = '⚠️ No se pudo obtener la ubicación. Ingresala manualmente.'; },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-  );
-}
-
-function guardarNuevoCliente() {
-  const nombre = document.getElementById('nc-nombre').value.trim();
-  const localidad = document.getElementById('nc-localidad').value.trim();
-  const lat = parseFloat(document.getElementById('nc-lat').value);
-  const lng = parseFloat(document.getElementById('nc-lng').value);
-
-  if (!nombre) { showToast('Ingresá el nombre del cliente'); return; }
-  if (!localidad) { showToast('Ingresá la localidad'); return; }
-  if (isNaN(lat) || isNaN(lng)) { showToast('Capturá o ingresá la ubicación'); return; }
-  if (MAPA_CLIENTES.some(c => c.cliente.toLowerCase() === nombre.toLowerCase())) {
-    showToast('Ya existe un cliente con ese nombre'); return;
-  }
-
-  const nuevo = { cliente: nombre, localidad, lat, lng, custom: true };
-  MAPA_CLIENTES.push(nuevo);
-
-  const extra = getClientesExtra();
-  extra.push(nuevo);
-  saveClientesExtra(extra);
-
-  if (leafletMap) {
-    const marker = L.circleMarker([nuevo.lat, nuevo.lng], {
-      radius: 8, fillColor: '#757575', color: '#fff', weight: 1.5, fillOpacity: 0.9,
-    }).addTo(leafletMap);
-    marker.on('click', () => seleccionarClienteMapa(nuevo.cliente));
-    mapaMarkers[nuevo.cliente] = marker;
-    refrescarMapa();
-  }
-  poblarSelectClientes();
-
-  closeModal();
-  showToast('✅ Cliente agregado: ' + nombre);
-}
-
-function eliminarClienteExtra(nombre) {
-  if (!confirm('¿Eliminar el cliente "' + nombre + '"? Se perderá su historial de visitas.')) return;
-
-  const idx = MAPA_CLIENTES.findIndex(c => c.cliente === nombre);
-  if (idx !== -1) MAPA_CLIENTES.splice(idx, 1);
-
-  if (mapaMarkers[nombre]) {
-    leafletMap.removeLayer(mapaMarkers[nombre]);
-    delete mapaMarkers[nombre];
-  }
-  if (mapaClienteActivo === nombre) mapaClienteActivo = null;
-
-  delete mapaVisitas[nombre];
-  saveVisitas();
-
-  saveClientesExtra(getClientesExtra().filter(c => c.cliente !== nombre));
-
-  poblarSelectClientes();
-  refrescarMapa();
-  showToast('Cliente eliminado');
 }
 
 function descargarImagenMapa() {
@@ -2136,7 +1764,7 @@ if (isIos() && !isInStandaloneMode()) {
 if ('serviceWorker' in navigator) {
   // Registrar SW inline usando blob URL
   const swCode = `
-    const CACHE = 'viajante-v2';
+    const CACHE = 'viajante-v1';
     self.addEventListener('install', e => {
       self.skipWaiting();
     });
@@ -2147,25 +1775,8 @@ if ('serviceWorker' in navigator) {
       self.clients.claim();
     });
     self.addEventListener('fetch', e => {
+      // Cache-first para archivos propios
       if (e.request.method !== 'GET') return;
-
-      // Documento principal: red primero, así una actualización nueva se ve
-      // apenas hay conexión. Si falla (sin internet), usamos la última
-      // copia guardada para que la app siga funcionando offline.
-      if (e.request.mode === 'navigate') {
-        e.respondWith(
-          fetch(e.request).then(resp => {
-            if (resp && resp.status === 200) {
-              const clone = resp.clone();
-              caches.open(CACHE).then(c => c.put(e.request, clone));
-            }
-            return resp;
-          }).catch(() => caches.match(e.request))
-        );
-        return;
-      }
-
-      // Resto de archivos (librerías externas): cache-first, cambian poco.
       e.respondWith(
         caches.match(e.request).then(cached => {
           if (cached) return cached;
@@ -2187,17 +1798,16 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+
 // ===== AGENDA =====
 const AGENDA_KEY = 'viajante_agenda_v2';
 
-// ── Zonas y rutina semanal ──
 const ZONAS = {
   SUR:    { nombre: 'Zona Sur',    emoji: '🟢', localidades: ['posadas','gobernador roca','jardin america','jardín america','puerto rico','montecarlo','capiovi','garuhape','garuhapé','ruiz de montoya','consepcion de la sierra','concepcion de la sierra','cerro azul','santa rita','colonia aurora'] },
   CENTRO: { nombre: 'Zona Centro', emoji: '🟡', localidades: ['apostoles','apóstoles','obera','oberá','colonia aurora','san vicente','el soberbio','campo grande','2 de mayo','dos de mayo','profundidad','azara'] },
   NORTE:  { nombre: 'Zona Norte',  emoji: '🔵', localidades: ['eldorado','pozo azul','bernardo de irigoyen','comandante andresito','wanda','san pedro','fracran','fracrán','9 de julio','puerto esperanza','puerto wanda','aristobulo del valle','aristóbulo del valle'] }
 };
 
-// Día de semana (1=lun...5=vie) → modo/zona
 const RUTINA_DIA = {
   1: { tipo: 'contacto', label: '📞 Llamados y WhatsApp', zona: null },
   2: { tipo: 'ruta',     label: '🚗 Zona Sur',            zona: 'SUR' },
@@ -2224,23 +1834,19 @@ function saveAgenda(a) {
   try { localStorage.setItem(AGENDA_KEY, JSON.stringify(a)); } catch(e) { showToast('⚠️ Sin espacio'); }
 }
 
-// Estado de la agenda
-let agendaDiaActivo = null;  // 'YYYY-MM-DD'
+let agendaDiaActivo = null;
 let agendaTipoSel = 'visita';
 
-// Días de la semana actuales (lunes a domingo)
 function getSemanaActual() {
   const hoy = new Date();
-  const dow = hoy.getDay(); // 0=dom
+  const dow = hoy.getDay();
   const lunes = new Date(hoy);
   lunes.setDate(hoy.getDate() - (dow === 0 ? 6 : dow - 1));
   const dias = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(lunes);
     d.setDate(lunes.getDate() + i);
-    const str = d.getFullYear() + '-' +
-      String(d.getMonth()+1).padStart(2,'0') + '-' +
-      String(d.getDate()).padStart(2,'0');
+    const str = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
     dias.push({ str, d });
   }
   return dias;
@@ -2252,27 +1858,19 @@ function renderAgendaDias() {
   const dias = getSemanaActual();
   const hoyStr = todayStr;
   if (!agendaDiaActivo) agendaDiaActivo = hoyStr;
-
   const agenda = getAgenda();
   const el = document.getElementById('agenda-dias');
   el.innerHTML = dias.map(({ str, d }) => {
     const dow = d.getDay();
-    const nombre = NOMBRES_DIA[dow];
-    const num = d.getDate();
-    const esHoy = str === hoyStr;
-    const esActivo = str === agendaDiaActivo;
     const rutina = RUTINA_DIA[dow];
     const cantContactos = (agenda[str] || []).length;
     const emoji = rutina.zona ? ZONAS[rutina.zona].emoji : (rutina.tipo === 'contacto' ? '📞' : rutina.tipo === 'admin' ? '📋' : '');
-    return `
-      <button class="agenda-dia-tab ${esHoy ? 'hoy' : ''} ${esActivo ? 'activo' : ''}"
-        onclick="selDiaAgenda('${str}')">
-        <span style="font-size:10px;">${nombre}</span>
-        <span class="dia-num">${num}</span>
-        <span style="font-size:11px;">${emoji}</span>
-        ${cantContactos > 0 ? `<span style="font-size:10px;background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 5px;">${cantContactos}</span>` : ''}
-      </button>
-    `;
+    return `<button class="agenda-dia-tab ${str===hoyStr?'hoy':''} ${str===agendaDiaActivo?'activo':''}" onclick="selDiaAgenda('${str}')">
+      <span style="font-size:10px;">${NOMBRES_DIA[dow]}</span>
+      <span class="dia-num">${d.getDate()}</span>
+      <span style="font-size:11px;">${emoji}</span>
+      ${cantContactos > 0 ? `<span style="font-size:10px;background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 5px;">${cantContactos}</span>` : ''}
+    </button>`;
   }).join('');
 }
 
@@ -2282,8 +1880,7 @@ function selDiaAgenda(str) {
   renderContactosDia();
 }
 
-// Último contacto de un cliente en el Diario
-function ultimaVisita(nombreCliente) {
+function ultimaVisitaEnDiario(nombreCliente) {
   const data = getData();
   let ultima = null;
   data.forEach(r => {
@@ -2293,11 +1890,11 @@ function ultimaVisita(nombreCliente) {
       }
     });
   });
-  return ultima; // 'YYYY-MM-DD' o null
+  return ultima;
 }
 
 function semaforo(nombreCliente) {
-  const ult = ultimaVisita(nombreCliente);
+  const ult = ultimaVisitaEnDiario(nombreCliente);
   if (!ult) return 'gris';
   const diasAtras = Math.floor((new Date(todayStr) - new Date(ult)) / 86400000);
   if (diasAtras <= 14) return 'verde';
@@ -2306,7 +1903,7 @@ function semaforo(nombreCliente) {
 }
 
 function ultimaVisitaTexto(nombreCliente) {
-  const ult = ultimaVisita(nombreCliente);
+  const ult = ultimaVisitaEnDiario(nombreCliente);
   if (!ult) return 'Sin visitas registradas';
   const diasAtras = Math.floor((new Date(todayStr) - new Date(ult)) / 86400000);
   if (diasAtras === 0) return 'Visitado hoy';
@@ -2318,117 +1915,76 @@ function renderContactosDia() {
   const agenda = getAgenda();
   const contactos = agenda[agendaDiaActivo] || [];
   const el = document.getElementById('agenda-contactos-list');
-
-  const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const partes = agendaDiaActivo.split('-');
   const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
   const dow = fd.getDay();
-  const titulo = diasSemana[dow] + ' ' + fmtDate(agendaDiaActivo);
+  const titulo = DIAS[dow] + ' ' + fmtDate(agendaDiaActivo);
   const rutina = RUTINA_DIA[dow];
   const tipoLabel = { visita: '🤝 Visita', llamado: '📞 Llamado', whatsapp: '💬 WhatsApp' };
-
-  // Banner de rutina del día
   const bannerColor = rutina.tipo === 'ruta' ? 'var(--green)' : rutina.tipo === 'contacto' ? 'var(--blue)' : '#795548';
   let bannerExtra = '';
   if (rutina.zona) {
     const z = ZONAS[rutina.zona];
-    bannerExtra = `<div style="font-size:11px;opacity:0.85;margin-top:3px;">${z.localidades.slice(0,5).map(l => l.charAt(0).toUpperCase()+l.slice(1)).join(' · ')}...</div>`;
+    bannerExtra = `<div style="font-size:11px;opacity:0.85;margin-top:3px;">${z.localidades.slice(0,5).map(l=>l.charAt(0).toUpperCase()+l.slice(1)).join(' · ')}...</div>`;
   }
-
-  // Sugerencias de clientes de la zona del día (solo si es día de ruta y no hay muchos ya)
   let sugerenciasHTML = '';
   if (rutina.zona && contactos.length < 3) {
-    const zonaClave = rutina.zona;
     const clientesZona = MAPA_CLIENTES
-      .filter(mc => getZonaDeLocalidad(mc.localidad) === zonaClave)
+      .filter(mc => getZonaDeLocalidad(mc.localidad) === rutina.zona)
       .filter(mc => !contactos.some(c => c.cliente === mc.cliente))
-      .map(mc => ({
-        ...mc,
-        sem: semaforo(mc.cliente),
-        ult: ultimaVisita(mc.cliente)
-      }))
-      // Primero rojos, después grises, después amarillos, después verdes
-      .sort((a, b) => {
-        const orden = { rojo: 0, gris: 1, amarillo: 2, verde: 3 };
-        return (orden[a.sem] ?? 4) - (orden[b.sem] ?? 4);
-      })
+      .map(mc => ({ ...mc, sem: semaforo(mc.cliente) }))
+      .sort((a,b) => { const o={rojo:0,gris:1,amarillo:2,verde:3}; return (o[a.sem]??4)-(o[b.sem]??4); })
       .slice(0, 5);
-
     if (clientesZona.length > 0) {
-      sugerenciasHTML = `
-        <div class="card" style="margin-bottom:10px;padding:12px 14px;">
-          <div class="card-title">💡 Sugeridos para hoy — ${ZONAS[zonaClave].nombre}</div>
-          ${clientesZona.map(mc => `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-              <div class="ac-semaforo ${mc.sem}" style="width:10px;height:10px;border-radius:50%;flex-shrink:0;"></div>
-              <div style="flex:1;">
-                <div style="font-weight:700;font-size:13px;">${mc.cliente}</div>
-                <div style="font-size:11px;color:var(--muted);">📍 ${mc.localidad} · ${ultimaVisitaTexto(mc.cliente)}</div>
-              </div>
-              <button onclick="agregarSugerido('${mc.cliente.replace(/'/g,"\\'")}','${mc.localidad.replace(/'/g,"\\'")}')"
-                style="background:var(--green);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">
-                + Agregar
-              </button>
-            </div>
-          `).join('')}
-        </div>`;
+      sugerenciasHTML = `<div class="card" style="margin-bottom:10px;padding:12px 14px;">
+        <div class="card-title">💡 Sugeridos — ${ZONAS[rutina.zona].nombre}</div>
+        ${clientesZona.map(mc => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div class="ac-semaforo ${mc.sem}" style="width:10px;height:10px;border-radius:50%;flex-shrink:0;"></div>
+          <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${mc.cliente}</div>
+          <div style="font-size:11px;color:var(--muted);">📍 ${mc.localidad} · ${ultimaVisitaTexto(mc.cliente)}</div></div>
+          <button onclick="agregarSugerido('${mc.cliente.replace(/'/g,"\'")}','${mc.localidad.replace(/'/g,"\'")}')
+" style="background:var(--green);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">+ Agregar</button>
+        </div>`).join('')}
+      </div>`;
     }
   }
-
-  const headerHTML = `
-    <div style="background:${bannerColor};color:white;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
-      <div style="font-weight:700;font-size:14px;">${rutina.label}</div>
-      <div style="font-size:12px;opacity:0.9;margin-top:2px;">${titulo}</div>
-      ${bannerExtra}
-    </div>`;
-
+  const headerHTML = `<div style="background:${bannerColor};color:white;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+    <div style="font-weight:700;font-size:14px;">${rutina.label}</div>
+    <div style="font-size:12px;opacity:0.9;margin-top:2px;">${titulo}</div>${bannerExtra}</div>`;
   if (contactos.length === 0) {
-    el.innerHTML = headerHTML + sugerenciasHTML + `
-      <div class="card" style="text-align:center;padding:24px 16px;color:var(--muted);">
-        <div style="font-size:32px;margin-bottom:8px;">📋</div>
-        <div style="font-size:13px;">No hay contactos planificados.<br>Agregá uno arriba o usá las sugerencias.</div>
-      </div>`;
+    el.innerHTML = headerHTML + sugerenciasHTML + `<div class="card" style="text-align:center;padding:24px 16px;color:var(--muted);"><div style="font-size:32px;margin-bottom:8px;">📋</div><div style="font-size:13px;">No hay contactos. Agregá uno o usá las sugerencias.</div></div>`;
     return;
   }
-
-  // Ordenar: pendientes primero (rojos arriba), completados al final
-  const ordenados = [...contactos].map((c, i) => ({ ...c, _i: i }));
-  ordenados.sort((a, b) => {
+  const ordenados = [...contactos].map((c,i) => ({...c,_i:i}));
+  ordenados.sort((a,b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
-    const orden = { rojo: 0, gris: 1, amarillo: 2, verde: 3 };
-    return (orden[semaforo(a.cliente)] ?? 4) - (orden[semaforo(b.cliente)] ?? 4);
+    const o={rojo:0,gris:1,amarillo:2,verde:3};
+    return (o[semaforo(a.cliente)]??4)-(o[semaforo(b.cliente)]??4);
   });
-
-  const hechos = contactos.filter(c => c.done).length;
-
+  const hechos = contactos.filter(c=>c.done).length;
   el.innerHTML = headerHTML + sugerenciasHTML + `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <div class="card-title" style="margin:0;">📋 ${contactos.length} contacto${contactos.length>1?'s':''}</div>
       <div style="font-size:12px;color:var(--muted);">${hechos}/${contactos.length} hechos</div>
     </div>
-    ${ordenados.map((c) => {
+    ${ordenados.map(c => {
       const sem = semaforo(c.cliente);
-      const ultTxt = ultimaVisitaTexto(c.cliente);
-      return `
-        <div class="agenda-contacto" style="${c.done ? 'opacity:0.5;' : ''}">
-          <div class="ac-semaforo ${sem}"></div>
-          <div class="ac-body">
-            <div class="ac-nombre" style="${c.done ? 'text-decoration:line-through;' : ''}">${c.cliente}</div>
-            <div class="ac-loc">📍 ${c.localidad || ''}</div>
-            <span class="ac-tipo ${c.tipo}">${tipoLabel[c.tipo] || c.tipo}</span>
-            ${c.producto ? `<div class="ac-prod">🎯 ${c.producto}</div>` : ''}
-            <div class="ac-ultima">${ultTxt}</div>
-          </div>
-          <div class="ac-actions">
-            <button class="ac-check ${c.done ? 'done' : ''}" onclick="toggleDoneAgenda('${agendaDiaActivo}', ${c._i})">
-              ${c.done ? '✓' : ''}
-            </button>
-            <button class="ac-del" onclick="eliminarContactoAgenda('${agendaDiaActivo}', ${c._i})">×</button>
-          </div>
+      return `<div class="agenda-contacto" style="${c.done?'opacity:0.5;':''}">
+        <div class="ac-semaforo ${sem}"></div>
+        <div class="ac-body">
+          <div class="ac-nombre" style="${c.done?'text-decoration:line-through;':''}">${c.cliente}</div>
+          <div class="ac-loc">📍 ${c.localidad||''}</div>
+          <span class="ac-tipo ${c.tipo}">${tipoLabel[c.tipo]||c.tipo}</span>
+          ${c.producto?`<div class="ac-prod">🎯 ${c.producto}</div>`:''}
+          <div class="ac-ultima">${ultimaVisitaTexto(c.cliente)}</div>
         </div>
-      `;
-    }).join('')}
-  `;
+        <div class="ac-actions">
+          <button class="ac-check ${c.done?'done':''}" onclick="toggleDoneAgenda('${agendaDiaActivo}',${c._i})">${c.done?'✓':''}</button>
+          <button class="ac-del" onclick="eliminarContactoAgenda('${agendaDiaActivo}',${c._i})">×</button>
+        </div>
+      </div>`;
+    }).join('')}`;
 }
 
 function agregarSugerido(cliente, localidad) {
@@ -2437,11 +1993,7 @@ function agregarSugerido(cliente, localidad) {
   if (agenda[agendaDiaActivo].some(c => c.cliente === cliente)) { showToast('Ya está en la agenda'); return; }
   const dow = new Date(agendaDiaActivo.replace(/-/g,'/')).getDay();
   const rutina = RUTINA_DIA[dow];
-  agenda[agendaDiaActivo].push({
-    cliente, localidad,
-    tipo: rutina.tipo === 'contacto' ? 'llamado' : 'visita',
-    producto: '', done: false, agregado: Date.now()
-  });
+  agenda[agendaDiaActivo].push({ cliente, localidad, tipo: rutina.tipo === 'contacto' ? 'llamado' : 'visita', producto: '', done: false, agregado: Date.now() });
   saveAgenda(agenda);
   renderAgendaDias();
   renderContactosDia();
@@ -2451,8 +2003,7 @@ function agregarSugerido(cliente, localidad) {
 function selTipo(tipo) {
   agendaTipoSel = tipo;
   ['visita','llamado','whatsapp'].forEach(t => {
-    const btn = document.getElementById('tbtn-' + t);
-    btn.className = 'tipo-btn' + (t === tipo ? ' sel-' + t : '');
+    document.getElementById('tbtn-'+t).className = 'tipo-btn' + (t===tipo?' sel-'+t:'');
   });
 }
 
@@ -2464,16 +2015,13 @@ function poblarSelectClientes() {
   const nombres = new Set();
   getData().forEach(r => r.clientes.forEach(c => nombres.add(c.nombre)));
   MAPA_CLIENTES.forEach(c => nombres.add(c.cliente));
-
-  // Si hay día activo con zona, mostrar primero los de esa zona
   agendaZonaActiva = null;
   if (agendaDiaActivo) {
     const partes = agendaDiaActivo.split('-');
-    const fd = new Date(+partes[0], +partes[1]-1, +partes[2]);
+    const fd = new Date(+partes[0],+partes[1]-1,+partes[2]);
     const rutina = RUTINA_DIA[fd.getDay()];
     agendaZonaActiva = rutina ? rutina.zona : null;
   }
-
   agendaClientesTodos = [...nombres].sort();
   limpiarClienteAgenda();
 }
@@ -2484,13 +2032,12 @@ function getLocalidadCliente(nombre) {
 }
 
 function normalizarBusqueda(s) {
-  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
 
 function resaltar(texto, q) {
   if (!q) return texto;
-  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-  return texto.replace(re, '<mark>$1</mark>');
+  return texto.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
 }
 
 function filtrarClientesAgenda(valor) {
@@ -2498,57 +2045,24 @@ function filtrarClientesAgenda(valor) {
   const cont = document.getElementById('agenda-cliente-resultados');
   const clearBtn = document.getElementById('agenda-cliente-clear');
   clearBtn.classList.toggle('visible', !!valor);
-
-  // Si el texto coincide exactamente con el cliente ya elegido, no lo tratamos como filtro nuevo
-  if (valor && valor === agendaClienteSeleccionado) {
-    cont.classList.remove('open');
-    return;
-  }
-  if (agendaClienteSeleccionado && valor !== agendaClienteSeleccionado) {
-    agendaClienteSeleccionado = '';
-  }
-
-  const coincide = (n) => {
-    if (!q) return true;
-    if (normalizarBusqueda(n).includes(q)) return true;
-    const loc = getLocalidadCliente(n);
-    return loc && normalizarBusqueda(loc).includes(q);
-  };
-
+  if (valor && valor === agendaClienteSeleccionado) { cont.classList.remove('open'); return; }
+  if (agendaClienteSeleccionado && valor !== agendaClienteSeleccionado) agendaClienteSeleccionado = '';
+  const coincide = n => { if (!q) return true; if (normalizarBusqueda(n).includes(q)) return true; const loc=getLocalidadCliente(n); return loc&&normalizarBusqueda(loc).includes(q); };
   const filtrados = agendaClientesTodos.filter(coincide);
-
-  const renderItem = (n) => {
-    const loc = getLocalidadCliente(n);
-    return `
-      <div class="ac-search-item" onmousedown="event.preventDefault();seleccionarClienteAgenda('${n.replace(/'/g,"\\'")}')">
-        <div class="ac-search-name">${resaltar(n, valor)}</div>
-        ${loc ? `<div class="ac-search-loc">📍 ${resaltar(loc, valor)}</div>` : ''}
-      </div>
-    `;
-  };
-
-  if (!filtrados.length) {
-    cont.innerHTML = '<div class="ac-search-empty">Sin resultados</div>';
-  } else if (!q && agendaZonaActiva) {
-    const deZona = filtrados.filter(n => {
-      const loc = getLocalidadCliente(n);
-      return loc && getZonaDeLocalidad(loc) === agendaZonaActiva;
-    });
-    const otros = filtrados.filter(n => !deZona.includes(n));
-    cont.innerHTML =
-      (deZona.length ? `<div class="ac-search-group">⭐ ${ZONAS[agendaZonaActiva].nombre}</div>${deZona.map(renderItem).join('')}` : '') +
-      (otros.length ? `<div class="ac-search-group">Otros clientes</div>${otros.map(renderItem).join('')}` : '');
-  } else {
-    cont.innerHTML = filtrados.map(renderItem).join('');
-  }
-
+  const renderItem = n => { const loc=getLocalidadCliente(n); return `<div class="ac-search-item" onmousedown="event.preventDefault();seleccionarClienteAgenda('${n.replace(/'/g,"\'")}')"><div class="ac-search-name">${resaltar(n,valor)}</div>${loc?`<div class="ac-search-loc">📍 ${resaltar(loc,valor)}</div>`:''}</div>`; };
+  if (!filtrados.length) { cont.innerHTML='<div class="ac-search-empty">Sin resultados</div>'; }
+  else if (!q && agendaZonaActiva) {
+    const deZona=filtrados.filter(n=>{const loc=getLocalidadCliente(n);return loc&&getZonaDeLocalidad(loc)===agendaZonaActiva;});
+    const otros=filtrados.filter(n=>!deZona.includes(n));
+    cont.innerHTML=(deZona.length?`<div class="ac-search-group">⭐ ${ZONAS[agendaZonaActiva].nombre}</div>${deZona.map(renderItem).join('')}`:'')+
+      (otros.length?`<div class="ac-search-group">Otros clientes</div>${otros.map(renderItem).join('')}`:'');
+  } else { cont.innerHTML=filtrados.map(renderItem).join(''); }
   cont.classList.add('open');
 }
 
 function seleccionarClienteAgenda(nombre) {
   agendaClienteSeleccionado = nombre;
-  const input = document.getElementById('agenda-cliente-buscar');
-  input.value = nombre;
+  document.getElementById('agenda-cliente-buscar').value = nombre;
   document.getElementById('agenda-cliente-clear').classList.add('visible');
   cerrarResultadosAgenda();
 }
@@ -2572,24 +2086,10 @@ function agregarContactoAgenda() {
   const cliente = agendaClienteSeleccionado;
   if (!cliente) { showToast('Elegí un cliente'); return; }
   if (!agendaDiaActivo) { showToast('Seleccioná un día'); return; }
-
   const agenda = getAgenda();
   if (!agenda[agendaDiaActivo]) agenda[agendaDiaActivo] = [];
-
-  // Evitar duplicados
-  if (agenda[agendaDiaActivo].some(c => c.cliente === cliente)) {
-    showToast('Ya está en este día'); return;
-  }
-
-  agenda[agendaDiaActivo].push({
-    cliente,
-    localidad: getLocalidadCliente(cliente),
-    tipo: agendaTipoSel,
-    producto: prod,
-    done: false,
-    agregado: Date.now()
-  });
-
+  if (agenda[agendaDiaActivo].some(c => c.cliente === cliente)) { showToast('Ya está en este día'); return; }
+  agenda[agendaDiaActivo].push({ cliente, localidad: getLocalidadCliente(cliente), tipo: agendaTipoSel, producto: prod, done: false, agregado: Date.now() });
   saveAgenda(agenda);
   limpiarClienteAgenda();
   document.getElementById('agenda-prod').value = '';
@@ -2620,68 +2120,30 @@ function eliminarContactoAgenda(fecha, idx) {
 }
 
 function agendaTab(tab) {
-  document.getElementById('atab-semana').classList.toggle('active', tab === 'semana');
-  document.getElementById('atab-olvidados').classList.toggle('active', tab === 'olvidados');
-  document.getElementById('agenda-vista-semana').style.display = tab === 'semana' ? '' : 'none';
-  document.getElementById('agenda-vista-olvidados').style.display = tab === 'olvidados' ? '' : 'none';
-  if (tab === 'olvidados') renderOlvidados();
+  document.getElementById('atab-semana').classList.toggle('active', tab==='semana');
+  document.getElementById('atab-olvidados').classList.toggle('active', tab==='olvidados');
+  document.getElementById('agenda-vista-semana').style.display = tab==='semana' ? '' : 'none';
+  document.getElementById('agenda-vista-olvidados').style.display = tab==='olvidados' ? '' : 'none';
+  if (tab==='olvidados') renderOlvidados();
 }
 
 function renderOlvidados() {
   const el = document.getElementById('agenda-olvidados-list');
-  const porZona = { SUR: [], CENTRO: [], NORTE: [], SIN_ZONA: [] };
-
+  const porZona = { SUR:[], CENTRO:[], NORTE:[], SIN_ZONA:[] };
   MAPA_CLIENTES.forEach(mc => {
-    const ult = ultimaVisita(mc.cliente);
+    const ult = ultimaVisitaEnDiario(mc.cliente);
     let diasAtras = null;
-    if (ult) {
-      diasAtras = Math.floor((new Date(todayStr) - new Date(ult)) / 86400000);
-      if (diasAtras <= 30) return;
-    }
+    if (ult) { diasAtras = Math.floor((new Date(todayStr)-new Date(ult))/86400000); if (diasAtras<=30) return; }
     const zona = getZonaDeLocalidad(mc.localidad) || 'SIN_ZONA';
-    porZona[zona].push({ nombre: mc.cliente, localidad: mc.localidad, diasAtras });
+    porZona[zona].push({ nombre:mc.cliente, localidad:mc.localidad, diasAtras });
   });
-
-  const total = Object.values(porZona).reduce((s, a) => s + a.length, 0);
-  if (total === 0) {
-    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px;">✅ Todos los clientes fueron visitados recientemente.</div>';
-    return;
-  }
-
-  const ordenar = arr => arr.sort((a, b) => {
-    if (a.diasAtras === null && b.diasAtras === null) return a.nombre.localeCompare(b.nombre);
-    if (a.diasAtras === null) return -1;
-    if (b.diasAtras === null) return 1;
-    return b.diasAtras - a.diasAtras;
-  });
-
-  const zonasDef = [
-    { key: 'SUR',      label: '🟢 Zona Sur    — Martes',   dia: 'Martes' },
-    { key: 'NORTE',    label: '🔵 Zona Norte  — Miércoles',dia: 'Miércoles' },
-    { key: 'CENTRO',   label: '🟡 Zona Centro — Jueves',   dia: 'Jueves' },
-    { key: 'SIN_ZONA', label: '⚫ Sin zona asignada',      dia: '' }
-  ];
-
-  el.innerHTML = zonasDef.map(z => {
-    const arr = ordenar(porZona[z.key]);
-    if (!arr.length) return '';
-    return `
-      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">${z.label}</div>
-      ${arr.map(r => `
-        <div class="olvidados-item">
-          <div>
-            <div class="oi-nombre">${r.nombre}</div>
-            <div class="oi-loc">📍 ${r.localidad}</div>
-          </div>
-          <div class="oi-dias">${r.diasAtras === null ? 'Sin visitas' : r.diasAtras + ' días'}</div>
-        </div>
-      `).join('')}
-    `;
-  }).join('');
+  const total = Object.values(porZona).reduce((s,a)=>s+a.length,0);
+  if (total===0) { el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px;">✅ Todos visitados recientemente.</div>'; return; }
+  const ordenar = arr => arr.sort((a,b) => { if (a.diasAtras===null&&b.diasAtras===null) return a.nombre.localeCompare(b.nombre); if (a.diasAtras===null) return -1; if (b.diasAtras===null) return 1; return b.diasAtras-a.diasAtras; });
+  const zonasDef = [{key:'SUR',label:'🟢 Zona Sur — Martes'},{key:'NORTE',label:'🔵 Zona Norte — Miércoles'},{key:'CENTRO',label:'🟡 Zona Centro — Jueves'},{key:'SIN_ZONA',label:'⚫ Sin zona'}];
+  el.innerHTML = zonasDef.map(z => { const arr=ordenar(porZona[z.key]); if(!arr.length) return ''; return `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">${z.label}</div>${arr.map(r=>`<div class="olvidados-item"><div><div class="oi-nombre">${r.nombre}</div><div class="oi-loc">📍 ${r.localidad}</div></div><div class="oi-dias">${r.diasAtras===null?'Sin visitas':r.diasAtras+' días'}</div></div>`).join('')}`; }).join('');
 }
 
-// Hook en showPage para inicializar la Agenda
-// (reemplaza la función original en lugar de hacer override)
 const _showPageOrigAgenda = showPage;
 showPage = function(name) {
   _showPageOrigAgenda(name);
