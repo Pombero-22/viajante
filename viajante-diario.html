@@ -768,7 +768,37 @@ function saveRecord() {
     data.unshift(record);
   }
   saveData(data);
-  showToast('✅ Día guardado');
+
+  // ── Marcar automáticamente en el mapa los clientes visitados ──
+  // Carga las visitas del mapa, agrega la fecha del día a cada cliente
+  // que aparece en el registro (evita duplicados), y guarda.
+  const visitasActuales = getVisitas();
+  let nuevasVisitas = 0;
+  record.clientes.forEach(c => {
+    // Buscar si el nombre coincide con algún cliente del mapa
+    const clienteMapa = MAPA_CLIENTES.find(mc =>
+      mc.cliente.toLowerCase().trim() === c.nombre.toLowerCase().trim()
+    );
+    if (!clienteMapa) return; // cliente no está en el mapa, ignorar
+
+    if (!visitasActuales[clienteMapa.cliente]) visitasActuales[clienteMapa.cliente] = [];
+    // Evitar duplicar si ya tiene visita para esa fecha
+    if (!visitasActuales[clienteMapa.cliente].includes(fecha)) {
+      visitasActuales[clienteMapa.cliente].push(fecha);
+      nuevasVisitas++;
+    }
+  });
+
+  if (nuevasVisitas > 0) {
+    try { localStorage.setItem('viajante_visitas_mapa', JSON.stringify(visitasActuales)); } catch(e) {}
+    // Si el mapa ya está cargado, refrescarlo
+    if (leafletMap) {
+      mapaVisitas = visitasActuales;
+      refrescarMapa();
+    }
+  }
+
+  showToast('✅ Día guardado' + (nuevasVisitas > 0 ? ` · ${nuevasVisitas} visita${nuevasVisitas>1?'s':''} marcada${nuevasVisitas>1?'s':''} en el mapa` : ''));
 
   // Reset
   clients = [];
