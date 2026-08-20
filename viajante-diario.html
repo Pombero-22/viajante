@@ -1695,40 +1695,268 @@ function refrescarMapa() {
 
 function descargarImagenMapa() {
   if (!leafletMap) { showToast('Abrí el mapa primero'); return; }
+
   const btn = document.getElementById('mapa-download-btn');
-  const textoOriginal = btn.textContent;
   btn.textContent = '⏳ Generando imagen...';
   btn.disabled = true;
 
-  // Cerrar popups abiertos para que no tapen el mapa en la foto, y dejar
-  // que el mapa termine de asentarse (tiles cargados, sin animación en
-  // curso) antes de capturarlo — evita que los puntos queden corridos.
   leafletMap.closePopup();
-  leafletMap.invalidateSize();
 
+  // Esperamos que el mapa termine de renderizar
   setTimeout(() => {
-    html2canvas(document.getElementById('leaflet-map'), {
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-    }).then(canvas => {
-      const mesTxt = mapaMesActual === 'all' ? 'todos-los-meses' : mapaMesActual;
-      const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mapa_visitas_' + mesTxt + '.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast('✅ Imagen descargada');
-      btn.textContent = textoOriginal;
-      btn.disabled = false;
-    }).catch(err => {
-      showToast('⚠️ No se pudo generar la imagen');
-      btn.textContent = textoOriginal;
-      btn.disabled = false;
-    });
-  }, 500);
+    try {
+      // Tomamos el canvas interno de Leaflet (preferCanvas:true lo genera)
+      const mapEl = document.getElementById('leaflet-map');
+      const leafletCanvas = mapEl.querySelector('canvas');
+
+      if (!leafletCanvas) {
+        // Fallback: dibujar mapa propio sin tiles
+        generarMapaPropio(btn);
+        return;
+      }
+
+      // Intentar copiar el canvas de Leaflet
+      const W = leafletCanvas.width;
+      const H = leafletCanvas.height;
+      const out = document.createElement('canvas');
+      out.width = W; out.height = H;
+      const ctx = out.getContext('2d');
+
+      // Fondo blanco
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(0, 0, W, H);
+
+      // Copiar el canvas de Leaflet (puede fallar por CORS de tiles)
+      try {
+        ctx.drawImage(leafletCanvas, 0, 0);
+      } catch(e) {
+        // Si falló por CORS, usamos fondo simple
+        ctx.fillStyle = '#e8f4e8';
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // Dibujar puntos y etiquetas sobre el canvas
+      dibujarPuntosEnCanvas(ctx, W, H);
+
+      // Descargar
+      descargarCanvas(out, btn);
+
+    } catch(e) {
+      generarMapaPropio(btn);
+    }
+  }, 800);
+}
+
+function dibujarPuntosEnCanvas(ctx, W, H) {
+  // Obtener bounds actuales del mapa para proyectar lat/lng a píxeles
+  const bounds = leafletMap.getBounds();
+  const mapSize = leafletMap.getSize();
+
+  function latlngToPixel(lat, lng) {
+    const point = leafletMap.latLngToContainerPoint([lat, lng]);
+    // Escalar si el canvas tiene diferente tamaño que el contenedor
+    const scaleX = W / mapSize.x;
+    const scaleY = H / mapSize.y;
+    return { x: point.x * scaleX, y: point.y * scaleY };
+  }
+
+  // Nombres de semana para leyenda
+  const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  MAPA_CLIENTES.forEach(c => {
+    const n = visitasDeCliente(c.cliente, mapaMesActual).length;
+    const color = mapaColor(c.cliente, mapaMesActual);
+    const px = latlngToPixel(c.lat, c.lng);
+    const radio = n === 0 ? 5 : Math.min(8 + n*2, 16);
+
+    // Círculo con borde
+    ctx.beginPath();
+    ctx.arc(px.x, px.y, radio, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = n > 0 ? 'white' : '#aaa';
+    ctx.lineWidth = n > 0 ? 1.5 : 1;
+    ctx.stroke();
+
+    // Etiqueta solo para visitados
+    if (n > 0) {
+      const nombre = c.cliente.length > 16 ? c.cliente.split(' ')[0] : c.cliente;
+      const fontSize = 9;
+      ctx.font = `bold ${fontSize}px -apple-system, Arial, sans-serif`;
+      const textW = ctx.measureText(nombre).width;
+      const pad = 3;
+      const lx = px.x + radio + 2;
+      const ly = px.y - fontSize/2;
+
+      // Fondo de la etiqueta
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(lx - pad, ly - pad, textW + pad*2, fontSize + pad*2, 4)
+                    : ctx.rect(lx - pad, ly - pad, textW + pad*2, fontSize + pad*2);
+      ctx.fill();
+
+      // Texto
+      ctx.fillStyle = 'white';
+      ctx.fillText(nombre, lx, ly + fontSize);
+    }
+  });
+
+  // Leyenda en esquina inferior izquierda
+  const leyenda = [
+    { color: '#9e9e9e', label: 'Sin visitar' },
+    { color: '#e53935', label: 'Semana 1 (1-7)' },
+    { color: '#f9a825', label: 'Semana 2 (8-14)' },
+    { color: '#43a047', label: 'Semana 3 (15-21)' },
+    { color: '#1e88e5', label: 'Semana 4+ (22+)' },
+  ];
+
+  // Título del período
+  const mesTxt = mapaMesActual === 'all' ? 'Todos los meses'
+    : (() => { const [y,m] = mapaMesActual.split('-'); return NOMBRES_MES[parseInt(m,10)-1] + ' ' + y; })();
+
+  const lW = 160, lH = leyenda.length * 20 + 36;
+  const lX = 10, lY = H - lH - 10;
+
+  // Fondo leyenda
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(lX, lY, lW, lH, 8) : ctx.rect(lX, lY, lW, lH);
+  ctx.fill();
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Título
+  ctx.fillStyle = '#2e7d32';
+  ctx.font = 'bold 11px Arial';
+  ctx.fillText('🗓 ' + mesTxt, lX + 8, lY + 16);
+
+  // Items
+  leyenda.forEach((item, i) => {
+    const iy = lY + 30 + i * 18;
+    ctx.beginPath();
+    ctx.arc(lX + 16, iy, 6, 0, Math.PI * 2);
+    ctx.fillStyle = item.color;
+    ctx.fill();
+    ctx.fillStyle = '#333';
+    ctx.font = '10px Arial';
+    ctx.fillText(item.label, lX + 28, iy + 4);
+  });
+
+  // Marca de agua
+  ctx.fillStyle = 'rgba(100,100,100,0.5)';
+  ctx.font = '9px Arial';
+  ctx.fillText('Diario del Viajante — AGDP', W - 170, H - 8);
+}
+
+function generarMapaPropio(btn) {
+  // Genera imagen sin tiles — solo puntos sobre fondo verde claro
+  const W = 900, H = 600;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Fondo
+  ctx.fillStyle = '#e8f5e9';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#c8e6c9';
+  ctx.lineWidth = 1;
+  // Grilla suave
+  for (let x = 0; x < W; x += 50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Calcular bounds de los clientes visitados
+  const visitados = MAPA_CLIENTES.filter(c => visitasDeCliente(c.cliente, mapaMesActual).length > 0);
+  const todos = visitados.length > 0 ? visitados : MAPA_CLIENTES;
+
+  const lats = todos.map(c => c.lat);
+  const lngs = todos.map(c => c.lng);
+  const minLat = Math.min(...lats) - 0.3;
+  const maxLat = Math.max(...lats) + 0.3;
+  const minLng = Math.min(...lngs) - 0.3;
+  const maxLng = Math.max(...lngs) + 0.3;
+
+  const pad = 40;
+  function toPixel(lat, lng) {
+    return {
+      x: pad + (lng - minLng) / (maxLng - minLng) * (W - pad*2),
+      y: H - pad - (lat - minLat) / (maxLat - minLat) * (H - pad*2)
+    };
+  }
+
+  dibujarPuntosConProyeccion(ctx, toPixel, W, H);
+  descargarCanvas(canvas, btn);
+}
+
+function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
+  MAPA_CLIENTES.forEach(c => {
+    const n = visitasDeCliente(c.cliente, mapaMesActual).length;
+    const color = mapaColor(c.cliente, mapaMesActual);
+    const px = toPixel(c.lat, c.lng);
+    const radio = n === 0 ? 4 : Math.min(7 + n*2, 14);
+
+    ctx.beginPath();
+    ctx.arc(px.x, px.y, radio, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = n > 0 ? 'white' : '#aaa';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    if (n > 0) {
+      const nombre = c.cliente.length > 16 ? c.cliente.split(' ')[0] : c.cliente;
+      ctx.font = 'bold 9px Arial';
+      const textW = ctx.measureText(nombre).width;
+      const lx = px.x + radio + 2, ly = px.y - 5;
+      ctx.fillStyle = color;
+      ctx.fillRect(lx - 2, ly - 2, textW + 4, 13);
+      ctx.fillStyle = 'white';
+      ctx.fillText(nombre, lx, ly + 9);
+    }
+  });
+
+  // Leyenda
+  const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const mesTxt = mapaMesActual === 'all' ? 'Todos los meses'
+    : (() => { const [y,m] = mapaMesActual.split('-'); return NOMBRES_MES[parseInt(m,10)-1] + ' ' + y; })();
+  const leyenda = [
+    { color:'#9e9e9e', label:'Sin visitar' },
+    { color:'#e53935', label:'Semana 1 (1-7)' },
+    { color:'#f9a825', label:'Semana 2 (8-14)' },
+    { color:'#43a047', label:'Semana 3 (15-21)' },
+    { color:'#1e88e5', label:'Semana 4+ (22+)' },
+  ];
+  const lW=165, lH=leyenda.length*20+36, lX=10, lY=H-lH-10;
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.fillRect(lX,lY,lW,lH);
+  ctx.strokeStyle='#ccc'; ctx.lineWidth=1; ctx.strokeRect(lX,lY,lW,lH);
+  ctx.fillStyle='#2e7d32'; ctx.font='bold 11px Arial';
+  ctx.fillText('🗓 ' + mesTxt, lX+8, lY+16);
+  leyenda.forEach((item,i) => {
+    const iy=lY+30+i*18;
+    ctx.beginPath(); ctx.arc(lX+14,iy,6,0,Math.PI*2); ctx.fillStyle=item.color; ctx.fill();
+    ctx.fillStyle='#333'; ctx.font='10px Arial'; ctx.fillText(item.label, lX+26, iy+4);
+  });
+  ctx.fillStyle='rgba(100,100,100,0.5)'; ctx.font='9px Arial';
+  ctx.fillText('Diario del Viajante — AGDP', W-170, H-8);
+}
+
+function descargarCanvas(canvas, btn) {
+  try {
+    const mesTxt = mapaMesActual === 'all' ? 'todos-los-meses' : mapaMesActual;
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mapa_visitas_' + mesTxt + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✅ Imagen descargada');
+  } catch(e) {
+    showToast('⚠️ No se pudo generar la imagen');
+  }
+  btn.textContent = '📸 Descargar imagen del mapa';
+  btn.disabled = false;
 }
 
 // Enter on client input
