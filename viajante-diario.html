@@ -462,6 +462,7 @@ const todayStr = today.getFullYear() + '-' +
   String(today.getMonth()+1).padStart(2,'0') + '-' +
   String(today.getDate()).padStart(2,'0');
 document.getElementById('fecha').value = todayStr;
+document.getElementById('gs-fecha').value = todayStr;
 document.getElementById('header-date').textContent = today.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
 
 // clients = [{nombre, pedidos:[{producto, cantidad}]}]
@@ -524,6 +525,7 @@ function showPage(name) {
   if (name === 'historial') renderHistorial();
   if (name === 'exportar') renderStats();
   if (name === 'mapa') initMapaVisitas();
+  if (name === 'gastos') { buildGsMesOptions(getGastosSueltos()); renderGastosSueltos(); }
 }
 
 // ===== CLIENTS =====
@@ -1159,6 +1161,132 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ===== GASTOS SUELTOS (pestaña "Gastos" independiente del registro diario) =====
+const GASTOS_SUELTOS_KEY = 'viajante_gastos_sueltos';
+let gsSueltoCategoria = 'Combustible';
+
+function getGastosSueltos() {
+  try { return JSON.parse(localStorage.getItem(GASTOS_SUELTOS_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveGastosSueltos(arr) {
+  try { localStorage.setItem(GASTOS_SUELTOS_KEY, JSON.stringify(arr)); }
+  catch(e) { showToast('⚠️ Sin espacio para guardar el gasto.'); }
+}
+
+function selectGastoSueltoCat(btn, cat) {
+  const cont = document.getElementById('gs-cat-btns');
+  (cont || document).querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  gsSueltoCategoria = cat;
+}
+
+function agregarGastoSuelto() {
+  const fecha = document.getElementById('gs-fecha').value || todayStr;
+  const monto = parseFloat(document.getElementById('gs-monto').value);
+  if (!monto || monto <= 0) { showToast('Ingresá un monto válido'); return; }
+  const desc = document.getElementById('gs-desc').value.trim();
+  const arr = getGastosSueltos();
+  arr.unshift({ fecha, categoria: gsSueltoCategoria, monto, descripcion: desc, savedAt: new Date().toISOString() });
+  saveGastosSueltos(arr);
+  document.getElementById('gs-monto').value = '';
+  document.getElementById('gs-desc').value = '';
+  buildGsMesOptions(arr);
+  renderGastosSueltos();
+  showToast('✅ Gasto agregado');
+}
+
+function eliminarGastoSuelto(i) {
+  const arr = getGastosSueltos();
+  arr.splice(i, 1);
+  saveGastosSueltos(arr);
+  buildGsMesOptions(arr);
+  renderGastosSueltos();
+}
+
+function gsMonthKey(dateStr) { return (dateStr || '').slice(0,7); }
+function gsMonthLabel(key) {
+  if (key === 'all') return 'Todos los meses';
+  const [y,m] = key.split('-');
+  const nombres = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return nombres[parseInt(m,10)-1] + ' ' + y;
+}
+
+function buildGsMesOptions(arr) {
+  const sel = document.getElementById('gs-mes');
+  const prevValue = sel.value;
+  const keys = new Set();
+  arr.forEach(g => keys.add(gsMonthKey(g.fecha)));
+  keys.add(mapaCurrentMonthKey());
+  const ordenados = Array.from(keys).sort().reverse();
+  sel.innerHTML = '';
+  const optAll = document.createElement('option');
+  optAll.value = 'all'; optAll.textContent = 'Todos los meses';
+  sel.appendChild(optAll);
+  ordenados.forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = gsMonthLabel(k);
+    sel.appendChild(o);
+  });
+  const validValues = ['all', ...ordenados];
+  sel.value = validValues.includes(prevValue) ? prevValue : mapaCurrentMonthKey();
+}
+
+function renderGastosSueltos() {
+  const arr = getGastosSueltos();
+  const sel = document.getElementById('gs-mes');
+  const mesSel = sel.value || mapaCurrentMonthKey();
+
+  const filtrados = mesSel === 'all' ? arr : arr.filter(g => gsMonthKey(g.fecha) === mesSel);
+
+  const catIcons = { Combustible:'⛽', Comida:'🍽', Peaje:'🛣', Alojamiento:'🏨', Otro:'📎' };
+  const porCat = {};
+  filtrados.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.monto; });
+  const totalPeriodo = filtrados.reduce((s,g) => s + g.monto, 0);
+
+  const contCats = document.getElementById('gs-resumen-cats');
+  const categorias = ['Combustible','Comida','Peaje','Alojamiento','Otro'];
+  contCats.innerHTML = categorias.map(cat => `
+    <div class="stat-box">
+      <div class="val" style="font-size:16px;">$${(porCat[cat]||0).toLocaleString('es-AR')}</div>
+      <div class="lbl">${catIcons[cat]} ${cat}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('gs-total-periodo').textContent = '$' + totalPeriodo.toLocaleString('es-AR');
+
+  const lista = document.getElementById('gs-lista');
+  if (!filtrados.length) {
+    lista.innerHTML = `<div class="empty-state" style="padding:20px;"><div class="ico">💸</div><div>Sin gastos en este período.</div></div>`;
+    return;
+  }
+  const ordenados = filtrados
+    .map(g => ({ g, _idxReal: arr.indexOf(g) }))
+    .sort((a,b) => b.g.fecha.localeCompare(a.g.fecha));
+  lista.innerHTML = ordenados.map(({g,_idxReal}) => `
+    <div class="gasto-item">
+      <span class="g-cat">${catIcons[g.categoria]||'📎'} ${g.categoria}</span>
+      <span class="g-desc">${fmtDate(g.fecha)}${g.descripcion ? ' · ' + g.descripcion : ''}</span>
+      <span class="g-monto">$${g.monto.toLocaleString('es-AR')}</span>
+      <button onclick="eliminarGastoSuelto(${_idxReal})">✕</button>
+    </div>
+  `).join('');
+}
+
+function exportGastosSueltosCSV() {
+  const arr = getGastosSueltos();
+  if (!arr.length) { showToast('Sin gastos para exportar'); return; }
+  const headers = ['Fecha','Categoría','Monto','Descripción'];
+  const rows = [headers];
+  arr.slice().sort((a,b) => a.fecha.localeCompare(b.fecha)).forEach(g => {
+    rows.push([csvField(fmtDate(g.fecha)), csvField(g.categoria), csvField(g.monto.toFixed(2)), csvField(g.descripcion||'')]);
+  });
+  const total = arr.reduce((s,g)=>s+g.monto,0);
+  rows.push([]);
+  rows.push(['TOTAL', '', csvField(total.toFixed(2)), '']);
+  downloadCSV(rows, 'gastos_' + todayStr + '.csv');
+}
+
 // ===== GPS TRACKER con persistencia en segundo plano =====
 // La clave: guardamos todo en localStorage con timestamps reales (Date.now())
 // Así cuando volvés a la app, recalculamos el tiempo real transcurrido
@@ -1577,9 +1705,10 @@ function initMapaVisitas() {
 
   if (!leafletMap) {
     leafletMap = L.map('leaflet-map', { preferCanvas: true }).setView([-27.0, -54.9], 7.3);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap',
-      maxZoom: 18,
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20,
       crossOrigin: true,
     }).addTo(leafletMap);
 
