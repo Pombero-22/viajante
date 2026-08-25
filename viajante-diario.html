@@ -1038,7 +1038,7 @@ function exportPedidosCSV() {
 // La hoja de compartir nativa (navigator.share con un archivo) es la vía
 // confiable en iOS: deja elegir "Guardar en Archivos" directamente.
 async function compartirOdescargarArchivo(content, filename, mimeType) {
-  const blob = new Blob([content], { type: mimeType });
+  const blob = (content instanceof Blob) ? content : new Blob([content], { type: mimeType });
   let compartido = false;
 
   try {
@@ -2292,11 +2292,14 @@ function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
   ctx.fillText('Diario del Viajante — AGDP', W-170, H-8);
 }
 
+let mapaImagenActual = { canvas: null, filename: '' };
+
 function descargarCanvas(canvas, btn) {
   try {
     const mesTxt = mapaMesActual === 'all' ? 'todos-los-meses' : mapaMesActual;
     const url = canvas.toDataURL('image/jpeg', 0.92);
     const filename = 'mapa_visitas_' + mesTxt + '.jpg';
+    mapaImagenActual = { canvas, filename };
 
     // Mostramos la imagen adentro de la propia app (modal con botón ✕ para
     // cerrar) en vez de abrir una pestaña/ventana nueva. Una pestaña nueva
@@ -2305,9 +2308,9 @@ function descargarCanvas(canvas, btn) {
     document.getElementById('modal-content').innerHTML = `
       <button class="modal-close" onclick="closeModal()">×</button>
       <div class="modal-title">📸 Imagen del mapa</div>
-      <p class="hint" style="margin-bottom:10px;text-align:left;">Mantené presionada la imagen para guardarla en Fotos, o tocá el botón de abajo.</p>
+      <p class="hint" style="margin-bottom:10px;text-align:left;">Mantené presionada la imagen para guardarla en Fotos, o tocá el botón de abajo para guardarla/compartirla.</p>
       <img src="${url}" style="width:100%;border-radius:10px;border:1px solid var(--border);display:block;margin-bottom:12px;">
-      <a href="${url}" download="${filename}" class="save-btn" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;">⬇️ Descargar archivo</a>
+      <button class="save-btn" style="width:100%;" onclick="compartirImagenMapaActual()">⬇️ Descargar / Compartir archivo</button>
     `;
     document.getElementById('modal-overlay').classList.add('open');
   } catch(e) {
@@ -2315,6 +2318,15 @@ function descargarCanvas(canvas, btn) {
   }
   btn.textContent = '📸 Descargar imagen del mapa';
   btn.disabled = false;
+}
+
+function compartirImagenMapaActual() {
+  const { canvas, filename } = mapaImagenActual;
+  if (!canvas) { showToast('⚠️ No hay imagen para compartir'); return; }
+  canvas.toBlob(blob => {
+    if (!blob) { showToast('⚠️ No se pudo generar el archivo'); return; }
+    compartirOdescargarArchivo(blob, filename, 'image/jpeg');
+  }, 'image/jpeg', 0.92);
 }
 
 // Enter on client input
@@ -2731,4 +2743,38 @@ function renderOlvidados() {
 }
 
 const _showPageOrigAgenda = showPage;
-showPage = func
+showPage = function(name) {
+  _showPageOrigAgenda(name);
+  if (name === 'agenda') {
+    poblarSelectClientes();
+    renderAgendaDias();
+    renderContactosDia();
+  }
+};
+
+// ===== APPLE TOUCH ICON (generado dinámicamente) =====
+(function() {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 180; canvas.height = 180;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#2e7d32';
+    const r = 36;
+    ctx.beginPath();
+    ctx.moveTo(r, 0); ctx.lineTo(180-r, 0); ctx.quadraticCurveTo(180, 0, 180, r);
+    ctx.lineTo(180, 180-r); ctx.quadraticCurveTo(180, 180, 180-r, 180);
+    ctx.lineTo(r, 180); ctx.quadraticCurveTo(0, 180, 0, 180-r);
+    ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.font = '110px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🌿', 90, 95);
+    const link = document.createElement('link');
+    link.rel = 'apple-touch-icon';
+    link.href = canvas.toDataURL('image/png');
+    document.head.appendChild(link);
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
