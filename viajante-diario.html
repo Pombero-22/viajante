@@ -398,6 +398,7 @@
       <div class="mapa-stat"><div class="v" id="mapa-total">0</div><div class="l">Visitas</div></div>
     </div>
     <button class="export-btn" id="mapa-nuevo-cliente-btn" onclick="abrirNuevoClienteModal()" style="margin:0;background:var(--green);color:white;border-color:var(--green);">➕ Agregar cliente nuevo</button>
+    <button class="export-btn" id="mapa-carga-masiva-btn" onclick="abrirCargaMasivaVisitas()" style="margin:0;">📋 Cargar visitas en bloque</button>
     <button class="export-btn" id="mapa-download-btn" onclick="descargarImagenMapa()" style="margin:0;">📸 Descargar imagen del mapa</button>
   </div>
   <div id="leaflet-map"></div>
@@ -1055,7 +1056,7 @@ function exportVisitasCSV() {
   const totalVisitas = nombres.reduce((s, n) => s + (visitas[n] || []).length, 0);
   if (!totalVisitas) { showToast('Todavía no registraste visitas en el Mapa'); return; }
 
-  const headers = ['Fecha', 'Cliente', 'Localidad'];
+  const headers = ['Fecha', 'Cliente', 'Localidad', 'Visitas en el mes'];
   const rows = [headers];
   const filas = [];
   nombres.forEach(nombre => {
@@ -1063,13 +1064,23 @@ function exportVisitasCSV() {
       filas.push({ fecha, nombre, localidad: clientesPorNombre[nombre] || '' });
     });
   });
+
+  // Cuántas visitas tuvo cada cliente en el mes de cada fecha (para la
+  // última columna) — se agrupa por cliente + mes (YYYY-MM).
+  const countPorClienteMes = {};
+  filas.forEach(f => {
+    const key = f.nombre + '|' + mapaMonthKey(f.fecha);
+    countPorClienteMes[key] = (countPorClienteMes[key] || 0) + 1;
+  });
+
   filas.sort((a, b) => a.fecha.localeCompare(b.fecha));
   filas.forEach(f => {
-    rows.push([csvField(fmtDate(f.fecha)), csvField(f.nombre), csvField(f.localidad)]);
+    const key = f.nombre + '|' + mapaMonthKey(f.fecha);
+    rows.push([csvField(fmtDate(f.fecha)), csvField(f.nombre), csvField(f.localidad), csvField(countPorClienteMes[key])]);
   });
 
   rows.push([]);
-  rows.push(['TOTAL VISITAS', csvField(totalVisitas), '']);
+  rows.push(['TOTAL VISITAS', csvField(totalVisitas), '', '']);
 
   downloadCSV(rows, 'historial_visitas_' + todayStr + '.csv');
 }
@@ -1970,25 +1981,120 @@ function eliminarClienteExtra(nombre) {
   showToast('Cliente eliminado');
 }
 
+// ===== CARGA MASIVA DE VISITAS =====
+function abrirCargaMasivaVisitas() {
+  document.getElementById('modal-content').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">📋 Cargar visitas en bloque</div>
+    <p class="hint" style="text-align:left;margin-bottom:8px;">
+      Una visita por línea, con el formato <strong>fecha, cliente</strong>.<br>
+      Fechas: 04/08/2026, 04/08/26 o 04/08 (toma el año actual).<br>
+      El nombre del cliente no hace falta que sea exacto — con que se reconozca alcanza.
+    </p>
+    <textarea id="carga-masiva-texto" class="notes-area" style="min-height:180px;" placeholder="04/08/2026, Morgenstern Elio Andres
+05/08/2026, Otto Gerardo
+06/08, Pindo SA"></textarea>
+    <button class="save-btn" style="margin-top:10px;" onclick="procesarCargaMasivaVisitas()">✅ Procesar y registrar</button>
+    <div id="carga-masiva-resultado" style="margin-top:12px;font-size:13px;text-align:left;"></div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function parseFechaFlexible(str) {
+  str = (str || '').trim();
+  const norm = (y, mo, d) => {
+    const yy = String(y).padStart(4, '0');
+    const mm = String(parseInt(mo, 10)).padStart(2, '0');
+    const dd = String(parseInt(d, 10)).padStart(2, '0');
+    if (+mm < 1 || +mm > 12 || +dd < 1 || +dd > 31) return null;
+    return `${yy}-${mm}-${dd}`;
+  };
+  let m;
+  m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return norm(m[1], m[2], m[3]);
+  m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return norm(m[3], m[2], m[1]);
+  m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+  if (m) return norm('20' + m[3], m[2], m[1]);
+  m = str.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  if (m) return norm(new Date().getFullYear(), m[2], m[1]);
+  return null;
+}
+
+function buscarClienteExacto(nombre) {
+  const q = normalizarBusqueda(nombre);
+  if (!q) return { match: null, ambiguous: false };
+  let match = MAPA_CLIENTES.find(c => normalizarBusqueda(c.cliente) === q);
+  if (match) return { match, ambiguous: false };
+  const candidatos = MAPA_CLIENTES.filter(c => {
+    const cn = normalizarBusqueda(c.cliente);
+    return cn.includes(q) || q.includes(cn);
+  });
+  if (candidatos.length === 1) return { match: candidatos[0], ambiguous: false };
+  if (candidatos.length > 1) return { match: null, ambiguous: true, candidatos };
+  return { match: null, ambiguous: false };
+}
+
+function procesarCargaMasivaVisitas() {
+  const texto = document.getElementById('carga-masiva-texto').value;
+  const lineas = texto.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lineas.length) { showToast('Pegá al menos una línea'); return; }
+
+  let ok = 0, dup = 0;
+  const noEncontrado = [], fechaInvalida = [], ambiguo = [];
+
+  lineas.forEach(linea => {
+    const idx = linea.search(/[,\t]/);
+    if (idx === -1) { noEncontrado.push(linea + ' — falta la coma entre fecha y cliente'); return; }
+    const fechaTxt = linea.slice(0, idx).trim();
+    const clienteTxt = linea.slice(idx + 1).trim();
+    const fecha = parseFechaFlexible(fechaTxt);
+    if (!fecha) { fechaInvalida.push(linea); return; }
+    if (fecha > todayStr) { fechaInvalida.push(linea + ' — fecha futura'); return; }
+
+    const { match, ambiguous, candidatos } = buscarClienteExacto(clienteTxt);
+    if (ambiguous) { ambiguo.push(linea + ' → coincide con: ' + candidatos.map(c => c.cliente).join(' / ')); return; }
+    if (!match) { noEncontrado.push(linea); return; }
+
+    if (!mapaVisitas[match.cliente]) mapaVisitas[match.cliente] = [];
+    if (mapaVisitas[match.cliente].includes(fecha)) { dup++; return; }
+    mapaVisitas[match.cliente].push(fecha);
+    ok++;
+  });
+
+  saveVisitas();
+  buildMapaMesOptions();
+  refrescarMapa();
+
+  let resumen = `<div style="background:var(--green-pale);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+    <strong>✅ ${ok}</strong> visita${ok===1?'':'s'} registrada${ok===1?'':'s'}${dup ? ` · <strong>${dup}</strong> ya existía${dup===1?'':'n'}` : ''}
+  </div>`;
+  if (fechaInvalida.length) {
+    resumen += `<div style="margin-bottom:6px;"><strong>⚠️ Fecha no reconocida (${fechaInvalida.length}):</strong>` +
+      fechaInvalida.map(l => `<div style="color:var(--muted);font-size:12px;">${l}</div>`).join('') + `</div>`;
+  }
+  if (ambiguo.length) {
+    resumen += `<div style="margin-bottom:6px;"><strong>⚠️ Nombre ambiguo (${ambiguo.length}):</strong>` +
+      ambiguo.map(l => `<div style="color:var(--muted);font-size:12px;">${l}</div>`).join('') + `</div>`;
+  }
+  if (noEncontrado.length) {
+    resumen += `<div><strong>⚠️ Cliente no encontrado (${noEncontrado.length}):</strong>` +
+      noEncontrado.map(l => `<div style="color:var(--muted);font-size:12px;">${l}</div>`).join('') + `</div>`;
+  }
+
+  document.getElementById('carga-masiva-resultado').innerHTML = resumen;
+  if (!fechaInvalida.length && !ambiguo.length && !noEncontrado.length) {
+    document.getElementById('carga-masiva-texto').value = '';
+  }
+  showToast(`✅ ${ok} visita${ok===1?'':'s'} cargada${ok===1?'':'s'}`);
+}
+
 function descargarImagenMapa() {
   if (!leafletMap) { showToast('Abrí el mapa primero'); return; }
 
   const btn = document.getElementById('mapa-download-btn');
   btn.textContent = '⏳ Generando imagen...';
   btn.disabled = true;
-
-  // En iOS, la pestaña donde vamos a mostrar la imagen se abre AHORA,
-  // dentro del mismo toque del usuario — si se abriera después (dentro
-  // del setTimeout de más abajo) Safari la bloquea como pop-up. La
-  // llenamos con la imagen real más abajo, una vez generada.
-  let preOpenedWindow = null;
-  if (isIos()) {
-    preOpenedWindow = window.open('', '_blank');
-    if (preOpenedWindow) {
-      preOpenedWindow.document.write('<html><head><title>Mapa de visitas</title></head><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;"><p style="color:#fff;font-family:-apple-system,sans-serif;">Generando imagen…</p></body></html>');
-      preOpenedWindow.document.close();
-    }
-  }
 
   leafletMap.closePopup();
 
@@ -2006,13 +2112,13 @@ function descargarImagenMapa() {
         .then(out => {
           const ctx = out.getContext('2d');
           dibujarLeyendaEnCanvas(ctx, out.width, out.height);
-          descargarCanvas(out, btn, preOpenedWindow);
+          descargarCanvas(out, btn);
         })
         .catch(() => {
-          generarMapaPropio(btn, preOpenedWindow);
+          generarMapaPropio(btn);
         });
     } else {
-      generarMapaPropio(btn, preOpenedWindow);
+      generarMapaPropio(btn);
     }
   }, 800);
 }
@@ -2066,7 +2172,7 @@ function dibujarLeyendaEnCanvas(ctx, W, H) {
   ctx.fillText('Diario del Viajante — AGDP', W - 170, H - 8);
 }
 
-function generarMapaPropio(btn, preOpenedWindow) {
+function generarMapaPropio(btn) {
   // Genera imagen sin tiles — solo puntos sobre fondo verde claro
   const W = 900, H = 600;
   const canvas = document.createElement('canvas');
@@ -2102,7 +2208,7 @@ function generarMapaPropio(btn, preOpenedWindow) {
   }
 
   dibujarPuntosConProyeccion(ctx, toPixel, W, H);
-  descargarCanvas(canvas, btn, preOpenedWindow);
+  descargarCanvas(canvas, btn);
 }
 
 function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
@@ -2158,48 +2264,25 @@ function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
   ctx.fillText('Diario del Viajante — AGDP', W-170, H-8);
 }
 
-function descargarCanvas(canvas, btn, preOpenedWindow) {
+function descargarCanvas(canvas, btn) {
   try {
     const mesTxt = mapaMesActual === 'all' ? 'todos-los-meses' : mapaMesActual;
     const url = canvas.toDataURL('image/jpeg', 0.92);
+    const filename = 'mapa_visitas_' + mesTxt + '.jpg';
 
-    if (isIos()) {
-      // En iOS (Safari o PWA instalada) el atributo download no guarda de
-      // forma confiable. Mostrar la imagen en la pestaña que ya abrimos
-      // (dentro del toque original, para que Safari no la bloquee) permite
-      // usar el gesto estándar: mantener presionado → "Agregar a Fotos".
-      const w = preOpenedWindow;
-      if (w && !w.closed) {
-        w.document.open();
-        w.document.write(
-          '<html><head><title>Mapa de visitas</title></head>' +
-          '<body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;">' +
-          '<img src="' + url + '" style="max-width:100%;height:auto;display:block;">' +
-          '</body></html>'
-        );
-        w.document.close();
-        showToast('📸 Mantené presionada la imagen → "Agregar a Fotos"');
-      } else {
-        // Pop-up bloqueado — fallback a descarga normal (va a Archivos)
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mapa_visitas_' + mesTxt + '.jpg';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast('⚠️ Permití las ventanas emergentes para verla directo');
-      }
-    } else {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mapa_visitas_' + mesTxt + '.jpg';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast('✅ Imagen descargada');
-    }
+    // Mostramos la imagen adentro de la propia app (modal con botón ✕ para
+    // cerrar) en vez de abrir una pestaña/ventana nueva. Una pestaña nueva
+    // en la app instalada en el ícono de inicio no tiene forma de volver
+    // atrás y "atrapa" al usuario ahí. El modal siempre se puede cerrar.
+    document.getElementById('modal-content').innerHTML = `
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-title">📸 Imagen del mapa</div>
+      <p class="hint" style="margin-bottom:10px;text-align:left;">Mantené presionada la imagen para guardarla en Fotos, o tocá el botón de abajo.</p>
+      <img src="${url}" style="width:100%;border-radius:10px;border:1px solid var(--border);display:block;margin-bottom:12px;">
+      <a href="${url}" download="${filename}" class="save-btn" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;">⬇️ Descargar archivo</a>
+    `;
+    document.getElementById('modal-overlay').classList.add('open');
   } catch(e) {
-    if (preOpenedWindow && !preOpenedWindow.closed) { try { preOpenedWindow.close(); } catch(_) {} }
     showToast('⚠️ No se pudo generar la imagen');
   }
   btn.textContent = '📸 Descargar imagen del mapa';
