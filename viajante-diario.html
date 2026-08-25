@@ -1032,18 +1032,50 @@ function exportPedidosCSV() {
   downloadCSV(rows, 'pedidos_' + todayStr + '.csv');
 }
 
+// Comparte o descarga un archivo de texto. En iPhone, sobre todo con la app
+// agregada a la pantalla de inicio, el enlace <a download> no siempre
+// guarda nada — no hay forma visible de fallar, simplemente no pasa nada.
+// La hoja de compartir nativa (navigator.share con un archivo) es la vía
+// confiable en iOS: deja elegir "Guardar en Archivos" directamente.
+async function compartirOdescargarArchivo(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  let compartido = false;
+
+  try {
+    const file = new File([blob], filename, { type: mimeType });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file] });
+      compartido = true;
+      showToast('✅ Compartido');
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') {
+      // El usuario cerró la hoja de compartir sin elegir nada — no forzamos
+      // una descarga aparte, fue una decisión suya.
+      compartido = true;
+    }
+  }
+  if (compartido) return;
+
+  // Fallback: descarga tradicional (Android, Safari en pestaña, escritorio)
+  try {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    showToast('✅ Archivo descargado');
+  } catch (e2) {
+    showToast('⚠️ No se pudo generar el archivo');
+  }
+}
+
 function downloadCSV(rows, filename) {
   // BOM UTF-8 para que Excel en español lo abra bien
   const csv = '\uFEFF' + rows.map(r => Array.isArray(r) ? r.join(',') : '').join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-  showToast('✅ CSV descargado');
+  compartirOdescargarArchivo(csv, filename, 'text/csv;charset=utf-8;');
 }
 
 // Historial de visitas registradas en el Mapa: una fila por visita
@@ -1126,12 +1158,8 @@ PEDIDOS POR CLIENTE:\n`;
     else peds.forEach(p => text += `  → ${p.cantidad} ${p.producto}\n`);
   });
 
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'resumen_' + now.toISOString().substring(0,7) + '.txt';
-  a.click();
-  showToast('✅ Resumen descargado');
+  const filename = 'resumen_' + now.toISOString().substring(0,7) + '.txt';
+  compartirOdescargarArchivo(text, filename, 'text/plain;charset=utf-8;');
 }
 
 function renderStats() {
@@ -2703,38 +2731,4 @@ function renderOlvidados() {
 }
 
 const _showPageOrigAgenda = showPage;
-showPage = function(name) {
-  _showPageOrigAgenda(name);
-  if (name === 'agenda') {
-    poblarSelectClientes();
-    renderAgendaDias();
-    renderContactosDia();
-  }
-};
-
-// ===== APPLE TOUCH ICON (generado dinámicamente) =====
-(function() {
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = 180; canvas.height = 180;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#2e7d32';
-    const r = 36;
-    ctx.beginPath();
-    ctx.moveTo(r, 0); ctx.lineTo(180-r, 0); ctx.quadraticCurveTo(180, 0, 180, r);
-    ctx.lineTo(180, 180-r); ctx.quadraticCurveTo(180, 180, 180-r, 180);
-    ctx.lineTo(r, 180); ctx.quadraticCurveTo(0, 180, 0, 180-r);
-    ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
-    ctx.closePath(); ctx.fill();
-    ctx.font = '110px serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🌿', 90, 95);
-    const link = document.createElement('link');
-    link.rel = 'apple-touch-icon';
-    link.href = canvas.toDataURL('image/png');
-    document.head.appendChild(link);
-  } catch(e) {}
-})();
-</script>
-</body>
-</html>
+showPage = func
