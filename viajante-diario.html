@@ -1693,7 +1693,9 @@ function mapaPopupHtml(c) {
         <b>${fechas.length}</b> visita(s) ${mapaMesActual==='all' ? '' : 'en ' + mapaMonthLabel(mapaMesActual)} &middot; <b>${totalAll}</b> en total<br>
         <div style="margin-top:4px;">${fechas.length ? listadoFechas : sinVisitas}</div>
       </div>
-      <button onclick="registrarVisita('${c.cliente.replace(/'/g,"\\'")}')">✓ Registrar visita hoy</button>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;display:block;margin:10px 0 4px;">Fecha de la visita</label>
+      <input type="date" id="popup-visita-fecha" value="${todayStr}" max="${todayStr}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;margin-bottom:8px;background:white;color:var(--text);">
+      <button onclick="registrarVisita('${c.cliente.replace(/'/g,"\\'")}')">✓ Registrar visita</button>
       ${fechas.length ? `<button class="undo-btn" onclick="deshacerVisita('${c.cliente.replace(/'/g,"\\'")}')">Deshacer última visita</button>` : ''}
     </div>
   `;
@@ -1752,15 +1754,20 @@ function seleccionarClienteMapa(cliente) {
 }
 
 function registrarVisita(cliente) {
-  const hoy = todayStr;
+  const inp = document.getElementById('popup-visita-fecha');
+  const fecha = (inp && inp.value) ? inp.value : todayStr;
   if (!mapaVisitas[cliente]) mapaVisitas[cliente] = [];
-  mapaVisitas[cliente].push(hoy);
+  if (mapaVisitas[cliente].includes(fecha)) {
+    showToast('Ya tenías una visita registrada ese día');
+    return;
+  }
+  mapaVisitas[cliente].push(fecha);
   saveVisitas();
   buildMapaMesOptions();
   refrescarMapa();
   const c = MAPA_CLIENTES.find(x => x.cliente === cliente);
   mapaMarkers[cliente].bindPopup(mapaPopupHtml(c)).openPopup();
-  showToast('✅ Visita registrada: ' + cliente);
+  showToast('✅ Visita registrada: ' + fmtDate(fecha));
 }
 
 function deshacerVisita(cliente) {
@@ -1970,108 +1977,48 @@ function descargarImagenMapa() {
   btn.textContent = '⏳ Generando imagen...';
   btn.disabled = true;
 
+  // En iOS, la pestaña donde vamos a mostrar la imagen se abre AHORA,
+  // dentro del mismo toque del usuario — si se abriera después (dentro
+  // del setTimeout de más abajo) Safari la bloquea como pop-up. La
+  // llenamos con la imagen real más abajo, una vez generada.
+  let preOpenedWindow = null;
+  if (isIos()) {
+    preOpenedWindow = window.open('', '_blank');
+    if (preOpenedWindow) {
+      preOpenedWindow.document.write('<html><head><title>Mapa de visitas</title></head><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;"><p style="color:#fff;font-family:-apple-system,sans-serif;">Generando imagen…</p></body></html>');
+      preOpenedWindow.document.close();
+    }
+  }
+
   leafletMap.closePopup();
 
   // Esperamos que el mapa termine de renderizar
   setTimeout(() => {
-    try {
-      // Tomamos el canvas interno de Leaflet (preferCanvas:true lo genera)
-      const mapEl = document.getElementById('leaflet-map');
-      const leafletCanvas = mapEl.querySelector('canvas');
+    const mapEl = document.getElementById('leaflet-map');
 
-      if (!leafletCanvas) {
-        // Fallback: dibujar mapa propio sin tiles
-        generarMapaPropio(btn);
-        return;
-      }
-
-      // Intentar copiar el canvas de Leaflet
-      const W = leafletCanvas.width;
-      const H = leafletCanvas.height;
-      const out = document.createElement('canvas');
-      out.width = W; out.height = H;
-      const ctx = out.getContext('2d');
-
-      // Fondo blanco
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(0, 0, W, H);
-
-      // Copiar el canvas de Leaflet (puede fallar por CORS de tiles)
-      try {
-        ctx.drawImage(leafletCanvas, 0, 0);
-      } catch(e) {
-        // Si falló por CORS, usamos fondo simple
-        ctx.fillStyle = '#e8f4e8';
-        ctx.fillRect(0, 0, W, H);
-      }
-
-      // Dibujar puntos y etiquetas sobre el canvas
-      dibujarPuntosEnCanvas(ctx, W, H);
-
-      // Descargar
-      descargarCanvas(out, btn);
-
-    } catch(e) {
-      generarMapaPropio(btn);
+    // Leaflet dibuja el fondo (calles) como imágenes <img> normales y los
+    // puntos de clientes en un <canvas> aparte (por preferCanvas:true).
+    // Copiar solo ese canvas deja afuera las calles — por eso el mapa salía
+    // "pelado". html2canvas renderiza el div completo tal cual se ve en
+    // pantalla (calles + puntos + etiquetas), que es lo que necesitamos.
+    if (typeof html2canvas === 'function') {
+      html2canvas(mapEl, { useCORS: true, backgroundColor: '#f0f0f0', logging: false })
+        .then(out => {
+          const ctx = out.getContext('2d');
+          dibujarLeyendaEnCanvas(ctx, out.width, out.height);
+          descargarCanvas(out, btn, preOpenedWindow);
+        })
+        .catch(() => {
+          generarMapaPropio(btn, preOpenedWindow);
+        });
+    } else {
+      generarMapaPropio(btn, preOpenedWindow);
     }
   }, 800);
 }
 
-function dibujarPuntosEnCanvas(ctx, W, H) {
-  // Obtener bounds actuales del mapa para proyectar lat/lng a píxeles
-  const bounds = leafletMap.getBounds();
-  const mapSize = leafletMap.getSize();
-
-  function latlngToPixel(lat, lng) {
-    const point = leafletMap.latLngToContainerPoint([lat, lng]);
-    // Escalar si el canvas tiene diferente tamaño que el contenedor
-    const scaleX = W / mapSize.x;
-    const scaleY = H / mapSize.y;
-    return { x: point.x * scaleX, y: point.y * scaleY };
-  }
-
-  // Nombres de semana para leyenda
+function dibujarLeyendaEnCanvas(ctx, W, H) {
   const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-  MAPA_CLIENTES.forEach(c => {
-    const n = visitasDeCliente(c.cliente, mapaMesActual).length;
-    const color = mapaColor(c.cliente, mapaMesActual);
-    const px = latlngToPixel(c.lat, c.lng);
-    const radio = n === 0 ? 5 : Math.min(8 + n*2, 16);
-
-    // Círculo con borde
-    ctx.beginPath();
-    ctx.arc(px.x, px.y, radio, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = n > 0 ? 'white' : '#aaa';
-    ctx.lineWidth = n > 0 ? 1.5 : 1;
-    ctx.stroke();
-
-    // Etiqueta solo para visitados
-    if (n > 0) {
-      const nombre = c.cliente.length > 16 ? c.cliente.split(' ')[0] : c.cliente;
-      const fontSize = 9;
-      ctx.font = `bold ${fontSize}px -apple-system, Arial, sans-serif`;
-      const textW = ctx.measureText(nombre).width;
-      const pad = 3;
-      const lx = px.x + radio + 2;
-      const ly = px.y - fontSize/2;
-
-      // Fondo de la etiqueta
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.roundRect ? ctx.roundRect(lx - pad, ly - pad, textW + pad*2, fontSize + pad*2, 4)
-                    : ctx.rect(lx - pad, ly - pad, textW + pad*2, fontSize + pad*2);
-      ctx.fill();
-
-      // Texto
-      ctx.fillStyle = 'white';
-      ctx.fillText(nombre, lx, ly + fontSize);
-    }
-  });
-
-  // Leyenda en esquina inferior izquierda
   const leyenda = [
     { color: '#9e9e9e', label: 'Sin visitar' },
     { color: '#e53935', label: 'Semana 1 (1-7)' },
@@ -2119,7 +2066,7 @@ function dibujarPuntosEnCanvas(ctx, W, H) {
   ctx.fillText('Diario del Viajante — AGDP', W - 170, H - 8);
 }
 
-function generarMapaPropio(btn) {
+function generarMapaPropio(btn, preOpenedWindow) {
   // Genera imagen sin tiles — solo puntos sobre fondo verde claro
   const W = 900, H = 600;
   const canvas = document.createElement('canvas');
@@ -2155,7 +2102,7 @@ function generarMapaPropio(btn) {
   }
 
   dibujarPuntosConProyeccion(ctx, toPixel, W, H);
-  descargarCanvas(canvas, btn);
+  descargarCanvas(canvas, btn, preOpenedWindow);
 }
 
 function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
@@ -2211,18 +2158,48 @@ function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
   ctx.fillText('Diario del Viajante — AGDP', W-170, H-8);
 }
 
-function descargarCanvas(canvas, btn) {
+function descargarCanvas(canvas, btn, preOpenedWindow) {
   try {
     const mesTxt = mapaMesActual === 'all' ? 'todos-los-meses' : mapaMesActual;
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'mapa_visitas_' + mesTxt + '.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast('✅ Imagen descargada');
+    const url = canvas.toDataURL('image/jpeg', 0.92);
+
+    if (isIos()) {
+      // En iOS (Safari o PWA instalada) el atributo download no guarda de
+      // forma confiable. Mostrar la imagen en la pestaña que ya abrimos
+      // (dentro del toque original, para que Safari no la bloquee) permite
+      // usar el gesto estándar: mantener presionado → "Agregar a Fotos".
+      const w = preOpenedWindow;
+      if (w && !w.closed) {
+        w.document.open();
+        w.document.write(
+          '<html><head><title>Mapa de visitas</title></head>' +
+          '<body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;">' +
+          '<img src="' + url + '" style="max-width:100%;height:auto;display:block;">' +
+          '</body></html>'
+        );
+        w.document.close();
+        showToast('📸 Mantené presionada la imagen → "Agregar a Fotos"');
+      } else {
+        // Pop-up bloqueado — fallback a descarga normal (va a Archivos)
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mapa_visitas_' + mesTxt + '.jpg';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast('⚠️ Permití las ventanas emergentes para verla directo');
+      }
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mapa_visitas_' + mesTxt + '.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('✅ Imagen descargada');
+    }
   } catch(e) {
+    if (preOpenedWindow && !preOpenedWindow.closed) { try { preOpenedWindow.close(); } catch(_) {} }
     showToast('⚠️ No se pudo generar la imagen');
   }
   btn.textContent = '📸 Descargar imagen del mapa';
