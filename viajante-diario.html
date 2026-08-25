@@ -391,6 +391,13 @@
 <div class="page" id="page-mapa">
   <div class="mapa-controls">
     <select id="mapa-mes"></select>
+    <select id="mapa-semana">
+      <option value="all">Todas las semanas</option>
+      <option value="1">Semana 1 (día 1-7)</option>
+      <option value="2">Semana 2 (día 8-14)</option>
+      <option value="3">Semana 3 (día 15-21)</option>
+      <option value="4">Semana 4 (día 22+)</option>
+    </select>
     <input id="mapa-buscar" placeholder="Buscar cliente o localidad...">
     <div class="mapa-stats">
       <div class="mapa-stat"><div class="v" id="mapa-visitados">0</div><div class="l">Visitados</div></div>
@@ -1572,6 +1579,13 @@ function haversine(lat1, lng1, lat2, lng2) {
 
 // ===== MAPA DE VISITAS =====
 const MAPA_CLIENTES = [{"cliente": "5 HERMANOS S.A.", "localidad": "San Vicente", "lat": -26.9854037, "lng": -54.4820017}, {"cliente": "ABREU VICTOR NORBERTO", "localidad": "Pozo Azul", "lat": -26.3985597, "lng": -54.5999747}, {"cliente": "ACKERMANN HORACIO JOSE", "localidad": "Comandante Andresito", "lat": -25.658873399999997, "lng": -54.0479569}, {"cliente": "ALONSO VALENTIN", "localidad": "Posadas", "lat": -27.3521374, "lng": -55.9008746}, {"cliente": "ASOCIACION DE PADRES SAN CRISTOBAL", "localidad": "Profundidad", "lat": -27.5616877, "lng": -55.7046304}, {"cliente": "BARTEL ALEJANDRO SEBASTIAN", "localidad": "Jardin America", "lat": -27.029857099999997, "lng": -55.2307281}, {"cliente": "BEREZOSKI OSCAR MIGUEL", "localidad": "San Vicente", "lat": -27.0019037, "lng": -54.4707433697508}, {"cliente": "BERNARDI HELENO", "localidad": "Piñalito Norte", "lat": -25.9317214, "lng": -53.9339295}, {"cliente": "BOCHERT ALFREDO ARNOLDO", "localidad": "Montecarlo", "lat": -26.557170399999997, "lng": -54.7664339}, {"cliente": "BRUERA OMAR DARIO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.04092856937308}, {"cliente": "BUDDENBERG CLAUDIO", "localidad": "Eldorado", "lat": -26.398405599999997, "lng": -54.6090783}, {"cliente": "CARVALLO MARCELO ANIBAL", "localidad": "Posadas", "lat": -27.350879069750803, "lng": -55.8943746}, {"cliente": "CAVIGIOLI MARIO CARLOS", "localidad": "Ruiz de Montoya", "lat": -26.958766899999997, "lng": -55.0529459}, {"cliente": "COOPERATIVA AGROPECUARIA UNION DE LA FRONTERA LTDA", "localidad": "Bernardo de Irigoyen", "lat": -26.2502596, "lng": -53.6476286}, {"cliente": "DE COULON S.A.", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.221535711844574}, {"cliente": "EL PATRON SRL", "localidad": "Consepcion de la Sierra", "lat": -27.970624599999997, "lng": -55.5217305}, {"cliente": "EL YERBALITO S.R.L.", "localidad": "Posadas", "lat": -27.354137400000003, "lng": -55.887018193539454}, {"cliente": "ERNESTO KOCH", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.890874600000004}, {"cliente": "ESTABLECIMIENTO DON GUILLERMO SRL", "localidad": "Eldorado", "lat": -26.396894671666505, "lng": -54.603036898763435}, {"cliente": "ESTANCIA MACACA S.A.", "localidad": "Bernardo de Irigoyen", "lat": -26.253759600000002, "lng": -53.6363702697508}, {"cliente": "FECHNER OMAR EDUARDO", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.595910558145704}, {"cliente": "FIDEICOMISO DON OTTO", "localidad": "Montecarlo", "lat": -26.55495439592978, "lng": -54.761987638136766}, {"cliente": "FIEGE MYRIAN CAROLINA", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2147281}, {"cliente": "FROSCHKE ROBERTO", "localidad": "Montecarlo", "lat": -26.554913688910094, "lng": -54.75614929824502}, {"cliente": "GANADERA AGUAPEY S.A.", "localidad": "Posadas", "lat": -27.3686374, "lng": -55.8896162697508}, {"cliente": "GRAEF ARTURO", "localidad": "Garuhape", "lat": -26.810360999999997, "lng": -54.9562728}, {"cliente": "GRANFORT S.A.", "localidad": "Eldorado", "lat": -26.407200233197447, "lng": -54.59915121125902}, {"cliente": "GUNTHER RICARDO DANIEL", "localidad": "Jardin America", "lat": -27.046928167811863, "lng": -55.223657032188136}, {"cliente": "HASSENRIIK JORGE ERVIN", "localidad": "Comandante Andresito", "lat": -25.66222675979197, "lng": -54.03340278807433}, {"cliente": "IGLESIA EVANGELICA SUIZA", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.0399459}, {"cliente": "JOHANN EVANDRO JAVIER", "localidad": "San Vicente", "lat": -27.0034037, "lng": -54.495858106460545}, {"cliente": "JOHANN MAGNOS", "localidad": "Pozo Azul", "lat": -26.400454332575837, "lng": -54.58981089072791}, {"cliente": "JOHANN MARCELO JOSE", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.584375853405085}, {"cliente": "JOHANN MARCIO ADRIANO", "localidad": "Pozo Azul", "lat": -26.417569388679027, "lng": -54.59563586260882}, {"cliente": "JUNES EDGARDO ABEL", "localidad": "Bernardo de Irigoyen", "lat": -26.2682596, "lng": -53.63377219353945}, {"cliente": "KALITKO ELIAS JOSE", "localidad": "Jardin America", "lat": -27.0528571, "lng": -55.2307281}, {"cliente": "KELLER JUAN ROBERTO", "localidad": "Capiovi", "lat": -26.922217399999997, "lng": -55.0520938}, {"cliente": "KINETZ JORGE DANIEL", "localidad": "Comandante Andresito", "lat": -25.670296548382733, "lng": -54.03805868558119}, {"cliente": "KIPP DANIEL CHIRISTIAL", "localidad": "Puerto Rico", "lat": -26.7963572, "lng": -55.0240801}, {"cliente": "KIPP JORGE", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.75777364596216}, {"cliente": "KIZUR ARIEL SEBASTIAN", "localidad": "Montecarlo", "lat": -26.56491297369033, "lng": -54.753631399210846}, {"cliente": "KONOPACKI RUBEN", "localidad": "Eldorado", "lat": -26.41301546353155, "lng": -54.59692308884509}, {"cliente": "KONOPACKI RUBEN EVALDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.59846833746815}, {"cliente": "KYOCAPUMISZ HECTOR LUIS", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.0381321555334}, {"cliente": "LA IANA SAS", "localidad": "Posadas", "lat": -27.375993806460553, "lng": -55.8928746}, {"cliente": "LACERDA GILBERTO JAVIER", "localidad": "Pozo Azul", "lat": -26.420272295282732, "lng": -54.605615188608525}, {"cliente": "LARRABURU WALTER ROBERTO", "localidad": "Posadas", "lat": -27.372137400000003, "lng": -55.9008746}, {"cliente": "LEITE VIVIANA ELISA", "localidad": "Bernardo de Irigoyen", "lat": -26.270259600000003, "lng": -53.6476286}, {"cliente": "MORGENSTERN ELIO ANDRES", "localidad": "2 de Mayo", "lat": -27.026283799999998, "lng": -54.6755593}, {"cliente": "MUNZ MARINA ESTELA", "localidad": "Eldorado", "lat": -26.41811501817426, "lng": -54.606685143357126}, {"cliente": "MUT GABRIEL", "localidad": "Eldorado", "lat": -26.421027843626536, "lng": -54.61218940363574}, {"cliente": "N.P. FORESTAL SRL", "localidad": "Posadas", "lat": -27.3733957302492, "lng": -55.907374600000004}, {"cliente": "OTTO GERARDO", "localidad": "Eldorado", "lat": -26.420381771970735, "lng": -54.61968826253185}, {"cliente": "PAULUZEK BRAIAN NAHUEL", "localidad": "Cerro Azul", "lat": -27.6349423, "lng": -55.4970643}, {"cliente": "RENZO MACKOW", "localidad": "Campo Grande", "lat": -27.206181, "lng": -54.9787679}, {"cliente": "RINCON PERDIDO SAS", "localidad": "Comandante Andresito", "lat": -25.68422528757783, "lng": -54.04344917909054}, {"cliente": "SADAÑOSKI ALEJANDRO IVAN", "localidad": "Apostoles", "lat": -27.9141554, "lng": -55.7549371}, {"cliente": "SCHMIDT HECTOR MIGUEL", "localidad": "Pozo Azul", "lat": -26.412120034943303, "lng": -54.61557354659491}, {"cliente": "SOMERFER MARILU INES", "localidad": "2 de Mayo", "lat": -27.0492838, "lng": -54.6755593}, {"cliente": "STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.826860999999997, "lng": -54.9450144697508}, {"cliente": "STEYER CATALINA", "localidad": "Fracran", "lat": -26.732759899999998, "lng": -54.2973353}, {"cliente": "STEYER JUAN SEBASTIAN", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.2843353}, {"cliente": "STEYER LUIS ALFREDO", "localidad": "Fracran", "lat": -26.758759899999998, "lng": -54.2973353}, {"cliente": "TRINIDAD RAMON ALBERTO", "localidad": "Posadas", "lat": -27.3701374, "lng": -55.91473100646055}, {"cliente": "TROCHE NESTOR FABIAN", "localidad": "San Antonio", "lat": -26.0572781, "lng": -53.7365194}, {"cliente": "TRUMPP AGUSTIN RICARDO", "localidad": "Montecarlo", "lat": -26.569948770842668, "lng": -54.750676975951805}, {"cliente": "WAIDELICH ANDRES EDGARDO", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.75777364596216}, {"cliente": "WAIDELICH CURT", "localidad": "Montecarlo", "lat": -26.577128977760545, "lng": -54.758077661074076}, {"cliente": "WAIDELICH OSCAR MARTIN", "localidad": "Montecarlo", "lat": -26.582205481932572, "lng": -54.760961577706794}, {"cliente": "WILD NESTOR JAVIER", "localidad": "Eldorado", "lat": -26.411951648870424, "lng": -54.618428462426856}, {"cliente": "WIRZ ANA KARENINA", "localidad": "Posadas", "lat": -27.3621374, "lng": -55.9108746}, {"cliente": "WIRZ JUAN BAUTISTA", "localidad": "Posadas", "lat": -27.355637400000003, "lng": -55.9121329302492}, {"cliente": "X CLAUDIA SILVIA", "localidad": "Jardin America", "lat": -27.051170808498984, "lng": -55.24204180849898}, {"cliente": "X HASSENRUCK ALDO", "localidad": "Montecarlo", "lat": -26.5771704, "lng": -54.7664339}, {"cliente": "X HODL NICOLAS ALOIS", "localidad": "Montecarlo", "lat": -26.579386404070217, "lng": -54.77088016186324}, {"cliente": "X KIPP DANIEL", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.01171636528816}, {"cliente": "X OMAR FECHNER", "localidad": "Eldorado", "lat": -26.40683862315668, "lng": -54.621983515363276}, {"cliente": "X STEFAN CARLOS ALBERTO", "localidad": "Garuhape", "lat": -26.828360999999997, "lng": -54.97012920646055}, {"cliente": "X WELKE HENRY CRISTIAN", "localidad": "Jardin America", "lat": -27.0398571, "lng": -55.2407281}, {"cliente": "X WELKE OMAR", "localidad": "Jardin America", "lat": -27.030664711844572, "lng": -55.23992048815543}, {"cliente": "MULLER SOLEDAD YAMILA", "localidad": "Colonia Aurora", "lat": -27.464846899999998, "lng": -54.5237984}, {"cliente": "MARCHIOTTI MARCOS LUIS", "localidad": "Santa Rita", "lat": -27.5130885, "lng": -54.7280385}, {"cliente": "MIETH LUIS", "localidad": "Santa Rita", "lat": -27.5360885, "lng": -54.7280385}, {"cliente": "FREMAR SRL", "localidad": "Ruiz de Montoya", "lat": -26.984766899999997, "lng": -55.0529459}, {"cliente": "HENN Y CIA", "localidad": "Posadas", "lat": -27.34828099353945, "lng": -55.908874600000004}, {"cliente": "CABAÑA DON JOSE SRL", "localidad": "Virasoro", "lat": -28.0543419, "lng": -56.0139884}, {"cliente": "PUBLIO SPON", "localidad": "Montecarlo", "lat": -26.579427111089903, "lng": -54.776718501754985}, {"cliente": "KRINDGES MARCOS", "localidad": "Puerto Rico", "lat": -26.81930147191, "lng": -55.01467553596332}, {"cliente": "MORAVICKI RODRIGO", "localidad": "Comandante Andresito", "lat": -25.678468329736145, "lng": -54.05077422556842}, {"cliente": "ESTANCIA TOBUNAS", "localidad": "Bernardo de Irigoyen", "lat": -26.2667596, "lng": -53.658886930249196}, {"cliente": "COOPERATIVA MONTECARLO LTDA", "localidad": "Montecarlo", "lat": -26.572170399999997, "lng": -54.775094154037845}, {"cliente": "PUERTO NUEVO", "localidad": "Montecarlo", "lat": -26.569427826309667, "lng": -54.77923640078916}, {"cliente": "GERMAN TIETJEN", "localidad": "Montecarlo", "lat": -26.56439202915733, "lng": -54.7821908240482}, {"cliente": "PINDO SA", "localidad": "Puerto Esperanza", "lat": -26.0227203, "lng": -54.6125731}, {"cliente": "PETROVALLE", "localidad": "Aristobulo del Valle", "lat": -27.0956103, "lng": -54.8935263}, {"cliente": "FELISA SRL", "localidad": "Consepcion de la Sierra", "lat": -27.9936246, "lng": -55.5217305}, {"cliente": "WEIDMANN SRL", "localidad": "Ruiz de Montoya", "lat": -26.9687669, "lng": -55.062945899999995}, {"cliente": "WEIDEN SA", "localidad": "Eldorado", "lat": -26.3993165640523, "lng": -54.6222460418543}, {"cliente": "STEYER ALEJANDRO", "localidad": "Fracran", "lat": -26.7427599, "lng": -54.3073353}, {"cliente": "SCHINDLER RUBEN", "localidad": "Montecarlo", "lat": -26.5621704, "lng": -54.775094154037845}, {"cliente": "FIEBKE WILLAN", "localidad": "Pozo Azul", "lat": -26.402324801981415, "lng": -54.60779301482468}, {"cliente": "SATO RICARDO", "localidad": "Comandante Andresito", "lat": -25.67738658954129, "lng": -54.05778164446661}, {"cliente": "LIMBERGER RAUL FREDY", "localidad": "Puerto Rico", "lat": -26.81444736994375, "lng": -55.02995795252292}, {"cliente": "COOP MMONTE VERDE", "localidad": "Obera", "lat": -27.4867802, "lng": -55.1203326}, {"cliente": "ARIEL HAHM", "localidad": "Capiovi", "lat": -26.9452174, "lng": -55.0520938}, {"cliente": "PES ADRIAN", "localidad": "Colonia Aurora", "lat": -27.4878469, "lng": -54.5237984}, {"cliente": "FREIBERGER JUAN CARLOS", "localidad": "Puerto Rico", "lat": -26.802339979073125, "lng": -55.03644383471184}, {"cliente": "DROSSLER BRUNO", "localidad": "Bernardo de Irigoyen", "lat": -26.252259600000002, "lng": -53.661485006460545}, {"cliente": "TRUMPP ANDRES", "localidad": "Montecarlo", "lat": -26.557211822239452, "lng": -54.77479013892593}, {"cliente": "ALCANTARA ENRIQUE", "localidad": "Comandante Andresito", "lat": -25.671150437412372, "lng": -54.0637940430701}, {"cliente": "SAN JOSE SRL", "localidad": "9 De Julio", "lat": -26.4299444, "lng": -54.4650556}, {"cliente": "KIMMICH MANUEL", "localidad": "Montecarlo", "lat": -26.552135318067425, "lng": -54.77190622229321}, {"cliente": "AMANN ERNESTO", "localidad": "Comandante Andresito", "lat": -25.66471924986998, "lng": -54.057053219953545}, {"cliente": "AZULA FERNANDO", "localidad": "Comandante Andresito", "lat": -25.657937104073195, "lng": -54.054985230626926}, {"cliente": "ASAGUAY SA", "localidad": "Eldorado", "lat": -26.399551039743468, "lng": -54.61372553172044}, {"cliente": "COFRA", "localidad": "Leandro N. Alem", "lat": -27.6018, "lng": -55.3227}];
+
+// Localidades de referencia fuera de Misiones (no son clientes), para dar
+// contexto geográfico en el borde de la zona de trabajo.
+const MAPA_REFERENCIAS = [
+  { nombre: "Virasoro (Ctes.)", lat: -28.0538, lng: -56.0207 },
+  { nombre: "Ituzaingó (Ctes.)", lat: -27.5972, lng: -56.6892 },
+];
 const VISITAS_KEY = 'viajante_visitas_mapa';
 
 // ── Clientes agregados desde la app ──
@@ -1591,6 +1605,7 @@ getClientesExtra().forEach(c => {
 
 let mapaVisitas = {}; // { cliente: ['YYYY-MM-DD', ...] }
 let mapaMesActual = 'all';
+let mapaSemanaActual = 'all';
 let leafletMap = null;
 let mapaMarkers = {};
 let mapaClienteActivo = null;
@@ -1615,10 +1630,11 @@ function mapaCurrentMonthKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
 }
-function visitasDeCliente(cliente, mes) {
-  const fechas = mapaVisitas[cliente] || [];
-  if (mes === 'all') return fechas;
-  return fechas.filter(f => mapaMonthKey(f) === mes);
+function visitasDeCliente(cliente, mes = mapaMesActual, semana = mapaSemanaActual) {
+  let fechas = mapaVisitas[cliente] || [];
+  if (mes !== 'all') fechas = fechas.filter(f => mapaMonthKey(f) === mes);
+  if (semana !== 'all') fechas = fechas.filter(f => getSemanaDelMes(f) === Number(semana));
+  return fechas;
 }
 function mapaRadio(n) { return n === 0 ? 6 : Math.min(9 + n*3, 22); }
 
@@ -1722,7 +1738,9 @@ function mapaPopupHtml(c) {
     </span>`;
   }).join('');
 
-  const sinVisitas = mapaMesActual !== 'all' ? 'Sin visitas este mes.' : 'Sin visitas.';
+  const sinVisitas = (mapaMesActual !== 'all' || mapaSemanaActual !== 'all')
+    ? 'Sin visitas con este filtro.'
+    : 'Sin visitas.';
 
   return `
     <div class="popup-inner">
@@ -1745,7 +1763,20 @@ function initMapaVisitas() {
   buildMapaMesOptions();
 
   if (!leafletMap) {
-    leafletMap = L.map('leaflet-map', { preferCanvas: true }).setView([-27.0, -54.9], 7.3);
+    // Límites de la zona de trabajo (Misiones + franja de Corrientes hasta
+    // Virasoro/Ituzaingó). Encuadran el mapa al abrir y frenan el paneo o
+    // zoom-out hacia el interior de Brasil, Paraguay o el resto de
+    // Argentina, para que se vea la zona propia y lo mínimo posible de más.
+    const REGION_BOUNDS = L.latLngBounds([-28.35, -56.95], [-25.15, -53.35]);
+
+    leafletMap = L.map('leaflet-map', {
+      preferCanvas: true,
+      maxBounds: REGION_BOUNDS.pad(0.08),
+      maxBoundsViscosity: 1.0,
+    });
+    leafletMap.fitBounds(REGION_BOUNDS, { padding: [4, 4] });
+    leafletMap.setMinZoom(leafletMap.getZoom());
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
@@ -1761,8 +1792,30 @@ function initMapaVisitas() {
       mapaMarkers[c.cliente] = marker;
     });
 
+    // Localidades de referencia (no son clientes), para orientarse: Virasoro
+    // e Ituzaingó, en Corrientes.
+    MAPA_REFERENCIAS.forEach(r => {
+      L.marker([r.lat, r.lng], {
+        icon: L.divIcon({
+          className: 'mapa-ref-icon',
+          html: `<div style="background:#1565c0;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.4);">${r.nombre}</div>`,
+          iconSize: null,
+          iconAnchor: [0, 0],
+        }),
+        interactive: false,
+      }).addTo(leafletMap);
+    });
+
     document.getElementById('mapa-mes').addEventListener('change', (e) => {
       mapaMesActual = e.target.value;
+      refrescarMapa();
+      if (mapaClienteActivo && mapaMarkers[mapaClienteActivo].isPopupOpen()) {
+        const c = MAPA_CLIENTES.find(x => x.cliente === mapaClienteActivo);
+        mapaMarkers[mapaClienteActivo].setPopupContent(mapaPopupHtml(c));
+      }
+    });
+    document.getElementById('mapa-semana').addEventListener('change', (e) => {
+      mapaSemanaActual = e.target.value;
       refrescarMapa();
       if (mapaClienteActivo && mapaMarkers[mapaClienteActivo].isPopupOpen()) {
         const c = MAPA_CLIENTES.find(x => x.cliente === mapaClienteActivo);
