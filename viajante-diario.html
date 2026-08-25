@@ -172,7 +172,7 @@
   .mapa-stat { background: var(--green-pale); border-radius: 8px; padding: 8px; text-align: center; }
   .mapa-stat .v { font-size: 18px; font-weight: 800; color: var(--green); }
   .mapa-stat .l { font-size: 10px; color: var(--muted); margin-top: 1px; }
-  #leaflet-map { height: 42vh; min-height: 260px; width: 100%; }
+  #leaflet-map { height: 58vh; min-height: 340px; width: 100%; }
   .mc-row-activo { background: var(--green-pale) !important; border-left: 3px solid var(--green); }
   #mapa-client-list { padding: 8px 16px 90px; }
   .mc-row { background: var(--card); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; }
@@ -1667,6 +1667,7 @@ let mapaLabelMarkers = {};
 
 function crearLabelMarker(c, color) {
   // Leaflet divIcon con el nombre del cliente
+  const texto = c.cliente.split(' ')[0];
   const icon = L.divIcon({
     className: '',
     html: `<div style="
@@ -1683,11 +1684,78 @@ function crearLabelMarker(c, color) {
       overflow:hidden;
       text-overflow:ellipsis;
       margin-top:2px;
-    ">${c.cliente.split(' ')[0]}</div>`,
+    ">${texto}</div>`,
     iconAnchor: [0, 0],
     iconSize: null
   });
-  return L.marker([c.lat + 0.003, c.lng], { icon, interactive: false, zIndexOffset: -100 });
+  const marker = L.marker([c.lat + 0.003, c.lng], { icon, interactive: false, zIndexOffset: -100 });
+  marker._labelTexto = texto;
+  return marker;
+}
+
+// Agrupa clientes activos que van a caer muy cerca unos de otros en
+// pantalla (según el zoom actual), para mostrar un solo globito con
+// varios nombres en vez de etiquetas individuales que se van a pisar.
+function agruparClientesActivos(activos) {
+  const RADIO_PX = 42; // distancia en pantalla, en px, para considerarlos "el mismo lugar"
+  const pts = activos.map(a => {
+    const p = leafletMap.latLngToContainerPoint([a.c.lat, a.c.lng]);
+    return { ...a, x: p.x, y: p.y };
+  });
+
+  const clusters = [];
+  pts.forEach(p => {
+    const destino = clusters.find(cl => {
+      const dx = cl.x - p.x, dy = cl.y - p.y;
+      return Math.sqrt(dx * dx + dy * dy) < RADIO_PX;
+    });
+    if (destino) {
+      destino.items.push(p);
+      destino.x = destino.items.reduce((s, i) => s + i.x, 0) / destino.items.length;
+      destino.y = destino.items.reduce((s, i) => s + i.y, 0) / destino.items.length;
+    } else {
+      clusters.push({ x: p.x, y: p.y, items: [p] });
+    }
+  });
+  return clusters;
+}
+
+function crearClusterMarker(items) {
+  const lat = items.reduce((s, i) => s + i.c.lat, 0) / items.length;
+  const lng = items.reduce((s, i) => s + i.c.lng, 0) / items.length;
+
+  // Si todos los clientes del grupo comparten color (misma semana de
+  // visita), se usa ese color; si están mezclados, un gris neutro.
+  const colores = new Set(items.map(i => i.color));
+  const color = colores.size === 1 ? items[0].color : '#546e7a';
+
+  const nombres = items.map(i => i.c.cliente.split(' ')[0]);
+  const listado = nombres.join(', ');
+  // Si los nombres entran cortos, se listan; si no, se resume en un contador.
+  const texto = listado.length <= 26 ? listado : `${items.length} clientes`;
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="
+      background:${color};
+      color:white;
+      font-size:10px;
+      font-weight:700;
+      padding:3px 7px;
+      border-radius:10px;
+      white-space:nowrap;
+      box-shadow:0 1px 4px rgba(0,0,0,0.35);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      border:1.5px solid rgba(255,255,255,0.85);
+    ">${texto}</div>`,
+    iconAnchor: [0, 0],
+    iconSize: null,
+  });
+  const marker = L.marker([lat + 0.003, lng], { icon, interactive: false, zIndexOffset: -90 });
+  marker._labelTexto = texto;
+  marker._esCluster = true;
+  marker._clienteNombres = items.map(i => i.c.cliente);
+  return marker;
 }
 
 function actualizarLabels() {
@@ -1695,14 +1763,104 @@ function actualizarLabels() {
   Object.values(mapaLabelMarkers).forEach(m => { try { leafletMap.removeLayer(m); } catch(e) {} });
   mapaLabelMarkers = {};
 
-  // Agregar solo para clientes visitados en el período seleccionado
+  // Reunir clientes visitados en el período seleccionado
+  const activos = [];
   MAPA_CLIENTES.forEach(c => {
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
     if (n === 0) return;
     const color = mapaColor(c.cliente, mapaMesActual);
-    const label = crearLabelMarker(c, color);
-    label.addTo(leafletMap);
-    mapaLabelMarkers[c.cliente] = label;
+    activos.push({ c, color });
+  });
+
+  // Agrupar los que van a quedar pegados en pantalla y crear un
+  // marker por cliente suelto o un globito de grupo por cluster.
+  const clusters = agruparClientesActivos(activos);
+  clusters.forEach((cl, idx) => {
+    if (cl.items.length === 1) {
+      const { c, color } = cl.items[0];
+      const label = crearLabelMarker(c, color);
+      label.addTo(leafletMap);
+      mapaLabelMarkers[c.cliente] = label;
+    } else {
+      const marker = crearClusterMarker(cl.items);
+      marker.addTo(leafletMap);
+      mapaLabelMarkers['__cluster_' + idx] = marker;
+    }
+  });
+
+  resolverColisionesLabels();
+}
+
+// ===== Anti-colisión de etiquetas =====
+// La agrupación de arriba resuelve el caso de clientes pegados en el
+// mismo punto; esto cubre el resto — cuando dos etiquetas (sueltas o de
+// grupo) quedan lo bastante cerca como para pisarse un poco sin llegar
+// a fusionarse. Mide la posición en píxeles de cada una y, si detecta
+// superposición, va corriendo hacia abajo las que sobran hasta que no
+// choquen más. Se vuelve a ejecutar cada vez que cambian los datos
+// mostrados y cada vez que el usuario hace zoom o mueve el mapa (las
+// distancias en píxeles cambian con el zoom).
+let mapaLabelLeaders = {};
+
+function limpiarLabelLeaders() {
+  Object.values(mapaLabelLeaders).forEach(l => { try { leafletMap.removeLayer(l); } catch(e) {} });
+  mapaLabelLeaders = {};
+}
+
+function resolverColisionesLabels() {
+  if (!leafletMap) return;
+  limpiarLabelLeaders();
+  const entries = Object.entries(mapaLabelMarkers);
+  if (!entries.length) return;
+
+  const ALTO = 18;      // alto aproximado de una etiqueta, en px
+  const PASO = 16;       // cuánto se corre cada vez que choca, en px
+  const MAX_INTENTOS = 25;
+
+  const items = entries.map(([key, marker]) => {
+    const pt = leafletMap.latLngToContainerPoint(marker.getLatLng());
+    const texto = marker._labelTexto || key.split(' ')[0];
+    const ancho = Math.min(180, texto.length * 6.2 + 14);
+    return { key, marker, x: pt.x, y: pt.y, w: ancho, h: ALTO, dy: 0 };
+  });
+
+  // De arriba hacia abajo, y de izquierda a derecha como desempate, para
+  // que el orden de "quién se corre" sea siempre el mismo y no salte.
+  items.sort((a, b) => a.y - b.y || a.x - b.x);
+
+  const colocados = [];
+  items.forEach(it => {
+    let dy = 0, intentos = 0;
+    while (intentos < MAX_INTENTOS) {
+      const boxTop = it.y + dy, boxBottom = boxTop + it.h;
+      const boxLeft = it.x, boxRight = it.x + it.w;
+      const choca = colocados.some(p => {
+        const pTop = p.y + p.dy, pBottom = pTop + p.h;
+        return boxLeft < p.x + p.w && boxRight > p.x && boxTop < pBottom && boxBottom > pTop;
+      });
+      if (!choca) break;
+      dy += PASO;
+      intentos++;
+    }
+    it.dy = dy;
+    colocados.push(it);
+
+    const el = it.marker.getElement();
+    const inner = el ? el.firstChild : null;
+    if (inner) inner.style.transform = dy ? `translateY(${dy}px)` : '';
+
+    // Si la etiqueta se corrió bastante, se traza una linea fina hacia
+    // el punto real del cliente (o del grupo) para que no quede
+    // "flotando" sin referencia.
+    if (dy > 10) {
+      const targetPt = L.point(it.x + 2, it.y + dy + it.h / 2);
+      const line = L.polyline(
+        [it.marker.getLatLng(), leafletMap.containerPointToLatLng(targetPt)],
+        { color: '#999', weight: 1, opacity: 0.7, interactive: false }
+      );
+      line.addTo(leafletMap);
+      mapaLabelLeaders[it.key] = line;
+    }
   });
 }
 
@@ -1805,6 +1963,11 @@ function initMapaVisitas() {
         interactive: false,
       }).addTo(leafletMap);
     });
+
+    // Recalcular el acomodo de etiquetas cada vez que cambia el zoom o
+    // se mueve el mapa: a otro nivel de zoom, dos clientes que antes
+    // chocaban pueden separarse solos (o al revés).
+    leafletMap.on('zoomend moveend', resolverColisionesLabels);
 
     document.getElementById('mapa-mes').addEventListener('change', (e) => {
       mapaMesActual = e.target.value;
@@ -2170,6 +2333,26 @@ function procesarCargaMasivaVisitas() {
   showToast(`✅ ${ok} visita${ok===1?'':'s'} cargada${ok===1?'':'s'}`);
 }
 
+// Encuadra el mapa para que entren, con margen, todos los clientes con
+// actividad en el período elegido (los que tienen etiqueta). Se usa antes
+// de exportar la imagen, para que en la presentación se vea todo sin
+// que quede nadie afuera del recuadro por estar el mapa muy zoomeado
+// o corrido hacia otro lado.
+function fitMapaAClientesActivos() {
+  const puntos = MAPA_CLIENTES
+    .filter(c => visitasDeCliente(c.cliente, mapaMesActual).length > 0)
+    .map(c => [c.lat, c.lng]);
+  if (!puntos.length) return;
+  const bounds = L.latLngBounds(puntos);
+  // Más margen abajo que arriba: ahí es donde las etiquetas que chocan
+  // se van apilando (ver resolverColisionesLabels).
+  leafletMap.fitBounds(bounds, {
+    paddingTopLeft: [50, 50],
+    paddingBottomRight: [50, 120],
+    animate: false,
+  });
+}
+
 function descargarImagenMapa() {
   if (!leafletMap) { showToast('Abrí el mapa primero'); return; }
 
@@ -2179,8 +2362,14 @@ function descargarImagenMapa() {
 
   leafletMap.closePopup();
 
+  // Encuadramos para que entren todos los clientes activos y reacomodamos
+  // las etiquetas para ese nuevo encuadre, antes de esperar y capturar.
+  fitMapaAClientesActivos();
+  resolverColisionesLabels();
+
   // Esperamos que el mapa termine de renderizar
   setTimeout(() => {
+    resolverColisionesLabels(); // el encuadre pudo cambiar el zoom
     const mapEl = document.getElementById('leaflet-map');
 
     // Leaflet dibuja el fondo (calles) como imágenes <img> normales y los
@@ -2189,7 +2378,7 @@ function descargarImagenMapa() {
     // "pelado". html2canvas renderiza el div completo tal cual se ve en
     // pantalla (calles + puntos + etiquetas), que es lo que necesitamos.
     if (typeof html2canvas === 'function') {
-      html2canvas(mapEl, { useCORS: true, backgroundColor: '#f0f0f0', logging: false })
+      html2canvas(mapEl, { useCORS: true, backgroundColor: '#f0f0f0', logging: false, scale: 2 })
         .then(out => {
           const ctx = out.getContext('2d');
           dibujarLeyendaEnCanvas(ctx, out.width, out.height);
@@ -2201,7 +2390,7 @@ function descargarImagenMapa() {
     } else {
       generarMapaPropio(btn);
     }
-  }, 800);
+  }, 1000);
 }
 
 function dibujarLeyendaEnCanvas(ctx, W, H) {
