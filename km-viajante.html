@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kilómetros">
+<title>Kilómetros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0EA; --surface:#FFFFFF; --ink:#1C2A28; --muted:#5E6B67; --line:#D3D9D1;
+  --road:#2F5D50; --road-ink:#FFFFFF; --earth:#9A3A22; --amber:#F2B632;
+  --dash:#1C2A28; --dash-cell:#26363A; --field:#F6F8F4;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121917; --surface:#1B2421; --ink:#E6ECE8; --muted:#9AA8A3; --line:#2C3834;
+    --road:#5FA38C; --road-ink:#0E1614; --earth:#D0674A; --dash:#0B1110; --dash-cell:#18221F; --field:#151D1B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121917; --surface:#1B2421; --ink:#E6ECE8; --muted:#9AA8A3; --line:#2C3834;
+  --road:#5FA38C; --road-ink:#0E1614; --earth:#D0674A; --dash:#0B1110; --dash-cell:#18221F; --field:#151D1B;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font:16px/1.45 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:12px 14px 96px}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:600;margin:0;letter-spacing:.01em}
+h2{font-size:1.45rem}
+.muted{color:var(--muted)}
+
+/* Tablero / odómetro */
+.dash{background:var(--dash);color:#E9EFEA;border-radius:18px;padding:16px 16px 14px;margin-bottom:14px}
+.dash-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dash-top h1{font-size:1.1rem;font-weight:500;color:#B9C6C1}
+.dash-top span{font-size:.9rem;color:#8FA09A}
+.odo{display:flex;gap:4px;margin:10px 0 12px;align-items:stretch}
+.odo .d{flex:1;max-width:52px;background:var(--dash-cell);border-radius:6px;text-align:center;
+  font:700 2.6rem/1.15 "Barlow Condensed","Arial Narrow",sans-serif;color:var(--amber);
+  box-shadow:inset 0 8px 10px -8px rgba(0,0,0,.8), inset 0 -8px 10px -8px rgba(0,0,0,.8)}
+.odo .d.z{color:#4E5E59}
+.odo .u{align-self:flex-end;font:600 1.2rem "Barlow Condensed",sans-serif;color:#B9C6C1;padding-left:6px}
+.mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mini div{border-top:1px solid #33443F;padding-top:6px}
+.mini b{display:block;font:600 1.35rem/1.1 "Barlow Condensed",sans-serif;color:#fff}
+.mini small{color:#8FA09A;font-size:.8rem}
+
+/* Pestañas */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+.tabs button{flex:1;max-width:190px;background:none;border:0;padding:12px 4px 10px;color:var(--muted);
+  font:600 1.05rem "Barlow Condensed",sans-serif;cursor:pointer;border-top:3px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-top-color:var(--road)}
+section[hidden]{display:none}
+
+/* Bloques */
+.block{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.block.fuel{border-left:5px solid var(--earth)}
+.block.trip{border-left:5px solid var(--road)}
+.block h2{margin-bottom:10px}
+.status{background:var(--field);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.95rem}
+.status b{font-family:"Barlow Condensed",sans-serif;font-size:1.15rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:10px}
+input{display:block;width:100%;margin-top:4px;padding:11px 10px;border:1px solid var(--line);border-radius:10px;
+  background:var(--field);color:var(--ink);font:500 1.05rem "Barlow",sans-serif;min-height:46px;-webkit-appearance:none;appearance:none}
+input:focus{outline:2px solid var(--road);outline-offset:1px}
+input.big{font:600 1.5rem "Barlow Condensed",sans-serif;letter-spacing:.03em}
+details{margin:2px 0 10px}
+summary{cursor:pointer;color:var(--road);font-weight:600;padding:6px 0}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font:600 1.2rem "Barlow Condensed",sans-serif;
+  background:var(--road);color:var(--road-ink);cursor:pointer}
+.btn.fuel{background:var(--earth);color:#fff}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-size:1rem;padding:10px;margin-top:8px}
+.btn:focus-visible,.tabs button:focus-visible,.link:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.hint{font-size:.85rem;color:var(--muted);margin:-4px 0 10px}
+
+/* Resumen */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:10px}
+.seg button{border:0;background:none;padding:9px;border-radius:9px;font:600 1.05rem "Barlow Condensed",sans-serif;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--road);color:var(--road-ink)}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.nav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.3rem;cursor:pointer}
+.nav h2{font-size:1.3rem;text-align:center;flex:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
+.stat b{display:block;font:700 1.6rem/1.1 "Barlow Condensed",sans-serif}
+.stat small{color:var(--muted);font-size:.8rem}
+.stat.km b{color:var(--road)}
+.bars{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 12px}
+.bar{display:grid;grid-template-columns:78px 1fr 64px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);
+  width:100%;background:none;border-left:0;border-right:0;border-top:0;color:inherit;font:inherit;text-align:left}
+.bar:last-child{border-bottom:0}
+button.bar{cursor:pointer}
+.bar .l{font-size:.92rem}
+.bar .t{height:10px;border-radius:5px;background:var(--field);overflow:hidden}
+.bar .t i{display:block;height:100%;background:var(--road);border-radius:5px}
+.bar .v{text-align:right;font:600 1.1rem "Barlow Condensed",sans-serif}
+.bar.today .l{font-weight:600}
+.empty{padding:18px 4px;color:var(--muted);text-align:center}
+
+/* Historial */
+.day{margin-bottom:14px}
+.day h3{font-size:1.1rem;color:var(--muted);font-weight:500;margin:0 0 6px;display:flex;justify-content:space-between}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;
+  display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.item.t{border-left:5px solid var(--road)} .item.f{border-left:5px solid var(--earth)} .item.open{border-left-style:dashed}
+.item .main{font-weight:600}
+.item .sub{grid-column:1;font-size:.88rem;color:var(--muted)}
+.item .num{grid-row:1 / span 2;grid-column:2;text-align:right;font:700 1.35rem/1 "Barlow Condensed",sans-serif}
+.item.f .num{color:var(--earth)}
+.acts{grid-column:1 / -1;display:flex;gap:14px}
+.link{background:none;border:0;padding:4px 0;color:var(--road);font:600 .9rem "Barlow",sans-serif;cursor:pointer}
+.link.del{color:var(--earth)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.tools .btn{font-size:1rem;padding:11px}
+
+dialog{border:0;border-radius:16px;padding:16px;width:min(92vw,480px);background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:10;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="dash" aria-live="polite">
+    <div class="dash-top"><h1>Este mes</h1><span id="dashMonth"></span></div>
+    <div class="odo" id="odo"></div>
+    <div class="mini">
+      <div><b id="kmHoy">0</b><small>km hoy</small></div>
+      <div><b id="kmSem">0</b><small>km esta semana</small></div>
+      <div><b id="nCargas">0</b><small>cargas este mes</small></div>
+    </div>
+  </div>
+
+  <!-- REGISTRAR -->
+  <section id="tab-reg">
+    <div class="block trip" id="tripBlock"></div>
+
+    <div class="block fuel">
+      <h2>Carga de combustible</h2>
+      <label>Fecha y hora<input type="datetime-local" id="fT"></label>
+      <label>Lugar<input type="text" id="fLugar" list="lugares" placeholder="Ej: YPF Oberá" autocomplete="off"></label>
+      <datalist id="lugares"></datalist>
+      <div class="row">
+        <label>Litros (opcional)<input type="number" inputmode="decimal" step="0.01" id="fLts"></label>
+        <label>Monto $ (opcional)<input type="number" inputmode="decimal" step="0.01" id="fMonto"></label>
+      </div>
+      <label>Km del odómetro (opcional)<input type="number" inputmode="numeric" id="fKm"></label>
+      <button class="btn fuel" id="saveFuel">Guardar carga</button>
+    </div>
+  </section>
+
+  <!-- RESUMEN -->
+  <section id="tab-res" hidden>
+    <div class="seg" role="group" aria-label="Período">
+      <button data-mode="dia">Día</button>
+      <button data-mode="semana">Semana</button>
+      <button data-mode="mes">Mes</button>
+    </div>
+    <div class="nav">
+      <button id="prev" aria-label="Período anterior">‹</button>
+      <h2 id="perTitle"></h2>
+      <button id="next" aria-label="Período siguiente">›</button>
+    </div>
+    <div class="stats">
+      <div class="stat km"><b id="sKm">0</b><small>kilómetros</small></div>
+      <div class="stat"><b id="sViajes">0</b><small>viajes</small></div>
+      <div class="stat"><b id="sHoras">0 h</b><small>al volante</small></div>
+    </div>
+    <div class="stats" id="fuelStats">
+      <div class="stat"><b id="sCargas">0</b><small>cargas</small></div>
+      <div class="stat"><b id="sLts">0</b><small>litros</small></div>
+      <div class="stat"><b id="sMonto">$0</b><small>gastado</small></div>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section id="tab-his" hidden>
+    <div id="hist"></div>
+    <div class="block">
+      <h2>Exportar y respaldar</h2>
+      <p class="hint" style="margin:0 0 10px">El CSV se abre en Excel. El respaldo sirve para pasar tus datos a otro celular o recuperarlos.</p>
+      <div class="tools">
+        <button class="btn" id="expCsv">Exportar CSV</button>
+        <button class="btn" id="expJson">Descargar respaldo</button>
+      </div>
+      <button class="btn ghost" id="impJson">Restaurar respaldo</button>
+      <input type="file" id="impFile" accept=".json,application/json" hidden>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="reg" aria-selected="true">Registrar</button>
+  <button role="tab" data-tab="res" aria-selected="false">Resumen</button>
+  <button role="tab" data-tab="his" aria-selected="false">Historial</button>
+</nav>
+
+<dialog id="dlg"><div id="dlgBody"></div></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY="kmlog_v1";
+var D=load();
+
+function load(){
+  try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.viajes&&o.cargas)return o;}}catch(e){}
+  return {viajes:[],cargas:[]};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){toast("No se pudo guardar en este navegador");}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+/* ---------- fechas ---------- */
+function p2(n){return (n<10?"0":"")+n;}
+function toLocal(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())+"T"+p2(d.getHours())+":"+p2(d.getMinutes());}
+function nowL(){return toLocal(new Date());}
+function P(s){var a=s.split("T"),d=a[0].split("-"),t=(a[1]||"00:00").split(":");
+  return new Date(+d[0],+d[1]-1,+d[2],+t[0],+t[1]);}
+function dayKey(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());}
+function sod(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function weekStart(d){var x=sod(d);return addDays(x,-((x.getDay()+6)%7));}
+function hhmm(s){return s.split("T")[1]||"";}
+var DIAS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+var DIASL=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+var MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function fmtDay(d){return DIASL[d.getDay()]+" "+d.getDate()+" de "+MESES[d.getMonth()];}
+function num(n,dec){return Number(n||0).toLocaleString("es-AR",{maximumFractionDigits:dec||0,minimumFractionDigits:0});}
+function money(n){return "$"+Number(n||0).toLocaleString("es-AR",{maximumFractionDigits:0});}
+function durTxt(min){if(min<=0)return "0 h";var h=Math.floor(min/60),m=Math.round(min%60);return h+" h"+(m?" "+p2(m):"");}
+
+/* ---------- cálculos ---------- */
+function tripKm(v){return v.lle?Math.max(0,v.lle.km-v.sal.km):0;}
+function tripMin(v){return v.lle?Math.max(0,(P(v.lle.t)-P(v.sal.t))/60000):0;}
+function openTrip(){for(var i=0;i<D.viajes.length;i++)if(!D.viajes[i].lle)return D.viajes[i];return null;}
+function lastKm(){
+  var best=null,bt=0;
+  D.viajes.forEach(function(v){var r=v.lle||v.sal,t=+P(r.t);if(t>=bt){bt=t;best=r.km;}});
+  D.cargas.forEach(function(c){if(c.km){var t=+P(c.t);if(t>bt){bt=t;best=c.km;}}});
+  return best;
+}
+function inRange(s,a,b){var t=P(s);return t>=a&&t<b;}
+function sumRange(a,b){
+  var r={km:0,n:0,min:0,cargas:0,lts:0,monto:0};
+  D.viajes.forEach(function(v){if(v.lle&&inRange(v.sal.t,a,b)){r.km+=tripKm(v);r.n++;r.min+=tripMin(v);}});
+  D.cargas.forEach(function(c){if(inRange(c.t,a,b)){r.cargas++;r.lts+=+c.lts||0;r.monto+=+c.monto||0;}});
+  return r;
+}
+function range(mode,ref){
+  if(mode==="dia"){var a=sod(ref);return[a,addDays(a,1)];}
+  if(mode==="semana"){var w=weekStart(ref);return[w,addDays(w,7)];}
+  return[new Date(ref.getFullYear(),ref.getMonth(),1),new Date(ref.getFullYear(),ref.getMonth()+1,1)];
+}
+
+/* ---------- tablero ---------- */
+function renderDash(){
+  var now=new Date(),m=range("mes",now),s=sumRange(m[0],m[1]);
+  $("dashMonth").textContent=MESES[now.getMonth()]+" "+now.getFullYear();
+  var str=String(Math.round(s.km)),len=Math.max(5,str.length);
+  str=("00000000"+str).slice(-len);
+  var firstNZ=str.search(/[1-9]/);if(firstNZ<0)firstNZ=len-1;
+  var h="";for(var i=0;i<len;i++)h+='<span class="d'+(i<firstNZ?" z":"")+'">'+str[i]+"</span>";
+  $("odo").innerHTML=h+'<span class="u">km</span>';
+  var d=range("dia",now),w=range("semana",now);
+  $("kmHoy").textContent=num(sumRange(d[0],d[1]).km);
+  $("kmSem").textContent=num(sumRange(w[0],w[1]).km);
+  $("nCargas").textContent=s.cargas;
+}
+
+/* ---------- registrar viaje ---------- */
+function renderTrip(){
+  var o=openTrip(),b=$("tripBlock"),lk=lastKm();
+  if(o){
+    b.innerHTML='<h2>Llegada</h2>'+
+      '<div class="status">En viaje desde <b>'+esc(hhmm(o.sal.t))+'</b> del '+esc(fmtDay(P(o.sal.t)))+', saliste con <b>'+num(o.sal.km)+' km</b>'+(o.dest?' rumbo a '+esc(o.dest):'')+'.</div>'+
+      '<label>Fecha y hora de llegada<input type="datetime-local" id="lT" value="'+nowL()+'"></label>'+
+      '<label>Km de llegada<input class="big" type="number" inputmode="numeric" id="lKm" placeholder="'+esc(o.sal.km)+'"></label>'+
+      '<label>Destino / nota<input type="text" id="lDest" value="'+esc(o.dest||"")+'" placeholder="Ej: Oberá, clientes zona centro"></label>'+
+      '<button class="btn" id="saveArr">Guardar llegada</button>'+
+      '<button class="btn ghost" id="cancelTrip">Descartar esta salida</button>';
+    $("saveArr").onclick=function(){
+      var km=parseFloat($("lKm").value),t=$("lT").value;
+      if(!t){toast("Poné la fecha y hora de llegada");return;}
+      if(isNaN(km)){toast("Poné los km de llegada");$("lKm").focus();return;}
+      if(km<o.sal.km){toast("Los km de llegada no pueden ser menores a los de salida ("+num(o.sal.km)+")");return;}
+      if(P(t)<P(o.sal.t)){toast("La llegada no puede ser antes de la salida");return;}
+      o.lle={t:t,km:km};o.dest=$("lDest").value.trim();save();all();
+      toast("Llegada guardada: "+num(km-o.sal.km)+" km");
+    };
+    $("cancelTrip").onclick=function(){
+      if(!confirm("¿Descartar la salida registrada?"))return;
+      D.viajes=D.viajes.filter(function(v){return v!==o;});save();all();toast("Salida descartada");
+    };
+  }else{
+    b.innerHTML='<h2>Salida</h2>'+
+      '<label>Fecha y hora de salida<input type="datetime-local" id="sT" value="'+nowL()+'"></label>'+
+      '<label>Km de salida<input class="big" type="number" inputmode="numeric" id="sKm" value="'+(lk!=null?esc(lk):"")+'"></label>'+
+      (lk!=null?'<p class="hint">Completado con el último km registrado. Corregilo si no coincide.</p>':'')+
+      '<label>Destino / nota (opcional)<input type="text" id="sDest" placeholder="Ej: Oberá, clientes zona centro"></label>'+
+      '<details id="fullDet"><summary>Ya llegué: cargar también la llegada</summary>'+
+        '<label>Fecha y hora de llegada<input type="datetime-local" id="sLT"></label>'+
+        '<label>Km de llegada<input class="big" type="number" inputmode="numeric" id="sLKm"></label>'+
+      '</details>'+
+      '<button class="btn" id="saveDep">Guardar salida</button>';
+    $("fullDet").addEventListener("toggle",function(){
+      $("saveDep").textContent=this.open?"Guardar viaje completo":"Guardar salida";
+      if(this.open&&!$("sLT").value)$("sLT").value=nowL();
+    });
+    $("saveDep").onclick=function(){
+      var km=parseFloat($("sKm").value),t=$("sT").value;
+      if(!t){toast("Poné la fecha y hora de salida");return;}
+      if(isNaN(km)){toast("Poné los km de salida");$("sKm").focus();return;}
+      var v={id:uid(),sal:{t:t,km:km},lle:null,dest:$("sDest").value.trim()};
+      if($("fullDet").open){
+        var lkm=parseFloat($("sLKm").value),lt=$("sLT").value;
+        if(isNaN(lkm)||!lt){toast("Completá fecha y km de llegada, o cerrá esa opción");return;}
+        if(lkm<km){toast("Los km de llegada no pueden ser menores a los de salida");return;}
+        if(P(lt)<P(t)){toast("La llegada no puede ser antes de la salida");return;}
+        v.lle={t:lt,km:lkm};
+      }
+      D.viajes.push(v);save();all();
+      toast(v.lle?"Viaje guardado: "+num(tripKm(v))+" km":"Salida guardada. ¡Buen viaje!");
+    };
+  }
+}
+
+/* ---------- combustible ---------- */
+function resetFuel(){
+  $("fT").value=nowL();$("fLugar").value="";$("fLts").value="";$("fMonto").value="";$("fKm").value="";
+}
+function renderLugares(){
+  var seen={},h="";
+  D.cargas.slice().reverse().forEach(function(c){var k=(c.lugar||"").trim();if(k&&!seen[k.toLowerCase()]){seen[k.toLowerCase()]=1;h+='<option value="'+esc(k)+'">';}});
+  $("lugares").innerHTML=h;
+}
+$("saveFuel").onclick=function(){
+  var t=$("fT").value,l=$("fLugar").value.trim();
+  if(!t){toast("Poné la fecha y hora de la carga");return;}
+  if(!l){toast("Poné el lugar de la carga");$("fLugar").focus();return;}
+  var c={id:uid(),t:t,lugar:l,lts:parseFloat($("fLts").value)||0,monto:parseFloat($("fMonto").value)||0,km:parseFloat($("fKm").value)||0};
+  D.cargas.push(c);save();resetFuel();all();toast("Carga guardada en "+l);
+};
+
+/* ---------- resumen ---------- */
+var mode="semana",ref=new Date();
+function renderRes(){
+  document.querySelectorAll(".seg button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.mode===mode?"true":"false");});
+  var r=range(mode,ref),s=sumRange(r[0],r[1]),a=r[0],title;
+  if(mode==="dia")title=fmtDay(a);
+  else if(mode==="semana"){var e=addDays(r[1],-1);title=a.getDate()+" "+MESES[a.getMonth()].slice(0,3)+" al "+e.getDate()+" "+MESES[e.getMonth()].slice(0,3);}
+  else title=MESES[a.getMonth()]+" "+a.getFullYear();
+  $("perTitle").textContent=title.charAt(0).toUpperCase()+title.slice(1);
+  $("sKm").textContent=num(s.km);$("sViajes").textContent=s.n;$("sHoras").textContent=durTxt(s.min);
+  $("sCargas").textContent=s.cargas;$("sLts").textContent=num(s.lts,1);$("sMonto").textContent=money(s.monto);
+
+  var rows=[],today=dayKey(new Date());
+  if(mode==="dia"){
+    var trips=D.viajes.filter(function(v){return v.lle&&inRange(v.sal.t,r[0],r[1]);}).sort(function(x,y){return P(x.sal.t)-P(y.sal.t);});
+    var mx=Math.max.apply(null,trips.map(tripKm).concat([1]));
+    trips.forEach(function(v){rows.push({l:hhmm(v.sal.t)+"–"+hhmm(v.lle.t),km:tripKm(v),mx:mx,sub:v.dest});});
+    $("bars").innerHTML=rows.length?rows.map(function(x){
+      return '<div class="bar"><span class="l">'+esc(x.l)+(x.sub?'<br><small class="muted">'+esc(x.sub)+'</small>':'')+'</span><span class="t"><i style="width:'+(x.km/x.mx*100)+'%"></i></span><span class="v">'+num(x.km)+' km</span></div>';
+    }).join(""):'<div class="empty">Sin viajes cerrados este día.</div>';
+    return;
+  }
+  if(mode==="semana"){
+    for(var i=0;i<7;i++){var d=addDays(r[0],i),ss=sumRange(d,addDays(d,1));rows.push({l:DIAS[d.getDay()]+" "+d.getDate(),km:ss.km,go:d,today:dayKey(d)===today});}
+  }else{
+    var w=weekStart(r[0]);
+    while(w<r[1]){
+      var a2=w<r[0]?r[0]:w,b2=addDays(w,7)>r[1]?r[1]:addDays(w,7),ss2=sumRange(a2,b2),e2=addDays(b2,-1);
+      rows.push({l:"Sem "+a2.getDate()+"–"+e2.getDate(),km:ss2.km,go:a2,today:new Date()>=a2&&new Date()<b2});
+      w=addDays(w,7);
+    }
+  }
+  var max=Math.max.apply(null,rows.map(function(x){return x.km;}).concat([1]));
+  $("bars").innerHTML=rows.map(function(x,idx){
+    return '<button class="bar'+(x.today?" today":"")+'" data-i="'+idx+'"><span class="l">'+esc(x.l)+'</span><span class="t"><i style="width:'+(x.km/max*100)+'%"></i></span><span class="v">'+num(x.km)+' km</span></button>';
+  }).join("")+'<p class="hint" style="margin:6px 0 4px">Tocá una fila para ver el detalle.</p>';
+  $("bars").querySelectorAll("button.bar").forEach(function(btn){
+    btn.onclick=function(){var x=rows[+btn.dataset.i];ref=x.go;mode=mode==="mes"?"semana":"dia";renderRes();};
+  });
+}
+document.querySelectorAll(".seg button").forEach(function(b){b.onclick=function(){mode=b.dataset.mode;renderRes();};});
+function shift(n){
+  if(mode==="dia")ref=addDays(ref,n);
+  else if(mode==="semana")ref=addDays(ref,7*n);
+  else ref=new Date(ref.getFullYear(),ref.getMonth()+n,1);
+  renderRes();
+}
+$("prev").onclick=function(){shift(-1);};$("next").onclick=function(){shift(1);};
+
+/* ---------- historial ---------- */
+function renderHist(){
+  var items=[];
+  D.viajes.forEach(function(v){items.push({k:"t",t:v.sal.t,o:v});});
+  D.cargas.forEach(function(c){items.push({k:"f",t:c.t,o:c});});
+  items.sort(function(a,b){return P(b.t)-P(a.t);});
+  if(!items.length){$("hist").innerHTML='<div class="block empty">Todavía no hay registros. Empezá cargando una salida en Registrar.</div>';return;}
+  var groups={},order=[];
+  items.forEach(function(it){var k=it.t.split("T")[0];if(!groups[k]){groups[k]=[];order.push(k);}groups[k].push(it);});
+  $("hist").innerHTML=order.slice(0,120).map(function(k){
+    var d=P(k+"T00:00"),tot=groups[k].reduce(function(s,it){return s+(it.k==="t"?tripKm(it.o):0);},0);
+    return '<div class="day"><h3><span>'+esc(fmtDay(d).charAt(0).toUpperCase()+fmtDay(d).slice(1))+'</span><span>'+num(tot)+' km</span></h3>'+
+      groups[k].map(function(it){
+        var o=it.o;
+        if(it.k==="t"){
+          return '<div class="item t'+(o.lle?"":" open")+'"><span class="main">'+(o.dest?esc(o.dest):"Viaje")+'</span>'+
+            '<span class="num">'+(o.lle?num(tripKm(o))+" km":"en curso")+'</span>'+
+            '<span class="sub">Sale '+esc(hhmm(o.sal.t))+' con '+num(o.sal.km)+(o.lle?' · llega '+esc(o.lle.t.split("T")[0]!==o.sal.t.split("T")[0]?fmtDay(P(o.lle.t))+" ":"")+esc(hhmm(o.lle.t))+' con '+num(o.lle.km):'')+'</span>'+
+            '<span class="acts"><button class="link" data-ed="t:'+o.id+'">Editar</button><button class="link del" data-del="t:'+o.id+'">Borrar</button></span></div>';
+        }
+        return '<div class="item f"><span class="main">⛽ '+esc(o.lugar)+'</span>'+
+          '<span class="num">'+(o.lts?num(o.lts,1)+" L":"")+'</span>'+
+          '<span class="sub">'+esc(hhmm(o.t))+(o.monto?' · '+money(o.monto):'')+(o.km?' · '+num(o.km)+' km':'')+'</span>'+
+          '<span class="acts"><button class="link" data-ed="f:'+o.id+'">Editar</button><button class="link del" data-del="f:'+o.id+'">Borrar</button></span></div>';
+      }).join("")+'</div>';
+  }).join("");
+  $("hist").querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){
+    var p=b.dataset.del.split(":");if(!confirm(p[0]==="t"?"¿Borrar este viaje?":"¿Borrar esta carga?"))return;
+    if(p[0]==="t")D.viajes=D.viajes.filter(function(v){return v.id!==p[1];});else D.cargas=D.cargas.filter(function(c){return c.id!==p[1];});
+    save();all();toast("Borrado");
+  };});
+  $("hist").querySelectorAll("[data-ed]").forEach(function(b){b.onclick=function(){var p=b.dataset.ed.split(":");edit(p[0],p[1]);};});
+}
+
+/* ---------- edición ---------- */
+function edit(kind,id){
+  var dlg=$("dlg"),body=$("dlgBody");
+  if(kind==="t"){
+    var v=D.viajes.find(function(x){return x.id===id;});if(!v)return;
+    body.innerHTML='<h2 style="margin-bottom:10px">Editar viaje</h2>'+
+      '<div class="row"><label>Salida<input type="datetime-local" id="eST" value="'+esc(v.sal.t)+'"></label><label>Km salida<input type="number" inputmode="numeric" id="eSK" value="'+esc(v.sal.km)+'"></label></div>'+
+      '<div class="row"><label>Llegada<input type="datetime-local" id="eLT" value="'+esc(v.lle?v.lle.t:"")+'"></label><label>Km llegada<input type="number" inputmode="numeric" id="eLK" value="'+esc(v.lle?v.lle.km:"")+'"></label></div>'+
+      '<label>Destino / nota<input type="text" id="eD" value="'+esc(v.dest||"")+'"></label>'+
+      '<button class="btn" id="eOk">Guardar cambios</button><button class="btn ghost" id="eNo">Cancelar</button>';
+    $("eOk").onclick=function(){
+      var st=$("eST").value,sk=parseFloat($("eSK").value),lt=$("eLT").value,lk=parseFloat($("eLK").value);
+      if(!st||isNaN(sk)){toast("Salida incompleta");return;}
+      if((lt&&isNaN(lk))||(!lt&&!isNaN(lk))){toast("Completá fecha y km de llegada, o dejá ambos vacíos");return;}
+      if(lt){if(lk<sk){toast("Km de llegada menores a los de salida");return;}if(P(lt)<P(st)){toast("La llegada es antes de la salida");return;}}
+      if(!lt){var o=openTrip();if(o&&o!==v){toast("Ya hay otro viaje en curso");return;}}
+      v.sal={t:st,km:sk};v.lle=lt?{t:lt,km:lk}:null;v.dest=$("eD").value.trim();
+      save();dlg.close();all();toast("Cambios guardados");
+    };
+  }else{
+    var c=D.cargas.find(function(x){return x.id===id;});if(!c)return;
+    body.innerHTML='<h2 style="margin-bottom:10px">Editar carga</h2>'+
+      '<label>Fecha y hora<input type="datetime-local" id="eT" value="'+esc(c.t)+'"></label>'+
+      '<label>Lugar<input type="text" id="eL" list="lugares" value="'+esc(c.lugar)+'"></label>'+
+      '<div class="row"><label>Litros<input type="number" inputmode="decimal" step="0.01" id="eLt" value="'+(c.lts||"")+'"></label><label>Monto $<input type="number" inputmode="decimal" step="0.01" id="eM" value="'+(c.monto||"")+'"></label></div>'+
+      '<label>Km del odómetro<input type="number" inputmode="numeric" id="eK" value="'+(c.km||"")+'"></label>'+
+      '<button class="btn fuel" id="eOk">Guardar cambios</button><button class="btn ghost" id="eNo">Cancelar</button>';
+    $("eOk").onclick=function(){
+      if(!$("eT").value||!$("eL").value.trim()){toast("Fecha y lugar son obligatorios");return;}
+      c.t=$("eT").value;c.lugar=$("eL").value.trim();c.lts=parseFloat($("eLt").value)||0;c.monto=parseFloat($("eM").value)||0;c.km=parseFloat($("eK").value)||0;
+      save();dlg.close();all();toast("Cambios guardados");
+    };
+  }
+  $("eNo").onclick=function(){dlg.close();};
+  if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");
+}
+
+/* ---------- exportar / respaldo ---------- */
+var dlPromise=null;
+function getDownloads(){
+  if(dlPromise)return dlPromise;
+  dlPromise=(window.claude&&typeof window.claude.use==="function")
+    ?Promise.race([window.claude.use("downloads").catch(function(){return null;}),new Promise(function(r){setTimeout(function(){r(null);},4000);})])
+    :Promise.resolve(null);
+  return dlPromise;
+}
+function download(name,text,type){
+  var blob=new Blob([text],{type:type});
+  getDownloads().then(function(dl){
+    if(dl){return dl.save({filename:name,data:blob}).then(function(){toast("Archivo listo");},function(e){if(e&&e.code!=="declined")toast("No se pudo descargar aquí");});}
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+  });
+}
+function csvCell(x){x=String(x==null?"":x);return /[;"\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x;}
+function dec(n){return n?String(n).replace(".",","):"";}
+$("expCsv").onclick=function(){
+  var L=["VIAJES","Fecha salida;Hora salida;Km salida;Fecha llegada;Hora llegada;Km llegada;Km recorridos;Duración (h);Destino"];
+  D.viajes.slice().sort(function(a,b){return P(a.sal.t)-P(b.sal.t);}).forEach(function(v){
+    L.push([v.sal.t.split("T")[0],hhmm(v.sal.t),v.sal.km,v.lle?v.lle.t.split("T")[0]:"",v.lle?hhmm(v.lle.t):"",v.lle?v.lle.km:"",v.lle?tripKm(v):"",v.lle?dec((tripMin(v)/60).toFixed(2)):"",v.dest||""].map(csvCell).join(";"));
+  });
+  L.push("","CARGAS DE COMBUSTIBLE","Fecha;Hora;Lugar;Litros;Monto;Km odómetro");
+  D.cargas.slice().sort(function(a,b){return P(a.t)-P(b.t);}).forEach(function(c){
+    L.push([c.t.split("T")[0],hhmm(c.t),c.lugar,dec(c.lts),dec(c.monto),c.km||""].map(csvCell).join(";"));
+  });
+  download("kilometros-"+dayKey(new Date())+".csv","\ufeff"+L.join("\r\n"),"text/csv");
+};
+$("expJson").onclick=function(){download("respaldo-kilometros-"+dayKey(new Date())+".json",JSON.stringify(D),"application/json");};
+$("impJson").onclick=function(){$("impFile").click();};
+$("impFile").onchange=function(){
+  var f=this.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){
+    try{var o=JSON.parse(rd.result);if(!o.viajes||!o.cargas)throw 0;
+      if(!confirm("Esto reemplaza tus datos actuales por los del respaldo ("+o.viajes.length+" viajes, "+o.cargas.length+" cargas). ¿Seguir?"))return;
+      D=o;save();all();toast("Respaldo restaurado");
+    }catch(e){toast("Ese archivo no es un respaldo válido");}
+  };
+  rd.readAsText(f);this.value="";
+};
+
+/* ---------- pestañas / general ---------- */
+document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){
+  document.querySelectorAll(".tabs button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false");});
+  ["reg","res","his"].forEach(function(t){$("tab-"+t).hidden=t!==b.dataset.tab;});
+  if(b.dataset.tab==="res"){ref=new Date();}
+  all();window.scrollTo(0,0);
+};});
+var tt;function toast(m){var e=$("toast");e.textContent=m;e.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){e.classList.remove("on");},2600);}
+function all(){renderDash();renderTrip();renderLugares();renderRes();renderHist();}
+resetFuel();all();
+})();
+</script>
+</body>
+</html>
