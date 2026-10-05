@@ -191,6 +191,120 @@
   .mapa-leyenda { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 16px; background: white; border-bottom: 1px solid var(--border); }
   .mapa-leyenda-item { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--muted); }
   .mapa-leyenda-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(0,0,0,0.15); }
+
+  input[type="tel"] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 16px; background: white; color: var(--text); -webkit-appearance: none; }
+
+  /* ===== AGENDA ===== */
+  .agenda-tab-btns { display: flex; gap: 6px; margin-bottom: 12px; }
+  .agenda-tab-btn { flex: 1; padding: 10px 6px; border: 1.5px solid var(--border); background: white; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .agenda-tab-btn.active { background: var(--green); border-color: var(--green); color: white; }
+  .agenda-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 10px; }
+  .agenda-dia-tab { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border: 1.5px solid var(--border); background: white; border-radius: 10px; cursor: pointer; color: var(--text); font-family: inherit; }
+  .agenda-dia-tab .dia-num { font-size: 16px; font-weight: 800; }
+  .agenda-dia-tab.hoy { border-color: var(--green); }
+  .agenda-dia-tab.activo { background: var(--green); border-color: var(--green); color: white; }
+  .semaforo-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .semaforo-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .agenda-add-form { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ac-search-wrap { position: relative; margin-bottom: 10px; }
+  .ac-search-wrap input { padding-right: 38px; }
+  .ac-search-clear { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); border: none; background: none; font-size: 22px; color: var(--muted); cursor: pointer; display: none; padding: 4px 10px; }
+  .ac-search-clear.visible { display: block; }
+  .ac-search-results { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: white; border: 1.5px solid var(--border); border-radius: 10px; max-height: 280px; overflow-y: auto; z-index: 50; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+  .ac-search-results.open { display: block; }
+  .ac-search-item { padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .ac-search-item:active { background: var(--green-pale); }
+  .ac-search-name { font-size: 14px; font-weight: 700; }
+  .ac-search-loc { font-size: 12px; color: var(--muted); }
+  .ac-search-group { font-size: 11px; font-weight: 800; color: var(--muted); padding: 8px 12px 4px; background: var(--bg); }
+  .ac-search-empty { padding: 14px; text-align: center; color: var(--muted); font-size: 13px; }
+  .ac-search-results mark { background: #fff9c4; border-radius: 2px; }
+  .tipo-selector { display: flex; gap: 6px; margin-bottom: 10px; }
+  .tipo-btn { flex: 1; padding: 10px 4px; border: 1.5px solid var(--border); background: white; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit; }
+  .tipo-btn.sel-visita { background: var(--green); border-color: var(--green); color: white; }
+  .tipo-btn.sel-llamado { background: var(--blue); border-color: var(--blue); color: white; }
+  .tipo-btn.sel-whatsapp { background: #1f9d48; border-color: #1f9d48; color: white; }
+  .tipo-btn.sel-recibido { background: #0f7a6c; border-color: #0f7a6c; color: white; }
+  .agenda-contacto { display: flex; gap: 10px; align-items: flex-start; background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ac-semaforo { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; background: #9e9e9e; }
+  .ac-semaforo.verde { background: #4caf50; }
+  .ac-semaforo.amarillo { background: #ff9800; }
+  .ac-semaforo.rojo { background: #f44336; }
+  .ac-body { flex: 1; min-width: 0; }
+  .ac-nombre { font-size: 14px; font-weight: 700; }
+  .ac-loc, .ac-ultima { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .ac-prod { font-size: 12px; margin-top: 3px; }
+  .ac-tipo { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-top: 4px; background: var(--green-pale); color: var(--green); }
+  .ac-tipo.llamado { background: var(--blue-pale); color: var(--blue); }
+  .ac-tipo.whatsapp { background: #e6f6eb; color: #17793a; }
+  .ac-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .ac-check { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--green); background: white; color: white; font-weight: 800; cursor: pointer; }
+  .ac-check.done { background: var(--green); }
+  .ac-del { border: none; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+  .ac-quick { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 15px; color: white; }
+  .olvidados-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .oi-nombre { font-size: 14px; font-weight: 700; }
+  .oi-loc { font-size: 12px; color: var(--muted); }
+  .oi-dias { font-size: 12px; font-weight: 800; color: var(--red); white-space: nowrap; }
+
+  /* ===== CONTACTOS ===== */
+  .ct-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .ct-chip { padding: 7px 11px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit; }
+  .ct-chip.sel { background: var(--text); border-color: var(--text); color: white; }
+  .accion-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 800; cursor: pointer; margin: 14px 0 8px; font-family: inherit; }
+  .accion-btn.wa { background: #1f9d48; }
+  .accion-btn.tel { background: var(--blue); }
+  .link-btn { width: 100%; background: none; border: none; color: var(--green); font-weight: 700; font-size: 14px; padding: 8px; cursor: pointer; font-family: inherit; }
+  .seg { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; margin-bottom: 10px; }
+  .seg button { flex: 1; border: none; background: none; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; }
+  .seg button.on { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+  .periodo-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .periodo-nav button { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--border); background: white; font-size: 20px; line-height: 1; cursor: pointer; color: var(--text); }
+  .periodo-nav .lbl { font-weight: 800; font-size: 15px; text-align: center; }
+  .num-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+  .num-box { background: var(--green-pale); border-radius: 8px; padding: 9px 4px 7px; text-align: center; }
+  .num-box .v { font-size: 22px; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .num-box .l { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .tabla-num { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tabla-num th { font-size: 11px; color: var(--muted); font-weight: 700; text-align: center; padding: 6px 4px; border-bottom: 1.5px solid var(--border); white-space: nowrap; }
+  .tabla-num th:first-child, .tabla-num td:first-child { text-align: left; }
+  .tabla-num td { padding: 8px 4px; border-bottom: 1px solid var(--border); text-align: center; font-variant-numeric: tabular-nums; }
+  .tabla-num td:first-child { font-weight: 700; font-size: 12px; }
+  .tabla-num td .sub { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+  .tabla-num td.tot { font-weight: 800; font-size: 15px; color: var(--green); }
+  .tabla-num td.cero { color: #cfcfcf; }
+  .tabla-num tbody tr { cursor: pointer; }
+  .tabla-num tbody tr:active { background: var(--green-pale); }
+  .tabla-num tfoot td { font-weight: 800; border-top: 1.5px solid var(--border); border-bottom: none; }
+  .tabla-vacia { text-align: center; color: var(--muted); font-size: 13px; padding: 18px 8px; }
+  .ct-log-item { display: flex; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .ct-log-item .ico { font-size: 18px; }
+  .ct-log-item .txt { flex: 1; min-width: 0; font-size: 13px; }
+  .ct-log-item .txt b { display: block; font-size: 13px; }
+  .ct-log-item .meta { font-size: 11px; color: var(--muted); }
+
+  /* ===== MAPA: zonas, recorrido y resumen ===== */
+  .zona-chips { display: flex; gap: 6px; margin-bottom: 8px; }
+  .zona-chip { flex: 1; padding: 9px 4px; border-radius: 8px; border: 1.5px solid var(--border); background: white; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit; }
+  .zona-chip.on { background: var(--green); border-color: var(--green); color: white; }
+  .mapa-leyenda-item .n { color: var(--text); font-weight: 800; }
+  .mapa-timeline { display: flex; align-items: center; gap: 10px; padding: 10px 16px 4px; background: white; }
+  .mapa-timeline button { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--green); color: white; font-size: 15px; cursor: pointer; flex-shrink: 0; }
+  .mapa-timeline input[type=range] { flex: 1; accent-color: var(--green); margin: 0; }
+  .mapa-timeline .tl-lbl { font-size: 13px; font-weight: 800; color: var(--text); min-width: 84px; text-align: right; font-variant-numeric: tabular-nums; }
+  .mapa-tl-dia { padding: 2px 16px 10px; font-size: 12px; color: var(--muted); background: white; border-bottom: 1px solid var(--border); min-height: 24px; }
+  .mapa-tl-dia b { color: var(--text); }
+  #mapa-resumen { padding: 12px 16px 0; }
+  .zona-barras { margin-bottom: 12px; }
+  .zb-row { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
+  .zb-n { width: 58px; font-weight: 700; color: var(--muted); }
+  .zb-bar { flex: 1; height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; }
+  .zb-fill { height: 100%; border-radius: 5px; background: var(--green); transition: width 0.3s; }
+  .zb-v { width: 30px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .mapa-lista-titulo { padding: 14px 16px 0; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+  .halo-ring { width: 36px; height: 36px; border-radius: 50%; border: 3px solid #1b5e20; box-sizing: border-box; animation: halo 1.1s ease-out infinite; }
+  @keyframes halo { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .halo-ring { animation: none; opacity: 0.8; } }
 </style>
 </head>
 <body>
@@ -316,7 +430,8 @@
 <!-- ===== AGENDA ===== -->
 <div class="page" id="page-agenda">
   <div class="agenda-tab-btns">
-    <button class="agenda-tab-btn active" id="atab-semana" onclick="agendaTab('semana')">🗓 Esta semana</button>
+    <button class="agenda-tab-btn active" id="atab-semana" onclick="agendaTab('semana')">🗓 Semana</button>
+    <button class="agenda-tab-btn" id="atab-contactos" onclick="agendaTab('contactos')">💬 Contactos</button>
     <button class="agenda-tab-btn" id="atab-olvidados" onclick="agendaTab('olvidados')">⚠️ Sin visitar</button>
   </div>
   <div id="agenda-vista-semana">
@@ -345,6 +460,59 @@
       <button class="save-btn" style="margin-top:0;" onclick="agregarContactoAgenda()">+ Agregar</button>
     </div>
     <div id="agenda-contactos-list"></div>
+  </div>
+  <div id="agenda-vista-contactos" style="display:none;">
+    <div class="card">
+      <div class="card-title">💬 Registrar contacto</div>
+      <div class="ac-search-wrap">
+        <input type="text" id="ct-buscar" placeholder="🔍 Buscar cliente..." autocomplete="off"
+          oninput="ctFiltrar(this.value)" onfocus="ctFiltrar(this.value)" onblur="setTimeout(ctCerrar,150)">
+        <button type="button" class="ac-search-clear" id="ct-clear" onclick="ctLimpiar()" aria-label="Borrar cliente">×</button>
+        <div class="ac-search-results" id="ct-resultados"></div>
+      </div>
+      <div id="ct-tel-row" style="display:none;">
+        <label for="ct-tel">WhatsApp del cliente</label>
+        <input type="tel" id="ct-tel" placeholder="Ej: 3764 123456 (sin 0 ni 15)" onchange="ctGuardarTel()">
+      </div>
+      <label>Tipo</label>
+      <div class="tipo-selector">
+        <button class="tipo-btn sel-whatsapp" id="ctt-wa_env" onclick="ctTipo('wa_env')">💬 Enviado</button>
+        <button class="tipo-btn" id="ctt-wa_rec" onclick="ctTipo('wa_rec')">📥 Recibido</button>
+        <button class="tipo-btn" id="ctt-llamada" onclick="ctTipo('llamada')">📞 Llamada</button>
+      </div>
+      <label>Motivo</label>
+      <div class="ct-chips" id="ct-motivos"></div>
+      <label for="ct-fecha">Fecha</label>
+      <input type="date" id="ct-fecha">
+      <label for="ct-nota">Mensaje o nota (opcional)</label>
+      <input type="text" id="ct-nota" placeholder="Ej: le paso precio de Tranidex">
+      <button class="accion-btn wa" id="ct-accion" onclick="ctAccion()">💬 Abrir WhatsApp y registrar</button>
+      <button class="link-btn" onclick="ctRegistrar()">Solo registrar, sin abrir</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Contactos por cliente</div>
+      <div class="seg">
+        <button id="ctp-semana" class="on" onclick="ctPeriodo('semana')">Semana</button>
+        <button id="ctp-mes" onclick="ctPeriodo('mes')">Mes</button>
+      </div>
+      <div class="periodo-nav">
+        <button onclick="ctMover(-1)" aria-label="Período anterior">‹</button>
+        <div class="lbl" id="ct-periodo-lbl"></div>
+        <button onclick="ctMover(1)" aria-label="Período siguiente">›</button>
+      </div>
+      <div class="num-grid" id="ct-nums"></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text);font-weight:600;margin:0 0 10px;">
+        <input type="checkbox" id="ct-incl-visitas" checked onchange="renderContactosReporte()" style="width:18px;height:18px;margin:0;"> Sumar las visitas del mapa
+      </label>
+      <div style="overflow-x:auto;"><table class="tabla-num" id="ct-tabla"></table></div>
+      <button class="export-btn" style="margin-top:12px;" onclick="exportContactosPeriodoCSV()">📥 Descargar reporte del período (CSV)</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🕑 Últimos registros</div>
+      <div id="ct-log"></div>
+    </div>
   </div>
   <div id="agenda-vista-olvidados" style="display:none;">
     <div class="card" style="padding:12px 16px;">
@@ -399,10 +567,11 @@
       <option value="4">Semana 4 (día 22+)</option>
     </select>
     <input id="mapa-buscar" placeholder="Buscar cliente o localidad...">
-    <div class="mapa-stats">
-      <div class="mapa-stat"><div class="v" id="mapa-visitados">0</div><div class="l">Visitados</div></div>
-      <div class="mapa-stat"><div class="v" id="mapa-pendientes">0</div><div class="l">Sin visitar</div></div>
-      <div class="mapa-stat"><div class="v" id="mapa-total">0</div><div class="l">Visitas</div></div>
+    <div class="zona-chips" id="mapa-zonas">
+      <button class="zona-chip on" data-z="all" onclick="setMapaZona('all')">Todas</button>
+      <button class="zona-chip" data-z="SUR" onclick="setMapaZona('SUR')">Sur</button>
+      <button class="zona-chip" data-z="CENTRO" onclick="setMapaZona('CENTRO')">Centro</button>
+      <button class="zona-chip" data-z="NORTE" onclick="setMapaZona('NORTE')">Norte</button>
     </div>
     <button class="export-btn" id="mapa-nuevo-cliente-btn" onclick="abrirNuevoClienteModal()" style="margin:0;background:var(--green);color:white;border-color:var(--green);">➕ Agregar cliente nuevo</button>
     <button class="export-btn" id="mapa-carga-masiva-btn" onclick="abrirCargaMasivaVisitas()" style="margin:0;">📋 Cargar visitas en bloque</button>
@@ -410,14 +579,40 @@
   </div>
   <div id="leaflet-map"></div>
 
-  <!-- Leyenda de colores por semana -->
+  <!-- Leyenda de colores por semana (con cantidad de visitas) -->
   <div class="mapa-leyenda" id="mapa-leyenda">
-    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#9e9e9e;"></div>Sin visitar</div>
-    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#e53935;"></div>Semana 1</div>
-    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#f9a825;"></div>Semana 2</div>
-    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#43a047;"></div>Semana 3</div>
-    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#1e88e5;"></div>Semana 4+</div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#9e9e9e;"></div>Sin visitar <span class="n" id="leg-n-0"></span></div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#e53935;"></div>Semana 1 <span class="n" id="leg-n-1"></span></div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#f9a825;"></div>Semana 2 <span class="n" id="leg-n-2"></span></div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#43a047;"></div>Semana 3 <span class="n" id="leg-n-3"></span></div>
+    <div class="mapa-leyenda-item"><div class="mapa-leyenda-dot" style="background:#1e88e5;"></div>Semana 4+ <span class="n" id="leg-n-4"></span></div>
   </div>
+
+  <!-- Recorrido del mes, día por día -->
+  <div class="mapa-timeline" id="mapa-timeline" style="display:none;">
+    <button id="tl-play" onclick="toggleTimeline()" aria-label="Ver el recorrido del mes">▶</button>
+    <input type="range" id="tl-range" min="1" max="31" value="31" oninput="detenerTimeline();setTimelineDia(+this.value)" aria-label="Día del mes">
+    <div class="tl-lbl" id="tl-lbl">Todo el mes</div>
+  </div>
+  <div class="mapa-tl-dia" id="tl-dia" style="display:none;"></div>
+
+  <!-- Resumen en números -->
+  <div id="mapa-resumen">
+    <div class="card">
+      <div class="card-title" id="mr-titulo">📊 Visitas del mes</div>
+      <div class="num-grid">
+        <div class="num-box"><div class="v" id="mapa-total">0</div><div class="l">Visitas</div></div>
+        <div class="num-box"><div class="v" id="mapa-visitados">0</div><div class="l">Clientes visitados</div></div>
+        <div class="num-box"><div class="v" id="mapa-pendientes">0</div><div class="l">Sin visitar</div></div>
+        <div class="num-box"><div class="v" id="mapa-km">0</div><div class="l">Km</div></div>
+      </div>
+      <div class="zona-barras" id="mr-zonas"></div>
+      <div style="overflow-x:auto;"><table class="tabla-num" id="mr-tabla"></table></div>
+      <button class="export-btn" style="margin-top:12px;" onclick="exportTablaVisitasCSV()">📥 Descargar tabla de visitas (CSV)</button>
+    </div>
+  </div>
+
+  <div class="mapa-lista-titulo">Todos los clientes</div>
 
   <!-- Barra de búsqueda lista -->
   <div style="padding:10px 16px 0;background:var(--bg);">
@@ -447,9 +642,17 @@
     <button class="export-btn" onclick="exportPedidosCSV()">📦 Pedidos por cliente (CSV)</button>
     <button class="export-btn" onclick="exportResumen()">📝 Resumen del mes (.txt)</button>
     <button class="export-btn" onclick="exportVisitasCSV()">📍 Historial de visitas (CSV)</button>
+    <button class="export-btn" onclick="exportContactosCSV()">💬 Historial de contactos (CSV)</button>
     <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
   </div>
   <div class="card" id="stats-mes"></div>
+  <div class="card">
+    <div class="card-title">🛟 Copia de seguridad</div>
+    <button class="export-btn" onclick="descargarBackup()">💾 Descargar copia completa (.json)</button>
+    <button class="export-btn" onclick="document.getElementById('backup-file').click()">♻️ Restaurar desde una copia</button>
+    <input type="file" id="backup-file" accept=".json,application/json" style="display:none;" onchange="restaurarBackup(this)">
+    <p class="hint" style="margin-top:4px;">Guarda días, visitas, gastos, agenda, contactos y teléfonos. Descargala antes de actualizar la app.</p>
+  </div>
 </div>
 
 <script>
@@ -1630,10 +1833,11 @@ function mapaCurrentMonthKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
 }
-function visitasDeCliente(cliente, mes = mapaMesActual, semana = mapaSemanaActual) {
+function visitasDeCliente(cliente, mes = mapaMesActual, semana = mapaSemanaActual, hasta = mapaHastaDia) {
   let fechas = mapaVisitas[cliente] || [];
   if (mes !== 'all') fechas = fechas.filter(f => mapaMonthKey(f) === mes);
   if (semana !== 'all') fechas = fechas.filter(f => getSemanaDelMes(f) === Number(semana));
+  if (hasta && mes !== 'all') fechas = fechas.filter(f => parseInt(f.slice(8, 10), 10) <= hasta);
   return fechas;
 }
 function mapaRadio(n) { return n === 0 ? 6 : Math.min(9 + n*3, 22); }
@@ -1667,7 +1871,8 @@ let mapaLabelMarkers = {};
 
 function crearLabelMarker(c, color) {
   // Leaflet divIcon con el nombre del cliente
-  const texto = c.cliente.split(' ')[0];
+  const nVis = visitasDeCliente(c.cliente).length;
+  const texto = c.cliente.split(' ')[0] + (nVis > 1 ? ' ×' + nVis : '');
   const icon = L.divIcon({
     className: '',
     html: `<div style="
@@ -1766,6 +1971,7 @@ function actualizarLabels() {
   // Reunir clientes visitados en el período seleccionado
   const activos = [];
   MAPA_CLIENTES.forEach(c => {
+    if (!clienteEnZona(c)) return;
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
     if (n === 0) return;
     const color = mapaColor(c.cliente, mapaMesActual);
@@ -1882,6 +2088,11 @@ function buildMapaMesOptions() {
   sel.value = mapaMesActual;
 }
 
+function nContactosPopup(cliente) {
+  const { desde, hasta } = rangoDeMes(mapaMesActual);
+  return contactosDeCliente(cliente, desde, hasta).length;
+}
+
 function mapaPopupHtml(c) {
   const fechas = visitasDeCliente(c.cliente, mapaMesActual).slice().sort().reverse();
   const totalAll = (mapaVisitas[c.cliente] || []).length;
@@ -1907,6 +2118,11 @@ function mapaPopupHtml(c) {
       <div class="count">
         <b>${fechas.length}</b> visita(s) ${mapaMesActual==='all' ? '' : 'en ' + mapaMonthLabel(mapaMesActual)} &middot; <b>${totalAll}</b> en total<br>
         <div style="margin-top:4px;">${fechas.length ? listadoFechas : sinVisitas}</div>
+      </div>
+      <div style="font-size:12px;margin-top:2px;">💬📞 <b>${nContactosPopup(c.cliente)}</b> contacto(s) ${mapaMesActual==='all' ? 'en total' : 'en el mes'}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button style="background:#1f9d48;" onclick="abrirWhatsAppEnc('${escAttr(c.cliente)}')">💬 WhatsApp</button>
+        <button style="background:var(--blue);" onclick="llamarClienteEnc('${escAttr(c.cliente)}')">📞 Llamar</button>
       </div>
       <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;display:block;margin:10px 0 4px;">Fecha de la visita</label>
       <input type="date" id="popup-visita-fecha" value="${todayStr}" max="${todayStr}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;margin-bottom:8px;background:white;color:var(--text);">
@@ -1971,7 +2187,11 @@ function initMapaVisitas() {
 
     document.getElementById('mapa-mes').addEventListener('change', (e) => {
       mapaMesActual = e.target.value;
+      detenerTimeline();
+      mapaHastaDia = null;
+      dibujarHalos(null);
       refrescarMapa();
+      actualizarTimelineUI();
       if (mapaClienteActivo && mapaMarkers[mapaClienteActivo].isPopupOpen()) {
         const c = MAPA_CLIENTES.find(x => x.cliente === mapaClienteActivo);
         mapaMarkers[mapaClienteActivo].setPopupContent(mapaPopupHtml(c));
@@ -1995,6 +2215,7 @@ function initMapaVisitas() {
   }
 
   refrescarMapa();
+  actualizarTimelineUI();
 }
 
 function seleccionarClienteMapa(cliente) {
@@ -2054,6 +2275,7 @@ function renderMapaLista(filtro) {
 
   let count = 0;
   ordenados.forEach(c => {
+    if (!clienteEnZona(c)) return;
     if (q && !c.cliente.toLowerCase().includes(q) && !c.localidad.toLowerCase().includes(q)) return;
     count++;
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
@@ -2105,23 +2327,32 @@ function refrescarMapaMarkers() {
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
     const m = mapaMarkers[c.cliente];
     if (!m) return;
+    if (!clienteEnZona(c)) { if (leafletMap.hasLayer(m)) leafletMap.removeLayer(m); return; }
+    if (!leafletMap.hasLayer(m)) m.addTo(leafletMap);
     const color = mapaColor(c.cliente, mapaMesActual);
     m.setRadius(mapaRadio(n));
     m.setStyle({ fillColor: color, color: n > 0 ? 'white' : '#bbb', weight: n > 0 ? 1.5 : 1 });
+    if (n > 0) m.bringToFront();
   });
   actualizarLabels();
 }
 
 function refrescarMapaStats() {
-  let visitados = 0, total = 0;
+  let visitados = 0, total = 0, enZona = 0;
+  const porSemana = [0, 0, 0, 0, 0];
   MAPA_CLIENTES.forEach(c => {
-    const n = visitasDeCliente(c.cliente, mapaMesActual).length;
-    if (n > 0) visitados++;
-    total += n;
+    if (!clienteEnZona(c)) return;
+    enZona++;
+    const fechas = visitasDeCliente(c.cliente, mapaMesActual);
+    if (fechas.length > 0) visitados++; else porSemana[0]++;
+    total += fechas.length;
+    fechas.forEach(f => porSemana[getSemanaDelMes(f)]++);
   });
   document.getElementById('mapa-visitados').textContent = visitados;
-  document.getElementById('mapa-pendientes').textContent = MAPA_CLIENTES.length - visitados;
+  document.getElementById('mapa-pendientes').textContent = enZona - visitados;
   document.getElementById('mapa-total').textContent = total;
+  porSemana.forEach((v, i) => { const el = document.getElementById('leg-n-' + i); if (el) el.textContent = '(' + v + ')'; });
+  renderResumenMapa();
 }
 
 function refrescarMapa() {
@@ -2340,7 +2571,7 @@ function procesarCargaMasivaVisitas() {
 // o corrido hacia otro lado.
 function fitMapaAClientesActivos() {
   const puntos = MAPA_CLIENTES
-    .filter(c => visitasDeCliente(c.cliente, mapaMesActual).length > 0)
+    .filter(c => clienteEnZona(c) && visitasDeCliente(c.cliente, mapaMesActual).length > 0)
     .map(c => [c.lat, c.lng]);
   if (!puntos.length) return;
   const bounds = L.latLngBounds(puntos);
@@ -2459,7 +2690,7 @@ function generarMapaPropio(btn) {
   for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 
   // Calcular bounds de los clientes visitados
-  const visitados = MAPA_CLIENTES.filter(c => visitasDeCliente(c.cliente, mapaMesActual).length > 0);
+  const visitados = MAPA_CLIENTES.filter(c => clienteEnZona(c) && visitasDeCliente(c.cliente, mapaMesActual).length > 0);
   const todos = visitados.length > 0 ? visitados : MAPA_CLIENTES;
 
   const lats = todos.map(c => c.lat);
@@ -2483,6 +2714,7 @@ function generarMapaPropio(btn) {
 
 function dibujarPuntosConProyeccion(ctx, toPixel, W, H) {
   MAPA_CLIENTES.forEach(c => {
+    if (!clienteEnZona(c)) return;
     const n = visitasDeCliente(c.cliente, mapaMesActual).length;
     const color = mapaColor(c.cliente, mapaMesActual);
     const px = toPixel(c.lat, c.lng);
@@ -2820,6 +3052,8 @@ function renderContactosDia() {
           <div class="ac-ultima">${ultimaVisitaTexto(c.cliente)}</div>
         </div>
         <div class="ac-actions">
+          ${c.tipo==='whatsapp' && !c.done ? `<button class="ac-quick" style="background:#1f9d48;" onclick="agendaContactar('${agendaDiaActivo}',${c._i})" aria-label="Abrir WhatsApp">💬</button>` : ''}
+          ${c.tipo==='llamado' && !c.done ? `<button class="ac-quick" style="background:var(--blue);" onclick="agendaContactar('${agendaDiaActivo}',${c._i})" aria-label="Llamar">📞</button>` : ''}
           <button class="ac-check ${c.done?'done':''}" onclick="toggleDoneAgenda('${agendaDiaActivo}',${c._i})">${c.done?'✓':''}</button>
           <button class="ac-del" onclick="eliminarContactoAgenda('${agendaDiaActivo}',${c._i})">×</button>
         </div>
@@ -2941,7 +3175,16 @@ function agregarContactoAgenda() {
 function toggleDoneAgenda(fecha, idx) {
   const agenda = getAgenda();
   if (agenda[fecha] && agenda[fecha][idx] !== undefined) {
-    agenda[fecha][idx].done = !agenda[fecha][idx].done;
+    const item = agenda[fecha][idx];
+    item.done = !item.done;
+    // Los WhatsApp y llamados hechos quedan en el historial de contactos
+    if (item.done && !item.contactoId && (item.tipo === 'whatsapp' || item.tipo === 'llamado')) {
+      const reg = registrarContacto(item.cliente, item.tipo === 'whatsapp' ? 'wa_env' : 'llamada', 'Seguimiento', item.producto || '', fecha <= todayStr ? fecha : todayStr);
+      item.contactoId = reg.id;
+    } else if (!item.done && item.contactoId) {
+      borrarContactoPorId(item.contactoId);
+      delete item.contactoId;
+    }
     saveAgenda(agenda);
     renderContactosDia();
     renderAgendaDias();
@@ -2960,11 +3203,12 @@ function eliminarContactoAgenda(fecha, idx) {
 }
 
 function agendaTab(tab) {
-  document.getElementById('atab-semana').classList.toggle('active', tab==='semana');
-  document.getElementById('atab-olvidados').classList.toggle('active', tab==='olvidados');
-  document.getElementById('agenda-vista-semana').style.display = tab==='semana' ? '' : 'none';
-  document.getElementById('agenda-vista-olvidados').style.display = tab==='olvidados' ? '' : 'none';
-  if (tab==='olvidados') renderOlvidados();
+  ['semana','contactos','olvidados'].forEach(t => {
+    document.getElementById('atab-' + t).classList.toggle('active', tab === t);
+    document.getElementById('agenda-vista-' + t).style.display = tab === t ? '' : 'none';
+  });
+  if (tab === 'olvidados') renderOlvidados();
+  if (tab === 'contactos') initContactosTab();
 }
 
 function renderOlvidados() {
@@ -2982,6 +3226,594 @@ function renderOlvidados() {
   const ordenar = arr => arr.sort((a,b) => { if (a.diasAtras===null&&b.diasAtras===null) return a.nombre.localeCompare(b.nombre); if (a.diasAtras===null) return -1; if (b.diasAtras===null) return 1; return b.diasAtras-a.diasAtras; });
   const zonasDef = [{key:'SUR',label:'🟢 Zona Sur — Martes'},{key:'NORTE',label:'🔵 Zona Norte — Miércoles'},{key:'CENTRO',label:'🟡 Zona Centro — Jueves'},{key:'SIN_ZONA',label:'⚫ Sin zona'}];
   el.innerHTML = zonasDef.map(z => { const arr=ordenar(porZona[z.key]); if(!arr.length) return ''; return `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">${z.label}</div>${arr.map(r=>`<div class="olvidados-item"><div><div class="oi-nombre">${r.nombre}</div><div class="oi-loc">📍 ${r.localidad}</div></div><div class="oi-dias">${r.diasAtras===null?'Sin visitas':r.diasAtras+' días'}</div></div>`).join('')}`; }).join('');
+}
+
+
+// ===== CONTACTOS (registro de WhatsApp y llamadas) =====
+// Cada contacto queda guardado con fecha y hora, para poder mostrarle a
+// AGDP cuántas veces se contactó a cada cliente por semana y por mes.
+const CONTACTOS_KEY = 'viajante_contactos';
+const TELEFONOS_KEY = 'viajante_telefonos';
+const TIPOS_CONTACTO = {
+  wa_env:  { label: 'WhatsApp enviado',  ico: '💬' },
+  wa_rec:  { label: 'WhatsApp recibido', ico: '📥' },
+  llamada: { label: 'Llamada',           ico: '📞' },
+};
+const MOTIVOS_CONTACTO = ['Seguimiento', 'Presupuesto', 'Pedido', 'Cobranza', 'Consulta técnica', 'Otro'];
+
+function getContactos() {
+  try { return JSON.parse(localStorage.getItem(CONTACTOS_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveContactos(arr) {
+  try { localStorage.setItem(CONTACTOS_KEY, JSON.stringify(arr)); }
+  catch(e) { showToast('⚠️ Sin espacio para guardar contactos.'); }
+}
+function getTelefonos() {
+  try { return JSON.parse(localStorage.getItem(TELEFONOS_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveTelefonos(t) {
+  try { localStorage.setItem(TELEFONOS_KEY, JSON.stringify(t)); } catch(e) {}
+}
+function pad2(n) { return String(n).padStart(2, '0'); }
+function fechaStr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function horaActual() { const d = new Date(); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+function escAttr(s) { return encodeURIComponent(s).replace(/'/g, '%27'); }
+
+function registrarContacto(cliente, tipo, motivo, nota, fecha) {
+  const arr = getContactos();
+  const reg = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    fecha: fecha || todayStr, hora: horaActual(),
+    cliente, tipo, motivo: motivo || '', nota: nota || '',
+  };
+  arr.push(reg);
+  saveContactos(arr);
+  refrescarVistasContacto();
+  return reg;
+}
+function borrarContactoPorId(id) {
+  saveContactos(getContactos().filter(c => c.id !== id));
+  refrescarVistasContacto();
+}
+function eliminarContacto(id) {
+  if (!confirm('¿Borrar este registro de contacto?')) return;
+  borrarContactoPorId(id);
+  showToast('Registro borrado');
+}
+
+// Número argentino → formato internacional que usa WhatsApp (549 + área + número)
+function normalizarTelefono(raw) {
+  let d = (raw || '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.startsWith('00')) d = d.slice(2);
+  if (d.startsWith('0')) d = d.slice(1);
+  if (d.startsWith('549')) d = d.slice(3);
+  else if (d.startsWith('54') && d.length >= 12) d = d.slice(2);
+  // Sacar el "15" de celulares escritos a la antigua (área + 15 + número)
+  if (d.length === 12) {
+    for (const i of [2, 3, 4]) {
+      if (d.substr(i, 2) === '15') { d = d.slice(0, i) + d.slice(i + 2); break; }
+    }
+  }
+  return d.length === 10 ? '549' + d : '';
+}
+function telefonoParaMostrar(t) {
+  if (!t) return '';
+  return t.startsWith('549') ? t.slice(3) : t;
+}
+function telefonoDeCliente(cliente, pedirSiFalta) {
+  const tels = getTelefonos();
+  if (tels[cliente]) return tels[cliente];
+  if (!pedirSiFalta) return '';
+  const raw = prompt(`Número de ${cliente}\nCon código de área, sin 0 ni 15. Ej: 3764 123456`);
+  if (!raw) return '';
+  const n = normalizarTelefono(raw);
+  if (!n) { showToast('⚠️ Revisá el número: código de área + número, 10 dígitos'); return ''; }
+  tels[cliente] = n;
+  saveTelefonos(tels);
+  return n;
+}
+function esCelular() { return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); }
+
+function abrirWhatsApp(cliente, motivo, mensaje, fecha) {
+  const tel = telefonoDeCliente(cliente, true);
+  if (!tel) return null;
+  const reg = registrarContacto(cliente, 'wa_env', motivo || 'Seguimiento', mensaje || '', fecha);
+  const txt = mensaje ? encodeURIComponent(mensaje) : '';
+  showToast('💬 Contacto registrado');
+  setTimeout(() => {
+    if (esCelular()) {
+      window.location.href = 'whatsapp://send?phone=' + tel + (txt ? '&text=' + txt : '');
+    } else {
+      window.open('https://wa.me/' + tel + (txt ? '?text=' + txt : ''), '_blank');
+    }
+  }, 150);
+  return reg;
+}
+function llamarCliente(cliente, motivo, nota, fecha) {
+  const tel = telefonoDeCliente(cliente, true);
+  if (!tel) return null;
+  const reg = registrarContacto(cliente, 'llamada', motivo || 'Seguimiento', nota || '', fecha);
+  showToast('📞 Llamada registrada');
+  setTimeout(() => { window.location.href = 'tel:+' + tel; }, 150);
+  return reg;
+}
+function abrirWhatsAppEnc(c) { abrirWhatsApp(decodeURIComponent(c)); }
+function llamarClienteEnc(c) { llamarCliente(decodeURIComponent(c)); }
+
+function refrescarVistasContacto() {
+  const vista = document.getElementById('agenda-vista-contactos');
+  if (vista && vista.style.display !== 'none') renderContactosTab();
+  if (leafletMap) {
+    refrescarMapaStats();
+    if (mapaClienteActivo && mapaMarkers[mapaClienteActivo] && mapaMarkers[mapaClienteActivo].isPopupOpen()) {
+      const c = MAPA_CLIENTES.find(x => x.cliente === mapaClienteActivo);
+      if (c) mapaMarkers[mapaClienteActivo].setPopupContent(mapaPopupHtml(c));
+    }
+  }
+}
+
+// Cantidad de contactos (WhatsApp + llamadas) de un cliente en un rango de fechas
+function contactosDeCliente(cliente, desde, hasta) {
+  return getContactos().filter(c => c.cliente === cliente && c.fecha >= desde && c.fecha <= hasta);
+}
+function rangoDeMes(key) {
+  if (key === 'all') return { desde: '0000-00-00', hasta: '9999-99-99' };
+  const [y, m] = key.split('-').map(Number);
+  return { desde: key + '-01', hasta: key + '-' + pad2(new Date(y, m, 0).getDate()) };
+}
+
+// ── Formulario "Registrar contacto" ──
+let ctCliente = '';
+let ctTipoSel = 'wa_env';
+let ctMotivoSel = 'Seguimiento';
+
+function ctTodosLosClientes() {
+  const nombres = new Set();
+  MAPA_CLIENTES.forEach(c => nombres.add(c.cliente));
+  getData().forEach(r => r.clientes.forEach(c => nombres.add(c.nombre)));
+  return [...nombres].sort();
+}
+function ctFiltrar(valor) {
+  const cont = document.getElementById('ct-resultados');
+  document.getElementById('ct-clear').classList.toggle('visible', !!valor);
+  if (valor && valor === ctCliente) { cont.classList.remove('open'); return; }
+  if (ctCliente && valor !== ctCliente) { ctCliente = ''; document.getElementById('ct-tel-row').style.display = 'none'; }
+  const q = normalizarBusqueda(valor);
+  const lista = ctTodosLosClientes().filter(n => {
+    if (!q) return true;
+    if (normalizarBusqueda(n).includes(q)) return true;
+    const loc = getLocalidadCliente(n);
+    return loc && normalizarBusqueda(loc).includes(q);
+  }).slice(0, 40);
+  cont.innerHTML = lista.length
+    ? lista.map(n => {
+        const loc = getLocalidadCliente(n);
+        return `<div class="ac-search-item" onmousedown="event.preventDefault();ctSeleccionar('${escAttr(n)}')">
+          <div class="ac-search-name">${resaltar(n, valor)}</div>${loc ? `<div class="ac-search-loc">📍 ${resaltar(loc, valor)}</div>` : ''}</div>`;
+      }).join('')
+    : '<div class="ac-search-empty">Sin resultados</div>';
+  cont.classList.add('open');
+}
+function ctSeleccionar(enc) {
+  ctCliente = decodeURIComponent(enc);
+  document.getElementById('ct-buscar').value = ctCliente;
+  document.getElementById('ct-clear').classList.add('visible');
+  document.getElementById('ct-tel').value = telefonoParaMostrar(getTelefonos()[ctCliente] || '');
+  document.getElementById('ct-tel-row').style.display = '';
+  ctCerrar();
+}
+function ctCerrar() { const c = document.getElementById('ct-resultados'); if (c) c.classList.remove('open'); }
+function ctLimpiar() {
+  ctCliente = '';
+  document.getElementById('ct-buscar').value = '';
+  document.getElementById('ct-clear').classList.remove('visible');
+  document.getElementById('ct-tel-row').style.display = 'none';
+  ctCerrar();
+}
+function ctGuardarTel() {
+  if (!ctCliente) return;
+  const raw = document.getElementById('ct-tel').value;
+  const tels = getTelefonos();
+  if (!raw.trim()) { delete tels[ctCliente]; saveTelefonos(tels); return; }
+  const n = normalizarTelefono(raw);
+  if (!n) { showToast('⚠️ Revisá el número: código de área + número, 10 dígitos'); return; }
+  tels[ctCliente] = n;
+  saveTelefonos(tels);
+  showToast('📱 Número guardado');
+}
+function ctTipo(tipo) {
+  ctTipoSel = tipo;
+  const clases = { wa_env: 'sel-whatsapp', wa_rec: 'sel-recibido', llamada: 'sel-llamado' };
+  Object.keys(clases).forEach(t => {
+    document.getElementById('ctt-' + t).className = 'tipo-btn' + (t === tipo ? ' ' + clases[t] : '');
+  });
+  const btn = document.getElementById('ct-accion');
+  if (tipo === 'wa_env') { btn.style.display = ''; btn.className = 'accion-btn wa'; btn.textContent = '💬 Abrir WhatsApp y registrar'; }
+  else if (tipo === 'llamada') { btn.style.display = ''; btn.className = 'accion-btn tel'; btn.textContent = '📞 Llamar y registrar'; }
+  else { btn.style.display = 'none'; }
+  document.querySelector('#agenda-vista-contactos .link-btn').textContent = tipo === 'wa_rec' ? '✓ Registrar mensaje recibido' : 'Solo registrar, sin abrir';
+}
+function ctRenderMotivos() {
+  document.getElementById('ct-motivos').innerHTML = MOTIVOS_CONTACTO.map(m =>
+    `<button class="ct-chip ${m === ctMotivoSel ? 'sel' : ''}" onclick="ctMotivo('${m}')">${m}</button>`).join('');
+}
+function ctMotivo(m) { ctMotivoSel = m; ctRenderMotivos(); }
+function ctLeerForm() {
+  if (!ctCliente) { showToast('Elegí un cliente'); return null; }
+  if (document.getElementById('ct-tel').value.trim()) ctGuardarTel();
+  return {
+    fecha: document.getElementById('ct-fecha').value || todayStr,
+    nota: document.getElementById('ct-nota').value.trim(),
+  };
+}
+function ctResetForm() {
+  document.getElementById('ct-nota').value = '';
+  document.getElementById('ct-fecha').value = todayStr;
+  ctLimpiar();
+}
+function ctAccion() {
+  const f = ctLeerForm(); if (!f) return;
+  const reg = ctTipoSel === 'llamada'
+    ? llamarCliente(ctCliente, ctMotivoSel, f.nota, f.fecha)
+    : abrirWhatsApp(ctCliente, ctMotivoSel, f.nota, f.fecha);
+  if (reg) ctResetForm();
+}
+function ctRegistrar() {
+  const f = ctLeerForm(); if (!f) return;
+  registrarContacto(ctCliente, ctTipoSel, ctMotivoSel, f.nota, f.fecha);
+  showToast('✅ ' + TIPOS_CONTACTO[ctTipoSel].label + ' registrado');
+  ctResetForm();
+}
+
+// ── Reporte semanal / mensual ──
+let ctPer = 'semana';
+let ctRef = new Date();
+const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function ctRango() {
+  if (ctPer === 'mes') {
+    const key = ctRef.getFullYear() + '-' + pad2(ctRef.getMonth() + 1);
+    return { ...rangoDeMes(key), label: NOMBRES_MES[ctRef.getMonth()] + ' ' + ctRef.getFullYear(), archivo: key };
+  }
+  const dow = ctRef.getDay();
+  const lunes = new Date(ctRef); lunes.setDate(ctRef.getDate() - (dow === 0 ? 6 : dow - 1));
+  const domingo = new Date(lunes); domingo.setDate(lunes.getDate() + 6);
+  const f = d => pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
+  return { desde: fechaStr(lunes), hasta: fechaStr(domingo), label: 'Semana del ' + f(lunes) + ' al ' + f(domingo), archivo: 'semana_' + fechaStr(lunes) };
+}
+function ctPeriodo(p) {
+  ctPer = p;
+  document.getElementById('ctp-semana').classList.toggle('on', p === 'semana');
+  document.getElementById('ctp-mes').classList.toggle('on', p === 'mes');
+  renderContactosReporte();
+}
+function ctMover(n) {
+  if (ctPer === 'mes') ctRef = new Date(ctRef.getFullYear(), ctRef.getMonth() + n, 1);
+  else { ctRef = new Date(ctRef); ctRef.setDate(ctRef.getDate() + 7 * n); }
+  renderContactosReporte();
+}
+function ctDatosPeriodo() {
+  const r = ctRango();
+  const incl = document.getElementById('ct-incl-visitas').checked;
+  const porCliente = {};
+  const fila = n => porCliente[n] || (porCliente[n] = { cliente: n, wa_env: 0, wa_rec: 0, llamada: 0, visita: 0 });
+  const detalle = [];
+  getContactos().forEach(c => {
+    if (c.fecha < r.desde || c.fecha > r.hasta) return;
+    fila(c.cliente)[c.tipo]++;
+    detalle.push({ fecha: c.fecha, hora: c.hora, cliente: c.cliente, tipo: TIPOS_CONTACTO[c.tipo] ? TIPOS_CONTACTO[c.tipo].label : c.tipo, motivo: c.motivo, nota: c.nota, id: c.id });
+  });
+  if (incl) {
+    const vis = getVisitas();
+    Object.entries(vis).forEach(([cliente, fechas]) => fechas.forEach(f => {
+      if (f < r.desde || f > r.hasta) return;
+      fila(cliente).visita++;
+      detalle.push({ fecha: f, hora: '', cliente, tipo: 'Visita', motivo: '', nota: '' });
+    }));
+  }
+  const filas = Object.values(porCliente).map(x => ({ ...x, wa: x.wa_env + x.wa_rec, total: x.wa_env + x.wa_rec + x.llamada + x.visita }))
+    .sort((a, b) => b.total - a.total || a.cliente.localeCompare(b.cliente));
+  detalle.sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+  return { r, incl, filas, detalle };
+}
+function renderContactosReporte() {
+  const { r, incl, filas } = ctDatosPeriodo();
+  document.getElementById('ct-periodo-lbl').textContent = r.label;
+  const sum = k => filas.reduce((s, f) => s + f[k], 0);
+  document.getElementById('ct-nums').innerHTML = [
+    [filas.length, 'Clientes'], [sum('wa'), 'WhatsApp'], [sum('llamada'), 'Llamadas'], [incl ? sum('visita') : '–', 'Visitas'],
+  ].map(([v, l]) => `<div class="num-box"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  const tabla = document.getElementById('ct-tabla');
+  if (!filas.length) {
+    tabla.innerHTML = '<tbody><tr><td class="tabla-vacia" colspan="5">Sin contactos en este período.</td></tr></tbody>';
+    return;
+  }
+  const celda = v => `<td class="${v ? '' : 'cero'}">${v}</td>`;
+  tabla.innerHTML = `<thead><tr><th>Cliente</th><th>💬</th><th>📞</th>${incl ? '<th>🤝</th>' : ''}<th>Total</th></tr></thead>
+    <tbody>${filas.map(f => `<tr data-cliente="${escAttr(f.cliente)}"><td>${f.cliente}<span class="sub">${getLocalidadCliente(f.cliente) || ''}</span></td>
+      ${celda(f.wa)}${celda(f.llamada)}${incl ? celda(f.visita) : ''}<td class="tot">${f.total}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Total</td><td>${sum('wa')}</td><td>${sum('llamada')}</td>${incl ? `<td>${sum('visita')}</td>` : ''}<td>${sum('total')}</td></tr></tfoot>`;
+  tabla.querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => ctDetalleCliente(decodeURIComponent(tr.dataset.cliente)));
+}
+function ctDetalleCliente(cliente) {
+  const { r, detalle } = ctDatosPeriodo();
+  const items = detalle.filter(d => d.cliente === cliente).reverse();
+  const tel = telefonoParaMostrar(getTelefonos()[cliente] || '');
+  const ico = t => t === 'Visita' ? '🤝' : t.includes('recibido') ? '📥' : t.includes('WhatsApp') ? '💬' : '📞';
+  document.getElementById('modal-content').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">${cliente}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">${r.label}${tel ? ' · 📱 ' + tel : ''}</div>
+    ${items.map(d => `<div class="ct-log-item"><div class="ico">${ico(d.tipo)}</div>
+      <div class="txt"><b>${d.tipo}${d.motivo ? ' · ' + d.motivo : ''}</b>${d.nota ? `<div class="meta">${d.nota}</div>` : ''}</div>
+      <div class="meta">${fmtDate(d.fecha)}${d.hora ? ' ' + d.hora : ''}</div></div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="accion-btn wa" style="margin:0;" onclick="closeModal();abrirWhatsAppEnc('${escAttr(cliente)}')">💬 WhatsApp</button>
+      <button class="accion-btn tel" style="margin:0;" onclick="closeModal();llamarClienteEnc('${escAttr(cliente)}')">📞 Llamar</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function renderContactosLog() {
+  const arr = getContactos().slice().sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora)).slice(0, 20);
+  const el = document.getElementById('ct-log');
+  if (!arr.length) {
+    el.innerHTML = '<div class="tabla-vacia">Todavía no hay contactos registrados. Elegí un cliente arriba y tocá el botón verde.</div>';
+    return;
+  }
+  el.innerHTML = arr.map(c => {
+    const t = TIPOS_CONTACTO[c.tipo] || { ico: '•', label: c.tipo };
+    return `<div class="ct-log-item"><div class="ico">${t.ico}</div>
+      <div class="txt"><b>${c.cliente}</b><span class="meta">${t.label}${c.motivo ? ' · ' + c.motivo : ''}${c.nota ? ' · ' + c.nota : ''}</span></div>
+      <div class="meta" style="text-align:right;">${fmtDate(c.fecha).slice(0, 5)}<br>${c.hora}</div>
+      <button class="ac-del" onclick="eliminarContacto('${c.id}')" aria-label="Borrar">×</button></div>`;
+  }).join('');
+}
+function renderContactosTab() {
+  renderContactosReporte();
+  renderContactosLog();
+}
+function initContactosTab() {
+  if (!document.getElementById('ct-fecha').value) document.getElementById('ct-fecha').value = todayStr;
+  document.getElementById('ct-fecha').max = todayStr;
+  ctRenderMotivos();
+  ctTipo(ctTipoSel);
+  renderContactosTab();
+}
+
+function exportContactosPeriodoCSV() {
+  const { r, incl, filas, detalle } = ctDatosPeriodo();
+  if (!filas.length) { showToast('No hay contactos en este período'); return; }
+  const zonaNombre = loc => { const z = getZonaDeLocalidad(loc); return z ? ZONAS[z].nombre : ''; };
+  const rows = [
+    ['Reporte de contactos a clientes'], ['Período', csvField(r.label)], [],
+    ['Cliente', 'Localidad', 'Zona', 'WhatsApp enviados', 'WhatsApp recibidos', 'Llamadas'].concat(incl ? ['Visitas'] : []).concat(['Total']),
+  ];
+  filas.forEach(f => {
+    const loc = getLocalidadCliente(f.cliente) || '';
+    rows.push([csvField(f.cliente), csvField(loc), csvField(zonaNombre(loc)), f.wa_env, f.wa_rec, f.llamada].concat(incl ? [f.visita] : []).concat([f.total]));
+  });
+  rows.push([], ['Detalle'], ['Fecha', 'Hora', 'Cliente', 'Tipo', 'Motivo', 'Nota']);
+  detalle.forEach(d => rows.push([fmtDate(d.fecha), d.hora, csvField(d.cliente), csvField(d.tipo), csvField(d.motivo), csvField(d.nota)]));
+  downloadCSV(rows, 'contactos_' + r.archivo + '.csv');
+}
+function exportContactosCSV() {
+  const arr = getContactos().slice().sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+  if (!arr.length) { showToast('Todavía no hay contactos registrados'); return; }
+  const rows = [['Fecha', 'Hora', 'Cliente', 'Localidad', 'Tipo', 'Motivo', 'Nota']];
+  arr.forEach(c => rows.push([fmtDate(c.fecha), c.hora, csvField(c.cliente), csvField(getLocalidadCliente(c.cliente) || ''),
+    csvField(TIPOS_CONTACTO[c.tipo] ? TIPOS_CONTACTO[c.tipo].label : c.tipo), csvField(c.motivo), csvField(c.nota)]));
+  downloadCSV(rows, 'historial_contactos.csv');
+}
+
+// Botones 💬 / 📞 en los contactos de la agenda: abren el chat o la
+// llamada, lo registran y lo marcan como hecho.
+function agendaContactar(fecha, idx) {
+  const agenda = getAgenda();
+  const item = agenda[fecha] && agenda[fecha][idx];
+  if (!item) return;
+  const reg = item.tipo === 'whatsapp'
+    ? abrirWhatsApp(item.cliente, 'Seguimiento', item.producto || '')
+    : llamarCliente(item.cliente, 'Seguimiento', item.producto || '');
+  if (!reg) return;
+  item.done = true;
+  item.contactoId = reg.id;
+  saveAgenda(agenda);
+  renderAgendaDias();
+  renderContactosDia();
+}
+
+// ===== COPIA DE SEGURIDAD =====
+function descargarBackup() {
+  const datos = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k !== 'pwa_banner_dismissed') datos[k] = localStorage.getItem(k);
+  }
+  const json = JSON.stringify({ app: 'diario-del-viajante', fecha: new Date().toISOString(), datos }, null, 1);
+  compartirOdescargarArchivo(json, 'viajante_backup_' + todayStr + '.json', 'application/json');
+}
+function restaurarBackup(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const obj = JSON.parse(reader.result);
+      if (!obj || !obj.datos) throw new Error('formato');
+      const n = Object.keys(obj.datos).length;
+      if (!confirm(`Esta copia es del ${fmtDate((obj.fecha || '').slice(0, 10))} y tiene ${n} grupos de datos.\nReemplaza lo que hay ahora en la app. ¿Seguir?`)) return;
+      Object.entries(obj.datos).forEach(([k, v]) => localStorage.setItem(k, v));
+      showToast('✅ Copia restaurada');
+      setTimeout(() => location.reload(), 800);
+    } catch (e) {
+      showToast('⚠️ El archivo no es una copia del Diario');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ===== MAPA: filtro por zona, recorrido día por día y resumen en números =====
+let mapaZonaActual = 'all';
+let mapaHastaDia = null;   // null = todo el mes; un número = hasta ese día inclusive
+let tlTimer = null;
+let tlHalos = null;
+
+function clienteEnZona(c) {
+  return mapaZonaActual === 'all' || getZonaDeLocalidad(c.localidad) === mapaZonaActual;
+}
+function setMapaZona(z) {
+  mapaZonaActual = z;
+  document.querySelectorAll('#mapa-zonas .zona-chip').forEach(b => b.classList.toggle('on', b.dataset.z === z));
+  refrescarMapa();
+  actualizarTimelineUI();
+  if (!leafletMap) return;
+  const pts = MAPA_CLIENTES.filter(clienteEnZona).map(c => [c.lat, c.lng]);
+  if (z === 'all' || !pts.length) {
+    leafletMap.flyToBounds(L.latLngBounds([-28.35, -56.95], [-25.15, -53.35]), { padding: [4, 4], duration: 0.6 });
+  } else {
+    leafletMap.flyToBounds(L.latLngBounds(pts), { padding: [30, 30], maxZoom: 11, duration: 0.6 });
+  }
+}
+
+function diasDelMes(key) { const [y, m] = key.split('-').map(Number); return new Date(y, m, 0).getDate(); }
+
+function actualizarTimelineUI() {
+  const wrap = document.getElementById('mapa-timeline');
+  const cap = document.getElementById('tl-dia');
+  if (!wrap) return;
+  if (mapaMesActual === 'all') { wrap.style.display = 'none'; cap.style.display = 'none'; return; }
+  wrap.style.display = 'flex'; cap.style.display = 'block';
+  const max = diasDelMes(mapaMesActual);
+  const range = document.getElementById('tl-range');
+  range.max = max;
+  range.value = mapaHastaDia || max;
+  const mm = mapaMesActual.slice(5, 7);
+  document.getElementById('tl-lbl').textContent = mapaHastaDia ? `Hasta el ${pad2(mapaHastaDia)}/${mm}` : 'Todo el mes';
+  document.getElementById('tl-play').textContent = tlTimer ? '⏸' : '▶';
+  if (!mapaHastaDia) {
+    cap.innerHTML = 'Tocá ▶ para ver cómo se armó el recorrido del mes, día por día.';
+    return;
+  }
+  const fecha = mapaMesActual + '-' + pad2(mapaHastaDia);
+  const delDia = MAPA_CLIENTES.filter(c => clienteEnZona(c) && (mapaVisitas[c.cliente] || []).includes(fecha));
+  cap.innerHTML = delDia.length
+    ? `<b>${pad2(mapaHastaDia)}/${mm}:</b> ${delDia.map(c => c.cliente.split(' ')[0]).join(', ')}`
+    : `<b>${pad2(mapaHastaDia)}/${mm}:</b> sin visitas`;
+}
+
+function dibujarHalos(dia) {
+  if (!leafletMap) return;
+  if (!tlHalos) tlHalos = L.layerGroup().addTo(leafletMap);
+  tlHalos.clearLayers();
+  if (!dia || mapaMesActual === 'all') return;
+  const fecha = mapaMesActual + '-' + pad2(dia);
+  MAPA_CLIENTES.forEach(c => {
+    if (!clienteEnZona(c) || !(mapaVisitas[c.cliente] || []).includes(fecha)) return;
+    L.marker([c.lat, c.lng], {
+      icon: L.divIcon({ className: '', html: '<div class="halo-ring"></div>', iconSize: [36, 36], iconAnchor: [18, 18] }),
+      interactive: false, zIndexOffset: 500,
+    }).addTo(tlHalos);
+  });
+}
+
+function setTimelineDia(d) {
+  if (mapaMesActual === 'all') return;
+  const max = diasDelMes(mapaMesActual);
+  mapaHastaDia = (d >= max && !tlTimer) ? null : Math.min(d, max);
+  refrescarMapa();
+  dibujarHalos(mapaHastaDia);
+  actualizarTimelineUI();
+}
+function detenerTimeline() {
+  if (tlTimer) { clearInterval(tlTimer); tlTimer = null; }
+  const b = document.getElementById('tl-play');
+  if (b) b.textContent = '▶';
+}
+function toggleTimeline() {
+  if (tlTimer) { detenerTimeline(); actualizarTimelineUI(); return; }
+  if (mapaMesActual === 'all') return;
+  const max = diasDelMes(mapaMesActual);
+  let d = (mapaHastaDia && mapaHastaDia < max) ? mapaHastaDia + 1 : 1;
+  if (mapaClienteActivo && mapaMarkers[mapaClienteActivo]) mapaMarkers[mapaClienteActivo].closePopup();
+  tlTimer = setInterval(() => {
+    if (d > max) {
+      detenerTimeline();
+      setTimeout(() => { if (!tlTimer) { mapaHastaDia = null; dibujarHalos(null); refrescarMapa(); actualizarTimelineUI(); } }, 1500);
+      return;
+    }
+    setTimelineDia(d++);
+  }, 650);
+  setTimelineDia(d++);
+}
+
+function kmDelPeriodo() {
+  let { desde, hasta } = rangoDeMes(mapaMesActual);
+  if (mapaHastaDia && mapaMesActual !== 'all') hasta = mapaMesActual + '-' + pad2(mapaHastaDia);
+  return getData().reduce((s, r) => (r.fecha >= desde && r.fecha <= hasta) ? s + (parseFloat(r.km) || 0) : s, 0);
+}
+
+function datosTablaVisitas() {
+  const { desde, hasta } = rangoDeMes(mapaMesActual);
+  const contactos = getContactos().filter(c => c.fecha >= desde && c.fecha <= hasta);
+  const filas = [];
+  MAPA_CLIENTES.filter(clienteEnZona).forEach(c => {
+    const fechas = visitasDeCliente(c.cliente);
+    const sem = [0, 0, 0, 0];
+    fechas.forEach(f => sem[getSemanaDelMes(f) - 1]++);
+    const ct = contactos.filter(x => x.cliente === c.cliente).length;
+    if (fechas.length || ct) filas.push({ c, n: fechas.length, sem, ct });
+  });
+  filas.sort((a, b) => b.n - a.n || b.ct - a.ct || a.c.cliente.localeCompare(b.c.cliente));
+  return filas;
+}
+
+function renderResumenMapa() {
+  const tabla = document.getElementById('mr-tabla');
+  if (!tabla) return;
+  const mesLbl = mapaMesActual === 'all' ? 'todos los meses' : mapaMonthLabel(mapaMesActual);
+  const zonaLbl = mapaZonaActual === 'all' ? '' : ' · ' + ZONAS[mapaZonaActual].nombre;
+  document.getElementById('mr-titulo').textContent = `📊 Visitas — ${mesLbl}${zonaLbl}${mapaHastaDia ? ' (hasta el ' + pad2(mapaHastaDia) + ')' : ''}`;
+  document.getElementById('mapa-km').textContent = Math.round(kmDelPeriodo()).toLocaleString('es-AR');
+
+  // Barras por zona (solo con "Todas")
+  const zb = document.getElementById('mr-zonas');
+  if (mapaZonaActual === 'all') {
+    const tot = { SUR: 0, CENTRO: 0, NORTE: 0 };
+    MAPA_CLIENTES.forEach(c => { const z = getZonaDeLocalidad(c.localidad); if (z) tot[z] += visitasDeCliente(c.cliente).length; });
+    const max = Math.max(1, ...Object.values(tot));
+    zb.style.display = '';
+    zb.innerHTML = Object.entries(tot).map(([z, v]) => `<div class="zb-row"><div class="zb-n">${ZONAS[z].nombre.replace('Zona ', '')}</div>
+      <div class="zb-bar"><div class="zb-fill" style="width:${Math.round(v / max * 100)}%"></div></div><div class="zb-v">${v}</div></div>`).join('');
+  } else { zb.style.display = 'none'; zb.innerHTML = ''; }
+
+  const filas = datosTablaVisitas();
+  if (!filas.length) {
+    tabla.innerHTML = '<tbody><tr><td class="tabla-vacia">Sin visitas en este período. Tocá un cliente en el mapa para registrar una.</td></tr></tbody>';
+    return;
+  }
+  const porSemana = mapaMesActual !== 'all';
+  const celda = v => `<td class="${v ? '' : 'cero'}">${v}</td>`;
+  const tot = filas.reduce((s, f) => { s.n += f.n; s.ct += f.ct; f.sem.forEach((v, i) => s.sem[i] += v); return s; }, { n: 0, ct: 0, sem: [0, 0, 0, 0] });
+  tabla.innerHTML = `<thead><tr><th>Cliente</th>${porSemana ? '<th>S1</th><th>S2</th><th>S3</th><th>S4</th>' : ''}<th>Visitas</th><th>💬📞</th></tr></thead>
+    <tbody>${filas.map(f => `<tr data-cliente="${escAttr(f.c.cliente)}"><td>${f.c.cliente}<span class="sub">${f.c.localidad}</span></td>
+      ${porSemana ? f.sem.map(celda).join('') : ''}<td class="tot">${f.n}</td>${celda(f.ct)}</tr>`).join('')}</tbody>
+    <tfoot><tr><td>Total (${filas.filter(f => f.n).length} clientes)</td>${porSemana ? tot.sem.map(v => `<td>${v}</td>`).join('') : ''}<td>${tot.n}</td><td>${tot.ct}</td></tr></tfoot>`;
+  tabla.querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => seleccionarClienteMapa(decodeURIComponent(tr.dataset.cliente)));
+}
+
+function exportTablaVisitasCSV() {
+  const filas = datosTablaVisitas();
+  if (!filas.length) { showToast('No hay visitas en este período'); return; }
+  const porSemana = mapaMesActual !== 'all';
+  const rows = [['Cliente', 'Localidad', 'Zona'].concat(porSemana ? ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'] : []).concat(['Visitas', 'WhatsApp y llamadas'])];
+  filas.forEach(f => {
+    const z = getZonaDeLocalidad(f.c.localidad);
+    rows.push([csvField(f.c.cliente), csvField(f.c.localidad), csvField(z ? ZONAS[z].nombre : '')].concat(porSemana ? f.sem : []).concat([f.n, f.ct]));
+  });
+  const nombre = 'visitas_' + (mapaMesActual === 'all' ? 'total' : mapaMesActual) + (mapaZonaActual === 'all' ? '' : '_' + mapaZonaActual.toLowerCase()) + '.csv';
+  downloadCSV(rows, nombre);
 }
 
 const _showPageOrigAgenda = showPage;
