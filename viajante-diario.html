@@ -305,6 +305,38 @@
   .halo-ring { width: 36px; height: 36px; border-radius: 50%; border: 3px solid #1b5e20; box-sizing: border-box; animation: halo 1.1s ease-out infinite; }
   @keyframes halo { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .halo-ring { animation: none; opacity: 0.8; } }
+
+  /* ===== PRESUPUESTOS ===== */
+  .bottom-nav button { position: relative; font-size: 10px; min-width: 0; }
+  .nav-badge { display: none; position: absolute; top: 4px; left: calc(50% + 6px); min-width: 17px; height: 17px; border-radius: 9px; background: var(--red); color: white; font-size: 10px; font-weight: 800; line-height: 17px; text-align: center; padding: 0 4px; }
+  .nav-badge.visible { display: block; }
+  .pr-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pr-nums .num-box .v { font-size: 19px; overflow-wrap: anywhere; }
+  .pr-moneda { margin: 0; flex-shrink: 0; }
+  .pr-moneda button { min-width: 46px; }
+  .pr-card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 5px solid #9e9e9e; }
+  .pr-card.rojo { border-left-color: #f44336; }
+  .pr-card.amarillo { border-left-color: #ff9800; }
+  .pr-card.verde { border-left-color: #4caf50; }
+  .pr-card.ganado { border-left-color: var(--green); }
+  .pr-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .pr-cliente { font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+  .pr-monto { font-size: 15px; font-weight: 800; color: var(--green); white-space: nowrap; }
+  .pr-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pr-detalle { font-size: 13px; margin-top: 7px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pr-alerta { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 4px 9px; margin-top: 8px; background: var(--bg); color: var(--muted); }
+  .pr-alerta.rojo { background: #ffebee; color: var(--red); }
+  .pr-alerta.amarillo { background: var(--orange-pale); color: var(--orange); }
+  .pr-alerta.verde, .pr-alerta.ganado { background: var(--green-pale); color: var(--green); }
+  .pr-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+  .pr-btns button, .pr-btns a { border: 1.5px solid var(--border); background: white; color: var(--text); border-radius: 8px; padding: 9px 2px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; font-family: inherit; line-height: 1.3; }
+  .pr-btns .wa { background: #1f9d48; border-color: #1f9d48; color: white; }
+  .pr-btns .tel { background: var(--blue); border-color: var(--blue); color: white; }
+  .pr-btns .ok { color: var(--green); border-color: var(--green-light); }
+  .pr-btns .no { color: var(--red); }
+  .pr-card details { margin-top: 10px; font-size: 12px; }
+  .pr-card summary { cursor: pointer; color: var(--muted); font-weight: 700; }
+  .pr-hist { padding: 6px 0; border-bottom: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -333,6 +365,7 @@
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="active" onclick="showPage('registrar')" id="nav-registrar"><span class="ico">📝</span>Registrar</button>
+  <button onclick="showPage('presup')" id="nav-presup"><span class="ico">📄</span>Presup.<span class="nav-badge" id="pr-badge"></span></button>
   <button onclick="showPage('agenda')" id="nav-agenda"><span class="ico">🗓</span>Agenda</button>
   <button onclick="showPage('gastos')" id="nav-gastos"><span class="ico">💸</span>Gastos</button>
   <button onclick="showPage('mapa')" id="nav-mapa"><span class="ico">📍</span>Mapa</button>
@@ -420,6 +453,52 @@
   </div>
 
   <button class="save-btn" onclick="saveRecord()">💾 Guardar día</button>
+</div>
+
+<!-- ===== PRESUPUESTOS ===== -->
+<div class="page" id="page-presup">
+  <div class="card">
+    <div class="card-title">📄 Resumen de presupuestos</div>
+    <div class="pr-nums" id="pr-nums"></div>
+  </div>
+
+  <button class="save-btn" id="pr-nuevo-btn" style="margin:0 0 14px;" onclick="prNuevo()">➕ Nuevo presupuesto</button>
+
+  <div class="card" id="pr-form" style="display:none;">
+    <div class="card-title" id="pr-form-titulo">➕ Nuevo presupuesto</div>
+    <div class="ac-search-wrap">
+      <input type="text" id="pr-cliente" placeholder="🔍 Cliente (o escribí uno nuevo)" autocomplete="off"
+        oninput="prFiltrar(this.value)" onfocus="prFiltrar(this.value)" onblur="setTimeout(prCerrar,150)">
+      <div class="ac-search-results" id="pr-resultados"></div>
+    </div>
+    <label>Zona</label>
+    <div class="zona-chips" id="pr-form-zonas"></div>
+    <label for="pr-tel">WhatsApp (opcional)</label>
+    <input type="tel" id="pr-tel" placeholder="Ej: 3764 123456 (sin 0 ni 15)">
+    <label for="pr-detalle">Productos / detalle</label>
+    <textarea class="notes-area" id="pr-detalle" placeholder="Ej: 20 bolsas Dekalb, 5 L Tranidex"></textarea>
+    <label for="pr-monto">Monto (opcional)</label>
+    <div class="row">
+      <div class="seg pr-moneda">
+        <button type="button" id="pr-mon-ARS" onclick="prMoneda('ARS')">$</button>
+        <button type="button" id="pr-mon-USD" onclick="prMoneda('USD')">US$</button>
+      </div>
+      <input type="text" inputmode="decimal" id="pr-monto" placeholder="Ej: 1.250.000">
+    </div>
+    <div class="grid-2" style="margin-top:12px;">
+      <div><label for="pr-envio">Enviado el</label><input type="date" id="pr-envio" onchange="prCambioEnvio()"></div>
+      <div><label for="pr-vence">Vence (opcional)</label><input type="date" id="pr-vence"></div>
+    </div>
+    <label for="pr-prox">Próximo contacto</label>
+    <input type="date" id="pr-prox">
+    <button class="save-btn" id="pr-guardar" onclick="prGuardar()">💾 Guardar presupuesto</button>
+    <button class="link-btn" onclick="prCerrarForm()">Cancelar</button>
+  </div>
+
+  <div class="seg" id="pr-filtros"></div>
+  <div class="zona-chips" id="pr-zonas"></div>
+  <div id="pr-lista"></div>
+  <button class="export-btn" style="margin-top:8px;" onclick="exportPresupuestosCSV()">📥 Descargar presupuestos (CSV)</button>
 </div>
 
 <!-- ===== HOY ===== -->
@@ -643,6 +722,7 @@
     <button class="export-btn" onclick="exportResumen()">📝 Resumen del mes (.txt)</button>
     <button class="export-btn" onclick="exportVisitasCSV()">📍 Historial de visitas (CSV)</button>
     <button class="export-btn" onclick="exportContactosCSV()">💬 Historial de contactos (CSV)</button>
+    <button class="export-btn" onclick="exportPresupuestosCSV()">📄 Presupuestos (CSV)</button>
     <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
   </div>
   <div class="card" id="stats-mes"></div>
@@ -651,7 +731,7 @@
     <button class="export-btn" onclick="descargarBackup()">💾 Descargar copia completa (.json)</button>
     <button class="export-btn" onclick="document.getElementById('backup-file').click()">♻️ Restaurar desde una copia</button>
     <input type="file" id="backup-file" accept=".json,application/json" style="display:none;" onchange="restaurarBackup(this)">
-    <p class="hint" style="margin-top:4px;">Guarda días, visitas, gastos, agenda, contactos y teléfonos. Descargala antes de actualizar la app.</p>
+    <p class="hint" style="margin-top:4px;">Guarda días, visitas, gastos, agenda, contactos, teléfonos y presupuestos. Descargala antes de actualizar la app.</p>
   </div>
 </div>
 
@@ -733,6 +813,7 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'hoy') renderHoy();
+  if (name === 'presup') renderPresupuestos();
   if (name === 'historial') renderHistorial();
   if (name === 'exportar') renderStats();
   if (name === 'mapa') initMapaVisitas();
@@ -3825,6 +3906,464 @@ showPage = function(name) {
     renderContactosDia();
   }
 };
+
+// ===== PRESUPUESTOS (seguimiento) =====
+const PRESUP_KEY = 'viajante_presupuestos';
+const PR_ESTADOS = { enviado: 'Enviado', conversacion: 'En conversación', ganado: 'Ganado', perdido: 'Perdido' };
+const PR_MOTIVOS = ['Precio', 'Plazo de pago', 'Sin stock', 'Compró a otro', 'Sin respuesta', 'Otro'];
+const PR_VIAS = {
+  wa_env:  { label: 'WhatsApp enviado',  ico: '💬' },
+  wa_rec:  { label: 'WhatsApp recibido', ico: '📥' },
+  llamada: { label: 'Llamada',           ico: '📞' },
+  visita:  { label: 'Visita',            ico: '🤝' },
+};
+let prFiltro = 'abiertos';
+let prZonaSel = 'all';
+let prEditando = null;   // id del presupuesto en edición
+let prFormZona = '';
+let prFormMoneda = 'ARS';
+let prProxAuto = true;   // el próximo contacto sigue a la fecha de envío mientras no se toque
+
+function getPresupuestos() {
+  try { return JSON.parse(localStorage.getItem(PRESUP_KEY) || '[]'); } catch(e) { return []; }
+}
+function savePresupuestos(arr) {
+  try { localStorage.setItem(PRESUP_KEY, JSON.stringify(arr)); return true; }
+  catch(e) { showToast('⚠️ Sin espacio para guardar el presupuesto.'); return false; }
+}
+function prEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+// La fecha de hoy se calcula cada vez: la app puede quedar abierta de un día para otro
+function prHoy() { return fechaStr(new Date()); }
+function prSumarDias(fecha, n) {
+  const [y, m, d] = fecha.split('-').map(Number);
+  return fechaStr(new Date(y, m - 1, d + n));
+}
+function prDiasEntre(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 86400000); }
+function prCorta(f) { return fmtDate(f).slice(0, 5); }
+function prNuevoId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function prAbierto(p) { return p.estado === 'enviado' || p.estado === 'conversacion'; }
+function prParseMonto(raw) {
+  let s = (raw || '').replace(/[^\d.,]/g, '');
+  if (!s) return null;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  const n = Number(s);
+  return Number.isFinite(n) ? n : NaN;
+}
+function prPlata(n, moneda) {
+  return (moneda === 'USD' ? 'US$ ' : '$ ') + n.toLocaleString('es-AR', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+}
+
+// Semáforo: rojo = atrasado o vencido · amarillo = hoy, vence en 3 días o sin fecha · verde = al día
+function prSemaforo(p) {
+  if (p.estado === 'ganado') return { color: 'ganado', orden: 3, texto: '✅ Ganado el ' + fmtDate(p.fechaCierre) };
+  if (p.estado === 'perdido') return { color: 'gris', orden: 3, texto: '✕ Perdido: ' + (p.motivoPerdida || 'sin motivo') };
+  const hoy = prHoy();
+  const dp = p.prox ? prDiasEntre(hoy, p.prox) : null;
+  const dv = p.vence ? prDiasEntre(hoy, p.vence) : null;
+  const rojos = [], amarillos = [];
+  if (dv !== null && dv < 0) rojos.push('Venció el ' + prCorta(p.vence));
+  if (dp !== null && dp < 0) rojos.push(`Contacto atrasado ${-dp} día${dp === -1 ? '' : 's'}`);
+  if (dp === 0) amarillos.push('Contactar hoy');
+  if (dp === null) amarillos.push('Sin próximo contacto');
+  if (dv !== null && dv >= 0 && dv <= 3) amarillos.push(dv === 0 ? 'Vence hoy' : dv === 1 ? 'Vence mañana' : `Vence en ${dv} días`);
+  if (rojos.length) return { color: 'rojo', orden: 0, texto: '🔴 ' + rojos.concat(amarillos).join(' · ') };
+  if (amarillos.length) return { color: 'amarillo', orden: 1, texto: '🟡 ' + amarillos.join(' · ') };
+  return { color: 'verde', orden: 2, texto: '🟢 Próximo contacto: ' + prCorta(p.prox) };
+}
+
+function prUrgentes() {
+  const hoy = prHoy();
+  return getPresupuestos().filter(p => prAbierto(p) && (!p.prox || p.prox <= hoy || (p.vence && p.vence < hoy))).length;
+}
+function prActualizarBadge() {
+  const b = document.getElementById('pr-badge');
+  const n = prUrgentes();
+  b.textContent = n;
+  b.classList.toggle('visible', n > 0);
+}
+
+// ── Formulario ──
+function prZonaChips(id, sel, fn, conTodas) {
+  const ops = (conTodas ? [['all', 'Todas']] : []).concat([['SUR', 'Sur'], ['CENTRO', 'Centro'], ['NORTE', 'Norte']]);
+  document.getElementById(id).innerHTML = ops.map(([z, l]) =>
+    `<button type="button" class="zona-chip ${z === sel ? 'on' : ''}" onclick="${fn}('${z}')">${l}</button>`).join('');
+}
+function prElegirZona(z) { prFormZona = prFormZona === z ? '' : z; prZonaChips('pr-form-zonas', prFormZona, 'prElegirZona'); }
+function prMoneda(m) {
+  prFormMoneda = m;
+  ['ARS', 'USD'].forEach(x => document.getElementById('pr-mon-' + x).classList.toggle('on', x === m));
+}
+function prClientes() {
+  const nombres = new Set(ctTodosLosClientes());
+  getPresupuestos().forEach(p => nombres.add(p.cliente));
+  return [...nombres].sort();
+}
+function prAutocompletarCliente(nombre) {
+  const loc = getLocalidadCliente(nombre);
+  const previo = getPresupuestos().find(p => p.cliente === nombre);
+  prFormZona = getZonaDeLocalidad(loc) || (previo && previo.zona) || '';
+  prZonaChips('pr-form-zonas', prFormZona, 'prElegirZona');
+  document.getElementById('pr-tel').value = telefonoParaMostrar(getTelefonos()[nombre] || '');
+}
+let prClienteElegido = '';
+function prFiltrar(valor) {
+  const cont = document.getElementById('pr-resultados');
+  if (prClienteElegido && valor !== prClienteElegido) {
+    prClienteElegido = ''; prFormZona = ''; document.getElementById('pr-tel').value = '';
+    prZonaChips('pr-form-zonas', '', 'prElegirZona');
+  }
+  if (valor && valor === prClienteElegido) { cont.classList.remove('open'); return; }
+  const q = normalizarBusqueda(valor);
+  const lista = prClientes().filter(n => !q || normalizarBusqueda(n).includes(q) || normalizarBusqueda(getLocalidadCliente(n)).includes(q)).slice(0, 40);
+  cont.innerHTML = lista.map(n => {
+    const loc = getLocalidadCliente(n);
+    return `<div class="ac-search-item" onmousedown="event.preventDefault();prSeleccionar('${escAttr(n)}')">
+      <div class="ac-search-name">${prEsc(n)}</div>${loc ? `<div class="ac-search-loc">📍 ${prEsc(loc)}</div>` : ''}</div>`;
+  }).join('');
+  cont.classList.toggle('open', lista.length > 0);
+}
+function prSeleccionar(enc) {
+  prClienteElegido = decodeURIComponent(enc);
+  document.getElementById('pr-cliente').value = prClienteElegido;
+  prAutocompletarCliente(prClienteElegido);
+  prCerrar();
+}
+function prCerrar() { document.getElementById('pr-resultados').classList.remove('open'); }
+
+function prAbrirForm(p) {
+  prEditando = p ? p.id : null;
+  prClienteElegido = p ? p.cliente : '';
+  prProxAuto = !p;
+  const val = (id, v) => { document.getElementById(id).value = v; };
+  val('pr-cliente', p ? p.cliente : '');
+  val('pr-detalle', p ? p.detalle : '');
+  val('pr-monto', p && p.monto != null ? p.monto.toLocaleString('es-AR', { maximumFractionDigits: 2 }) : '');
+  val('pr-envio', p ? p.fechaEnvio : prHoy());
+  val('pr-vence', p ? p.vence : '');
+  val('pr-prox', p ? p.prox : prSumarDias(prHoy(), 2));
+  val('pr-tel', p ? telefonoParaMostrar(getTelefonos()[p.cliente] || '') : '');
+  prFormZona = p ? p.zona : '';
+  prZonaChips('pr-form-zonas', prFormZona, 'prElegirZona');
+  prMoneda(p ? p.moneda : 'ARS');
+  document.getElementById('pr-form-titulo').textContent = p ? '✏️ Editar presupuesto' : '➕ Nuevo presupuesto';
+  document.getElementById('pr-guardar').textContent = p ? '💾 Guardar cambios' : '💾 Guardar presupuesto';
+  document.getElementById('pr-form').style.display = '';
+  document.getElementById('pr-nuevo-btn').style.display = 'none';
+  document.getElementById('pr-form').scrollIntoView({ block: 'center' });
+}
+function prNuevo() { prAbrirForm(null); }
+function prCerrarForm() {
+  prEditando = null;
+  document.getElementById('pr-form').style.display = 'none';
+  document.getElementById('pr-nuevo-btn').style.display = '';
+}
+function prCambioEnvio() {
+  const f = document.getElementById('pr-envio').value;
+  if (prProxAuto && f) document.getElementById('pr-prox').value = prSumarDias(f, 2);
+}
+function prGuardar() {
+  const v = id => document.getElementById(id).value.trim();
+  let cliente = v('pr-cliente');
+  if (!cliente) { showToast('Ingresá el cliente'); return; }
+  // Si lo escribieron a mano y ya existe, se usa el nombre de la lista
+  const existente = prClientes().find(n => normalizarBusqueda(n) === normalizarBusqueda(cliente));
+  if (existente) cliente = existente;
+  const detalle = v('pr-detalle');
+  if (!detalle) { showToast('Anotá qué presupuestaste'); return; }
+  const monto = prParseMonto(v('pr-monto'));
+  if (Number.isNaN(monto)) { showToast('Revisá el monto'); return; }
+  const fechaEnvio = v('pr-envio') || prHoy();
+  const vence = v('pr-vence');
+  if (vence && vence < fechaEnvio) { showToast('El vencimiento es anterior al envío'); return; }
+
+  const arr = getPresupuestos();
+  const previo = prEditando ? arr.find(p => p.id === prEditando) : null;
+  const prox = v('pr-prox');
+  if ((!previo || prAbierto(previo)) && !prox) { showToast('Poné la fecha del próximo contacto'); return; }
+
+  const telRaw = v('pr-tel');
+  if (telRaw) {
+    const tel = normalizarTelefono(telRaw);
+    if (!tel) { showToast('⚠️ Revisá el número: código de área + número, 10 dígitos'); return; }
+    const tels = getTelefonos(); tels[cliente] = tel; saveTelefonos(tels);
+  }
+  const zona = prFormZona || getZonaDeLocalidad(getLocalidadCliente(cliente)) || '';
+  const datos = { cliente, zona, detalle, moneda: prFormMoneda, monto, fechaEnvio, vence, prox };
+  if (previo) Object.assign(previo, datos);
+  else arr.push({ id: prNuevoId(), ...datos, estado: 'enviado', motivoPerdida: '', notaCierre: '', fechaCierre: '', contactos: [], creado: new Date().toISOString() });
+  if (!savePresupuestos(arr)) return;
+  prCerrarForm();
+  if (!previo) { prFiltro = 'abiertos'; prZonaSel = 'all'; }
+  renderPresupuestos();
+  showToast(previo ? '✅ Cambios guardados' : '✅ Presupuesto guardado');
+}
+
+// ── Lista y resumen ──
+function prSetFiltro(f) { prFiltro = f; renderPresupuestos(); }
+function prSetZona(z) { prZonaSel = z; renderPresupuestos(); }
+function prCalendarUrl(p) {
+  const dia = (p.prox && p.prox >= prHoy()) ? p.prox : prHoy();
+  const d = dia.replace(/-/g, '');
+  const tel = telefonoParaMostrar(getTelefonos()[p.cliente] || '');
+  const detalles = [p.detalle, p.monto != null ? 'Monto: ' + prPlata(p.monto, p.moneda) : '',
+    'Enviado: ' + fmtDate(p.fechaEnvio), p.vence ? 'Vence: ' + fmtDate(p.vence) : '', tel ? 'Tel: ' + tel : ''].filter(Boolean).join('\n');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent('Presupuesto: contactar a ' + p.cliente)
+    + '&dates=' + d + 'T090000/' + d + 'T093000'
+    + '&ctz=America/Argentina/Buenos_Aires'
+    + '&details=' + encodeURIComponent(detalles);
+}
+function prTarjeta(p) {
+  const s = prSemaforo(p);
+  const loc = getLocalidadCliente(p.cliente);
+  const lugar = [loc, p.zona && ZONAS[p.zona] ? ZONAS[p.zona].nombre : ''].filter(Boolean).join(' · ');
+  const abierto = prAbierto(p);
+  const hist = (p.contactos || []).slice().reverse().map(c => {
+    const via = PR_VIAS[c.via] || { ico: '•', label: c.via };
+    return `<div class="pr-hist">${via.ico} <b>${via.label}</b> · ${fmtDate(c.fecha)} ${c.hora || ''}${c.nota ? '<br>' + prEsc(c.nota) : ''}</div>`;
+  }).join('');
+  return `<div class="pr-card ${s.color}">
+    <div class="pr-head"><div class="pr-cliente">${prEsc(p.cliente)}</div>${p.monto != null ? `<div class="pr-monto">${prPlata(p.monto, p.moneda)}</div>` : ''}</div>
+    ${lugar ? `<div class="pr-sub">📍 ${prEsc(lugar)}</div>` : ''}
+    <div class="pr-sub">Enviado ${prCorta(p.fechaEnvio)}${p.vence ? ' · Vence ' + prCorta(p.vence) : ''} · <b>${PR_ESTADOS[p.estado]}</b></div>
+    <div class="pr-detalle">${prEsc(p.detalle)}</div>
+    <div class="pr-alerta ${s.color}">${prEsc(s.texto)}</div>
+    ${p.notaCierre ? `<div class="pr-sub">${prEsc(p.notaCierre)}</div>` : ''}
+    ${abierto ? `<div class="pr-btns">
+      <button class="wa" onclick="prWhatsApp('${p.id}')">💬<br>WhatsApp</button>
+      <button class="tel" onclick="prLlamar('${p.id}')">📞<br>Llamar</button>
+      <button onclick="prModalContacto('${p.id}')">📝<br>Anotar</button>
+      <a href="${prCalendarUrl(p)}" target="_blank" rel="noopener">📅<br>Calendario</a>
+      <button class="ok" onclick="prModalCierre('${p.id}','ganado')">✅<br>Ganado</button>
+      <button class="no" onclick="prModalCierre('${p.id}','perdido')">✕<br>Perdido</button>
+      <button onclick="prEditar('${p.id}')">✏️<br>Editar</button>
+      <button onclick="prEliminar('${p.id}')">🗑<br>Borrar</button>
+    </div>` : `<div class="pr-btns">
+      <button onclick="prReabrir('${p.id}')">↩️<br>Reabrir</button>
+      <button onclick="prEditar('${p.id}')">✏️<br>Editar</button>
+      <button onclick="prEliminar('${p.id}')">🗑<br>Borrar</button>
+    </div>`}
+    ${hist ? `<details><summary>Contactos hechos (${p.contactos.length})</summary>${hist}</details>` : ''}
+  </div>`;
+}
+function renderPresupuestos() {
+  const todos = getPresupuestos();
+  const enZona = todos.filter(p => prZonaSel === 'all' || p.zona === prZonaSel);
+  const abiertos = enZona.filter(prAbierto);
+  const ganados = enZona.filter(p => p.estado === 'ganado');
+  const perdidos = enZona.filter(p => p.estado === 'perdido');
+  const suma = m => abiertos.reduce((s, p) => s + (p.moneda === m && p.monto != null ? p.monto : 0), 0);
+  const cerrados = ganados.length + perdidos.length;
+  const urgentes = abiertos.filter(p => prSemaforo(p).orden < 2).length;
+  document.getElementById('pr-nums').innerHTML = [
+    [urgentes, 'Para atender'],
+    [cerrados ? Math.round(ganados.length / cerrados * 100) + '%' : '–', 'Ganados (de los cerrados)'],
+    [prPlata(suma('ARS'), 'ARS'), 'Abierto en pesos'],
+    [prPlata(suma('USD'), 'USD'), 'Abierto en dólares'],
+  ].map(([v, l]) => `<div class="num-box"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+
+  document.getElementById('pr-filtros').innerHTML = [['abiertos', 'Abiertos', abiertos], ['ganado', 'Ganados', ganados], ['perdido', 'Perdidos', perdidos]]
+    .map(([k, l, a]) => `<button class="${prFiltro === k ? 'on' : ''}" onclick="prSetFiltro('${k}')">${l} (${a.length})</button>`).join('');
+  prZonaChips('pr-zonas', prZonaSel, 'prSetZona', true);
+
+  let lista = prFiltro === 'abiertos' ? abiertos : prFiltro === 'ganado' ? ganados : perdidos;
+  lista = lista.slice().sort((a, b) => prFiltro === 'abiertos'
+    ? prSemaforo(a).orden - prSemaforo(b).orden || (a.prox || '').localeCompare(b.prox || '') || (b.monto || 0) - (a.monto || 0)
+    : (b.fechaCierre || '').localeCompare(a.fechaCierre || ''));
+  document.getElementById('pr-lista').innerHTML = lista.length
+    ? lista.map(prTarjeta).join('')
+    : `<div class="empty-state" style="padding:24px;"><div class="ico">📄</div><div>No hay presupuestos ${prFiltro === 'abiertos' ? 'abiertos' : prFiltro + 's'}${prZonaSel === 'all' ? '' : ' en esta zona'}.</div></div>`;
+  prActualizarBadge();
+}
+
+// ── Acciones ──
+function prBuscar(id) { return getPresupuestos().find(p => p.id === id); }
+function prCambiar(id, fn) {
+  const arr = getPresupuestos();
+  const p = arr.find(x => x.id === id);
+  if (!p) return false;
+  fn(p);
+  const ok = savePresupuestos(arr);
+  renderPresupuestos();
+  return ok;
+}
+function prEditar(id) { const p = prBuscar(id); if (p) prAbrirForm(p); }
+function prEliminar(id) {
+  const p = prBuscar(id);
+  if (!p || !confirm(`¿Borrar el presupuesto de ${p.cliente}?\nSi no se concretó, conviene marcarlo como Perdido.`)) return;
+  savePresupuestos(getPresupuestos().filter(x => x.id !== id));
+  if (prEditando === id) prCerrarForm();
+  renderPresupuestos();
+  showToast('Presupuesto borrado');
+}
+function prMensaje(p) {
+  const hoy = prHoy();
+  let que = p.detalle.split('\n')[0];
+  if (que.length > 60) que = que.slice(0, 57) + '...';
+  const base = `Hola, ¿pudiste ver el presupuesto del ${prCorta(p.fechaEnvio)} (${que})?`;
+  if (p.vence && p.vence >= hoy && prDiasEntre(hoy, p.vence) <= 3) return `${base} El precio se mantiene hasta el ${prCorta(p.vence)}, ¿te lo reservo?`;
+  return `${base} ¿Te quedó alguna duda?`;
+}
+// WhatsApp y llamada usan las mismas funciones que Contactos, así cuentan en el reporte
+function prWhatsApp(id) {
+  const p = prBuscar(id); if (!p) return;
+  const reg = abrirWhatsApp(p.cliente, 'Presupuesto', prMensaje(p));
+  if (reg) prAnotarAutomatico(id, reg, 'wa_env');
+}
+function prLlamar(id) {
+  const p = prBuscar(id); if (!p) return;
+  const reg = llamarCliente(p.cliente, 'Presupuesto', '');
+  if (reg) prAnotarAutomatico(id, reg, 'llamada');
+}
+function prAnotarAutomatico(id, reg, via) {
+  prCambiar(id, p => p.contactos.push({ id: reg.id, fecha: reg.fecha, hora: reg.hora, via, nota: '' }));
+  prModalContacto(id, reg.id);
+}
+
+function prAbrirModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+let prModalVia = 'llamada';
+let prModalEstado = 'enviado';
+// regId: contacto que ya quedó registrado al tocar WhatsApp o Llamar
+function prModalContacto(id, regId) {
+  const p = prBuscar(id); if (!p) return;
+  prModalVia = 'llamada';
+  prModalEstado = p.estado;
+  prAbrirModal(`
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">${regId ? '¿Cómo quedó?' : '📝 Anotar contacto'} · ${prEsc(p.cliente)}</div>
+    ${regId ? '' : `<label>Tipo</label><div class="ct-chips" id="prm-vias"></div>`}
+    <label for="prm-nota">Qué te dijo (opcional)</label>
+    <textarea class="notes-area" id="prm-nota" placeholder="Ej: lo consulta con el socio"></textarea>
+    <label>Estado</label>
+    <div class="ct-chips" id="prm-estados"></div>
+    <label for="prm-prox">Próximo contacto</label>
+    <div class="ct-chips" style="margin-bottom:8px;">
+      ${[[1, 'Mañana'], [2, 'En 2 días'], [7, 'En 7 días'], [15, 'En 15 días']].map(([n, l]) =>
+        `<button class="ct-chip" onclick="document.getElementById('prm-prox').value='${prSumarDias(prHoy(), n)}'">${l}</button>`).join('')}
+    </div>
+    <input type="date" id="prm-prox" value="${p.prox && p.prox > prHoy() ? p.prox : prSumarDias(prHoy(), 5)}">
+    <button class="save-btn" style="margin-top:14px;" onclick="prGuardarContacto('${id}','${regId || ''}')">💾 Guardar</button>
+    ${regId ? `<button class="link-btn" style="color:var(--red);" onclick="prDescartarContacto('${id}','${regId}')">No lo contacté: borrar este registro</button>` : ''}
+  `);
+  if (!regId) prModalVias();
+  prModalEstados();
+}
+function prModalVias(v) {
+  if (v) prModalVia = v;
+  document.getElementById('prm-vias').innerHTML = Object.entries(PR_VIAS).map(([k, x]) =>
+    `<button class="ct-chip ${k === prModalVia ? 'sel' : ''}" onclick="prModalVias('${k}')">${x.ico} ${x.label}</button>`).join('');
+}
+function prModalEstados(e) {
+  if (e) prModalEstado = e;
+  document.getElementById('prm-estados').innerHTML = ['enviado', 'conversacion'].map(k =>
+    `<button class="ct-chip ${k === prModalEstado ? 'sel' : ''}" onclick="prModalEstados('${k}')">${PR_ESTADOS[k]}</button>`).join('');
+}
+// Una visita anotada acá también se marca en las visitas del mapa
+function prMarcarVisita(cliente, fecha) {
+  if (!MAPA_CLIENTES.some(c => c.cliente === cliente)) return;
+  const v = getVisitas();
+  if (!v[cliente]) v[cliente] = [];
+  if (v[cliente].includes(fecha)) return;
+  v[cliente].push(fecha);
+  mapaVisitas = v;
+  saveVisitas();
+  if (leafletMap) refrescarMapa();
+}
+function prGuardarContacto(id, regId) {
+  const nota = document.getElementById('prm-nota').value.trim();
+  const prox = document.getElementById('prm-prox').value;
+  if (!prox) { showToast('Poné la fecha del próximo contacto'); return; }
+  const p = prBuscar(id); if (!p) return;
+  let nuevo = null;
+  if (regId) {
+    if (nota) saveContactos(getContactos().map(c => c.id === regId ? { ...c, nota } : c));
+  } else {
+    if (prModalVia === 'visita') {
+      prMarcarVisita(p.cliente, prHoy());
+      nuevo = { id: prNuevoId(), fecha: prHoy(), hora: horaActual(), via: 'visita', nota };
+    } else {
+      const reg = registrarContacto(p.cliente, prModalVia, 'Presupuesto', nota, prHoy());
+      nuevo = { id: reg.id, fecha: reg.fecha, hora: reg.hora, via: prModalVia, nota };
+    }
+  }
+  prCambiar(id, x => {
+    if (nuevo) x.contactos.push(nuevo);
+    else if (nota) { const c = x.contactos.find(c => c.id === regId); if (c) c.nota = nota; }
+    x.estado = prModalEstado;
+    x.prox = prox;
+  });
+  refrescarVistasContacto();
+  closeModal();
+  showToast('✅ Seguimiento guardado');
+}
+function prDescartarContacto(id, regId) {
+  borrarContactoPorId(regId);
+  prCambiar(id, p => { p.contactos = p.contactos.filter(c => c.id !== regId); });
+  closeModal();
+  showToast('Registro borrado');
+}
+
+let prModalMotivo = '';
+function prModalCierre(id, estado) {
+  const p = prBuscar(id); if (!p) return;
+  prModalMotivo = '';
+  prAbrirModal(`
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">${estado === 'ganado' ? '✅ Presupuesto ganado' : '✕ Presupuesto perdido'} · ${prEsc(p.cliente)}</div>
+    ${estado === 'perdido' ? `<label>Motivo</label><div class="ct-chips" id="prm-motivos"></div>` : ''}
+    <label for="prm-cierre-nota">Nota (opcional)</label>
+    <input type="text" id="prm-cierre-nota" placeholder="${estado === 'ganado' ? 'Ej: entrega la semana que viene' : 'Ej: le ofrecieron más plazo'}">
+    <button class="save-btn" style="margin-top:14px;" onclick="prCerrarPresupuesto('${id}','${estado}')">Confirmar</button>
+  `);
+  if (estado === 'perdido') prModalMotivos();
+}
+function prModalMotivos(m) {
+  if (m) prModalMotivo = m;
+  document.getElementById('prm-motivos').innerHTML = PR_MOTIVOS.map(x =>
+    `<button class="ct-chip ${x === prModalMotivo ? 'sel' : ''}" onclick="prModalMotivos('${x}')">${x}</button>`).join('');
+}
+function prCerrarPresupuesto(id, estado) {
+  if (estado === 'perdido' && !prModalMotivo) { showToast('Elegí el motivo'); return; }
+  const nota = document.getElementById('prm-cierre-nota').value.trim();
+  prCambiar(id, p => {
+    p.estado = estado; p.fechaCierre = prHoy(); p.notaCierre = nota;
+    p.motivoPerdida = estado === 'perdido' ? prModalMotivo : ''; p.prox = '';
+  });
+  closeModal();
+  showToast(estado === 'ganado' ? '🎉 Marcado como ganado' : 'Marcado como perdido');
+}
+function prReabrir(id) {
+  prFiltro = 'abiertos';
+  prCambiar(id, p => { p.estado = 'conversacion'; p.fechaCierre = ''; p.motivoPerdida = ''; p.notaCierre = ''; p.prox = prHoy(); });
+  showToast('Presupuesto reabierto: contactar hoy');
+}
+
+function exportPresupuestosCSV() {
+  const arr = getPresupuestos().slice().sort((a, b) => a.fechaEnvio.localeCompare(b.fechaEnvio));
+  if (!arr.length) { showToast('Todavía no cargaste presupuestos'); return; }
+  const rows = [['Enviado', 'Cliente', 'Localidad', 'Zona', 'Detalle', 'Moneda', 'Monto', 'Vence', 'Estado', 'Motivo pérdida', 'Nota de cierre', 'Fecha de cierre', 'Próximo contacto', 'Cant. contactos', 'Último contacto']];
+  arr.forEach(p => {
+    const ult = (p.contactos || []).map(c => c.fecha).sort().pop() || '';
+    rows.push([fmtDate(p.fechaEnvio), p.cliente, getLocalidadCliente(p.cliente), p.zona && ZONAS[p.zona] ? ZONAS[p.zona].nombre : '', p.detalle,
+      p.moneda, p.monto == null ? '' : p.monto.toFixed(2), fmtDate(p.vence), PR_ESTADOS[p.estado], p.motivoPerdida, p.notaCierre,
+      fmtDate(p.fechaCierre), fmtDate(p.prox), (p.contactos || []).length, fmtDate(ult)].map(csvField));
+  });
+  downloadCSV(rows, 'presupuestos_' + prHoy() + '.csv');
+}
+
+prActualizarBadge();
+document.getElementById('pr-prox').addEventListener('input', () => { prProxAuto = false; });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (document.getElementById('page-presup').classList.contains('active')) renderPresupuestos();
+  else prActualizarBadge();
+});
 
 // ===== APPLE TOUCH ICON (generado dinámicamente) =====
 (function() {
