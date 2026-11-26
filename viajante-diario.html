@@ -221,8 +221,18 @@
   .zb-v { width: 30px; text-align: right; font-weight: 800; }
   #vi-barras { margin-bottom: 12px; }
   header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .header-btns { display: flex; gap: 6px; flex-shrink: 0; }
+  .header-btn.principal { background: white; color: var(--green); }
+  .ac-nuevo { color: var(--green); font-weight: 700; font-size: 14px; }
+  #pr-pdf-aviso { background: var(--green-pale); border-radius: 10px; padding: 12px; font-size: 13px; margin-bottom: 12px; }
+  #pr-pdf-aviso > div, #pr-pdf-nuevo > div { margin-top: 5px; }
+  #pr-pdf-aviso .export-btn { background: white; margin: 8px 0 0; }
+  .pr-detalle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; }
+  .pr-detalle.abierto { display: block; }
+  .grid-2 > div { min-width: 0; }
+  .grid-2 input[type="date"] { min-width: 0; max-width: 100%; padding-left: 8px; padding-right: 8px; }
   .header-btn { background: rgba(255,255,255,0.16); color: white; border: none; border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
-  @media (max-width: 340px) { header h1 { font-size: 16px; } .header-btn { padding: 8px 9px; font-size: 11px; } }
+  @media (max-width: 340px) { header h1 { font-size: 15px; } header p { font-size: 12px; } header { padding-left: 12px; padding-right: 12px; } .header-btn { padding: 8px 9px; font-size: 11px; } }
 </style>
 </head>
 <body>
@@ -232,7 +242,10 @@
     <h1>🌿 Diario del Viajante</h1>
     <p id="header-date"></p>
   </div>
-  <button class="header-btn" onclick="showPage('respaldo')">💾 Respaldo</button>
+  <div class="header-btns">
+    <button class="header-btn principal" id="btn-nuevo-cliente" onclick="abrirNuevoCliente()">➕ Cliente</button>
+    <button class="header-btn" id="btn-respaldo" onclick="showPage('respaldo')" aria-label="Respaldo" title="Respaldo">💾</button>
+  </div>
 </header>
 
 <!-- PWA Install Banner (iOS) -->
@@ -267,8 +280,12 @@
 
   <button class="save-btn" id="pr-nuevo-btn" style="margin:0 0 14px;" onclick="prNuevo()">➕ Nuevo presupuesto</button>
 
+  <button class="export-btn" id="pr-pdf-btn" style="margin:0 0 14px;background:white;" onclick="document.getElementById('pr-pdf-file').click()">📄 Cargar PDF</button>
+  <input type="file" id="pr-pdf-file" accept="application/pdf,.pdf" style="display:none;" onchange="prLeerPdf(this)">
+
   <div class="card" id="pr-form" style="display:none;">
     <div class="card-title" id="pr-form-titulo">➕ Nuevo presupuesto</div>
+    <div id="pr-pdf-aviso" style="display:none;"></div>
     <div class="ac-search-wrap">
       <input type="text" id="pr-cliente" placeholder="🔍 Cliente (o escribí uno nuevo)" autocomplete="off"
         oninput="prFiltrar(this.value)" onfocus="prFiltrar(this.value)" onblur="setTimeout(prCerrar,150)">
@@ -319,7 +336,6 @@
     <label for="vi-nota">Nota o pedido (opcional)</label>
     <textarea class="notes-area" id="vi-nota" placeholder="Ej: pidió precio de Tranidex"></textarea>
     <button class="save-btn" onclick="viGuardar()">💾 Guardar visita</button>
-    <button class="link-btn" onclick="abrirNuevoCliente()">➕ Cliente nuevo</button>
     <button class="link-btn" onclick="abrirCargaMasivaVisitas()">📋 Cargar visitas en bloque</button>
   </div>
 
@@ -719,10 +735,10 @@ function viFiltrar(valor) {
   viClienteSel = '';
   const q = normalizarBusqueda(valor);
   const lista = todosLosClientes().filter(n => !q || normalizarBusqueda(n).includes(q) || normalizarBusqueda(getLocalidadCliente(n)).includes(q)).slice(0, 40);
-  cont.innerHTML = lista.length
+  cont.innerHTML = (lista.length
     ? lista.map(n => { const loc = getLocalidadCliente(n); return `<div class="ac-search-item" onmousedown="event.preventDefault();viSeleccionar('${escAttr(n)}')">
         <div class="ac-search-name">${prEsc(n)}</div>${loc ? `<div class="ac-search-loc">📍 ${prEsc(loc)}</div>` : ''}</div>`; }).join('')
-    : '<div class="ac-search-empty">Sin resultados. Agregalo con “Cliente nuevo”.</div>';
+    : '<div class="ac-search-empty">Sin resultados</div>') + itemClienteNuevo(valor, 'vi');
   cont.classList.add('open');
 }
 function viSeleccionar(enc) {
@@ -873,25 +889,38 @@ function exportVisitasCSV() {
 }
 
 // ── Cliente nuevo ──
-function abrirNuevoCliente() {
+// destino: buscador desde el que se pidió ('pr', 'vi', 'ag' o 'ct'), para dejarlo elegido al guardar
+let ncDestino = '';
+function itemClienteNuevo(valor, destino) {
+  const t = (valor || '').trim();
+  if (!t) return '';
+  const q = normalizarBusqueda(t);
+  if (todosLosClientes().some(n => normalizarBusqueda(n) === q)) return '';
+  return `<div class="ac-search-item ac-nuevo" onmousedown="event.preventDefault()" onclick="abrirNuevoCliente('${destino}','${escAttr(t)}')">➕ Cargar “${prEsc(t)}” como cliente nuevo</div>`;
+}
+function abrirNuevoCliente(destino, nombreEnc) {
+  ncDestino = destino || '';
+  if (document.activeElement) document.activeElement.blur();
+  document.querySelectorAll('.ac-search-results').forEach(c => c.classList.remove('open'));
   const agregados = getClientesExtra();
   prAbrirModal(`
     <button class="modal-close" onclick="closeModal()">×</button>
     <div class="modal-title">➕ Cliente nuevo</div>
     <label>Nombre del cliente</label>
-    <input type="text" id="nc-nombre" placeholder="Nombre o razón social">
+    <input type="text" id="nc-nombre" placeholder="Nombre o razón social" value="${prEsc(nombreEnc ? decodeURIComponent(nombreEnc) : '')}">
     <label>Localidad</label>
     <input type="text" id="nc-localidad" placeholder="Ej: Eldorado" list="nc-localidades">
     <datalist id="nc-localidades">${[...new Set(MAPA_CLIENTES.map(c => c.localidad))].sort().map(l => `<option value="${prEsc(l)}">`).join('')}</datalist>
     <label>WhatsApp (opcional)</label>
-    <input type="tel" id="nc-tel" placeholder="Ej: 3764 123456 (sin 0 ni 15)">
+    <input type="tel" id="nc-tel" placeholder="Ej: 3764 123456 (sin 0 ni 15)" value="${destino === 'pr' ? prEsc(document.getElementById('pr-tel').value) : ''}">
     <button class="save-btn" style="margin-top:16px;" onclick="guardarNuevoCliente()">✅ Guardar cliente</button>
     ${agregados.length ? `<label style="margin-top:18px;">Clientes que agregaste</label>${agregados.map(c => `<div class="ct-log-item"><div class="txt"><b>${prEsc(c.cliente)}</b><span class="meta">${prEsc(c.localidad)}</span></div>
       <button class="ac-del" onclick="eliminarClienteExtra('${escAttr(c.cliente)}')" aria-label="Eliminar cliente">🗑</button></div>`).join('')}` : ''}
   `);
 }
 function guardarNuevoCliente() {
-  const nombre = document.getElementById('nc-nombre').value.trim();
+  // Las comillas dobles rompen los botones de las listas
+  const nombre = document.getElementById('nc-nombre').value.replace(/"/g, "'").trim();
   const localidad = document.getElementById('nc-localidad').value.trim();
   if (!nombre) { showToast('Ingresá el nombre del cliente'); return; }
   if (!localidad) { showToast('Ingresá la localidad'); return; }
@@ -906,9 +935,19 @@ function guardarNuevoCliente() {
   MAPA_CLIENTES.push(nuevo);
   saveClientesExtra(getClientesExtra().concat(nuevo));
   closeModal();
-  viSeleccionar(escAttr(nombre));
-  renderVisitas();
+  usarClienteNuevo(nombre);
   showToast('✅ Cliente agregado');
+}
+function usarClienteNuevo(nombre) {
+  const activa = document.querySelector('.page.active').id.replace('page-', '');
+  const destino = ncDestino || (activa === 'visitas' ? 'vi' : '');
+  ncDestino = '';
+  if (activa === 'agenda') { poblarSelectClientes(); renderContactosDia(); }
+  if (destino === 'pr') prSeleccionar(escAttr(nombre));
+  if (destino === 'vi') viSeleccionar(escAttr(nombre));
+  if (destino === 'ag') seleccionarClienteAgenda(nombre);
+  if (destino === 'ct') ctSeleccionar(escAttr(nombre));
+  if (activa === 'visitas') renderVisitas();
 }
 function eliminarClienteExtra(enc) {
   const nombre = decodeURIComponent(enc);
@@ -1298,6 +1337,7 @@ function filtrarClientesAgenda(valor) {
     cont.innerHTML=(deZona.length?`<div class="ac-search-group">⭐ ${ZONAS[agendaZonaActiva].nombre}</div>${deZona.map(renderItem).join('')}`:'')+
       (otros.length?`<div class="ac-search-group">Otros clientes</div>${otros.map(renderItem).join('')}`:'');
   } else { cont.innerHTML=filtrados.map(renderItem).join(''); }
+  cont.insertAdjacentHTML('beforeend', itemClienteNuevo(valor, 'ag'));
   cont.classList.add('open');
 }
 
@@ -1555,13 +1595,13 @@ function ctFiltrar(valor) {
     const loc = getLocalidadCliente(n);
     return loc && normalizarBusqueda(loc).includes(q);
   }).slice(0, 40);
-  cont.innerHTML = lista.length
+  cont.innerHTML = (lista.length
     ? lista.map(n => {
         const loc = getLocalidadCliente(n);
         return `<div class="ac-search-item" onmousedown="event.preventDefault();ctSeleccionar('${escAttr(n)}')">
           <div class="ac-search-name">${resaltar(n, valor)}</div>${loc ? `<div class="ac-search-loc">📍 ${resaltar(loc, valor)}</div>` : ''}</div>`;
       }).join('')
-    : '<div class="ac-search-empty">Sin resultados</div>';
+    : '<div class="ac-search-empty">Sin resultados</div>') + itemClienteNuevo(valor, 'ct');
   cont.classList.add('open');
 }
 function ctSeleccionar(enc) {
@@ -1940,18 +1980,20 @@ function prFiltrar(valor) {
     const loc = getLocalidadCliente(n);
     return `<div class="ac-search-item" onmousedown="event.preventDefault();prSeleccionar('${escAttr(n)}')">
       <div class="ac-search-name">${prEsc(n)}</div>${loc ? `<div class="ac-search-loc">📍 ${prEsc(loc)}</div>` : ''}</div>`;
-  }).join('');
-  cont.classList.toggle('open', lista.length > 0);
+  }).join('') + itemClienteNuevo(valor, 'pr');
+  cont.classList.toggle('open', cont.innerHTML !== '');
 }
 function prSeleccionar(enc) {
   prClienteElegido = decodeURIComponent(enc);
   document.getElementById('pr-cliente').value = prClienteElegido;
   prAutocompletarCliente(prClienteElegido);
+  pdfClienteElegido();
   prCerrar();
 }
 function prCerrar() { document.getElementById('pr-resultados').classList.remove('open'); }
 
 function prAbrirForm(p) {
+  pdfLimpiar();
   prEditando = p ? p.id : null;
   prClienteElegido = p ? p.cliente : '';
   prProxAuto = !p;
@@ -1974,6 +2016,7 @@ function prAbrirForm(p) {
 }
 function prNuevo() { prAbrirForm(null); }
 function prCerrarForm() {
+  pdfLimpiar();
   prEditando = null;
   document.getElementById('pr-form').style.display = 'none';
   document.getElementById('pr-nuevo-btn').style.display = '';
@@ -2010,6 +2053,15 @@ function prGuardar() {
   }
   const zona = prFormZona || getZonaDeLocalidad(getLocalidadCliente(cliente)) || '';
   const datos = { cliente, zona, detalle, moneda: prFormMoneda, monto, fechaEnvio, vence, prox };
+  if (prPdf) {
+    datos.numero = prPdf.numero;
+    datos.codCliente = prPdf.codigo;
+    if (prPdf.codigo) {
+      const codigos = getCodigosCliente();
+      codigos[prPdf.codigo] = { cliente, clave: pdfClave(prPdf.nombre) };
+      localStorage.setItem(PR_CODIGOS_KEY, JSON.stringify(codigos));
+    }
+  }
   if (previo) Object.assign(previo, datos);
   else arr.push({ id: prNuevoId(), ...datos, estado: 'enviado', motivoPerdida: '', notaCierre: '', fechaCierre: '', contactos: [], creado: new Date().toISOString() });
   if (!savePresupuestos(arr)) return;
@@ -2047,7 +2099,7 @@ function prTarjeta(p) {
     <div class="pr-head"><div class="pr-cliente">${prEsc(p.cliente)}</div>${p.monto != null ? `<div class="pr-monto">${prPlata(p.monto, p.moneda)}</div>` : ''}</div>
     ${lugar ? `<div class="pr-sub">📍 ${prEsc(lugar)}</div>` : ''}
     <div class="pr-sub">Enviado ${prCorta(p.fechaEnvio)}${p.vence ? ' · Vence ' + prCorta(p.vence) : ''} · <b>${PR_ESTADOS[p.estado]}</b></div>
-    <div class="pr-detalle">${prEsc(p.detalle)}</div>
+    <div class="pr-detalle" onclick="this.classList.toggle('abierto')">${prEsc(p.detalle)}</div>
     <div class="pr-alerta ${s.color}">${prEsc(s.texto)}</div>
     ${p.notaCierre ? `<div class="pr-sub">${prEsc(p.notaCierre)}</div>` : ''}
     ${abierto ? `<div class="pr-btns">
@@ -2121,7 +2173,9 @@ function prMensaje(p) {
   const hoy = prHoy();
   let que = p.detalle.split('\n')[0];
   if (que.length > 60) que = que.slice(0, 57) + '...';
-  const base = `Hola, ¿pudiste ver el presupuesto del ${prCorta(p.fechaEnvio)} (${que})?`;
+  const base = p.numero
+    ? `Hola, ¿pudiste ver el presupuesto Nº ${p.numero} del ${prCorta(p.fechaEnvio)}?`
+    : `Hola, ¿pudiste ver el presupuesto del ${prCorta(p.fechaEnvio)} (${que})?`;
   if (p.vence && p.vence >= hoy && prDiasEntre(hoy, p.vence) <= 3) return `${base} El precio se mantiene hasta el ${prCorta(p.vence)}, ¿te lo reservo?`;
   return `${base} ¿Te quedó alguna duda?`;
 }
@@ -2254,18 +2308,244 @@ function prReabrir(id) {
 function exportPresupuestosCSV() {
   const arr = getPresupuestos().slice().sort((a, b) => a.fechaEnvio.localeCompare(b.fechaEnvio));
   if (!arr.length) { showToast('Todavía no cargaste presupuestos'); return; }
-  const rows = [['Enviado', 'Cliente', 'Localidad', 'Zona', 'Detalle', 'Moneda', 'Monto', 'Vence', 'Estado', 'Motivo pérdida', 'Nota de cierre', 'Fecha de cierre', 'Próximo contacto', 'Cant. contactos', 'Último contacto']];
+  const rows = [['Enviado', 'Cliente', 'Localidad', 'Zona', 'Detalle', 'Moneda', 'Monto', 'Vence', 'Estado', 'Motivo pérdida', 'Nota de cierre', 'Fecha de cierre', 'Próximo contacto', 'Cant. contactos', 'Último contacto', 'Nº presupuesto']];
   arr.forEach(p => {
     const ult = (p.contactos || []).map(c => c.fecha).sort().pop() || '';
     rows.push([fmtDate(p.fechaEnvio), p.cliente, getLocalidadCliente(p.cliente), p.zona && ZONAS[p.zona] ? ZONAS[p.zona].nombre : '', p.detalle,
       p.moneda, p.monto == null ? '' : p.monto.toFixed(2), fmtDate(p.vence), PR_ESTADOS[p.estado], p.motivoPerdida, p.notaCierre,
-      fmtDate(p.fechaCierre), fmtDate(p.prox), (p.contactos || []).length, fmtDate(ult)].map(csvField));
+      fmtDate(p.fechaCierre), fmtDate(p.prox), (p.contactos || []).length, fmtDate(ult), p.numero || ''].map(csvField));
   });
   downloadCSV(rows, 'presupuestos_' + prHoy() + '.csv');
 }
 
 prActualizarBadge();
 document.getElementById('pr-prox').addEventListener('input', () => { prProxAuto = false; });
+// ===== PRESUPUESTO DESDE PDF (formato del sistema de AGDP) =====
+// El PDF se lee en el teléfono; solo se descarga el lector (pdf.js)
+const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/';
+const PR_CODIGOS_KEY = 'viajante_codigos_cliente';
+let pdfLib = null;
+let pdfFallos = 0;
+let prPdf = null;          // datos del PDF que está en el formulario
+let pdfLeyendo = false;
+
+async function pdfCargarLector() {
+  if (pdfLib) return pdfLib;
+  try {
+    // Si falló antes, se pide con otra dirección para que el navegador lo reintente
+    const lib = await import(PDFJS_BASE + 'pdf.min.mjs' + (pdfFallos ? '?r=' + pdfFallos : ''));
+    lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.mjs';
+    pdfLib = lib;
+    return lib;
+  } catch (e) {
+    pdfFallos++;
+    throw e;
+  }
+}
+
+// Junta los textos que están a la misma altura, de izquierda a derecha
+function pdfLineas(items) {
+  const textos = items.filter(i => i.str && i.str.trim())
+    .map(i => ({ s: i.str.trim(), x: i.transform[4], y: i.transform[5], fin: i.transform[4] + i.width }))
+    .sort((a, b) => b.y - a.y || a.x - b.x);
+  const lineas = [];
+  textos.forEach(t => {
+    const l = lineas[lineas.length - 1];
+    if (l && l.y - t.y <= 4.5) l.items.push(t);
+    else lineas.push({ y: t.y, items: [t] });
+  });
+  lineas.forEach(l => {
+    l.items.sort((a, b) => a.x - b.x);
+    l.texto = l.items.reduce((txt, t, i) => txt + (i && t.x - l.items[i - 1].fin > 0.8 ? ' ' : '') + t.s, '').replace(/\s+/g, ' ').trim();
+  });
+  return lineas;
+}
+
+function pdfNumero(s) { return Number(String(s).replace(/\./g, '').replace(',', '.')); }
+
+function pdfInterpretar(lineas) {
+  const SIM = '(U\\$S|U\\$D|US\\$|USD|u\\$s|\\$)';
+  const NUM = '(-?[\\d.]+,\\d{2})';
+  const buscar = re => { for (const l of lineas) { const m = l.texto.match(re); if (m) return m; } return null; };
+  const campo = re => { const m = buscar(re); return m ? m[1].trim() : ''; };
+
+  const nombre = campo(/Nombre del cliente\s*:\s*(.*?)\s*(?:V[áa]lido hasta.*)?$/i);
+  const total = buscar(new RegExp('\\bTOTAL\\s*' + SIM + '\\s*' + NUM));
+  if (!nombre || !total) return null;
+
+  const num = buscar(/N\s*[º°o]\.?\s*de\D{0,20}?(\d+)\s*-\s*(\d+)/);
+  const fecha = buscar(/Fecha\s*:\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  const sub = buscar(new RegExp('Subtotal\\s*' + SIM + '\\s*' + NUM));
+
+  // Renglones de productos: entre el encabezado de la tabla y el pie
+  const reItem = new RegExp('^(-?[\\d.]+(?:,\\d+)?) (.+?) ?' + SIM + ' ?' + NUM + ' ?' + SIM + ' ?' + NUM + '$');
+  const items = [];
+  let enTabla = false, xUnidad = null;
+  lineas.forEach(l => {
+    if (/Cantidad/.test(l.texto) && /Descripci[óo]n/.test(l.texto)) {
+      enTabla = true;
+      const u = l.items.find(t => t.s === 'Unidad');
+      xUnidad = u ? u.x : null;
+      return;
+    }
+    if (!enTabla) return;
+    if (/Subtotal|vigencia|Plan Elegido|Gracias por/.test(l.texto)) { enTabla = false; return; }
+    const m = l.texto.match(reItem);
+    if (m) {
+      let desc = m[2].trim(), unidad = '';
+      const signo = l.items.find(t => t.s.startsWith('$') || /^U(\$S|\$D|S\$|SD)/i.test(t.s));
+      if (xUnidad !== null && signo) {
+        unidad = l.items.filter(t => t.x >= xUnidad - 12 && t.x < signo.x).map(t => t.s).join(' ');
+      }
+      if (!unidad) { const f = desc.match(/ (Unidad(?:es)?)$/i); if (f) unidad = f[1]; }
+      if (unidad && desc.endsWith(unidad)) desc = desc.slice(0, -unidad.length).trim();
+      items.push({ cantidad: pdfNumero(m[1]), desc, unidad, precio: pdfNumero(m[4]), importe: pdfNumero(m[6]) });
+    } else if (items.length && !l.texto.includes('$') && l.items[0].x > 60 && (xUnidad === null || l.items[0].x < xUnidad)) {
+      items[items.length - 1].desc += ' ' + l.texto;   // descripción en dos renglones
+    }
+  });
+
+  const avisos = [];
+  if (!items.length) avisos.push('No pude leer los productos: completalos a mano.');
+  else if (sub && Math.abs(items.reduce((s, i) => s + i.importe, 0) - pdfNumero(sub[2])) > 1) {
+    avisos.push('La suma de los productos no coincide con el subtotal: revisá que no falte ninguno.');
+  }
+
+  let fechaIso = '';
+  if (fecha) fechaIso = fecha[3] + '-' + fecha[2].padStart(2, '0') + '-' + fecha[1].padStart(2, '0');
+  else avisos.push('No pude leer la fecha.');
+
+  return {
+    nombre,
+    numero: num ? num[1] + '-' + num[2] : '',
+    fecha: fechaIso,
+    codigo: campo(/de Cliente\s*:\s*(\d+)/),
+    dias: Number(campo(/V[áa]lido hasta\s*:\s*(\d+)\s*d[íi]as/i)) || 0,
+    telefono: normalizarTelefono(campo(/tel[ée]fono\s*:\s*([+(]?\d[\d\s\-().]*)/i)),
+    localidad: campo(/Localidad\s*:\s*(.*?)\s*(?:Vendedor.*)?$/i).replace(/^\d+\s*-\s*/, ''),
+    plan: campo(/Plan Elegido\s+(.*?)\s*(?:TOTAL.*)?$/),
+    moneda: total[1] === '$' ? 'ARS' : 'USD',
+    total: pdfNumero(total[2]),
+    items,
+    avisos
+  };
+}
+
+function pdfDetalle(d) {
+  const signo = d.moneda === 'USD' ? 'US$ ' : '$ ';
+  const n = v => v.toLocaleString('es-AR', { maximumFractionDigits: 2 });
+  const renglones = d.items.map(i => {
+    const unidad = i.unidad && !/^unidad/i.test(i.unidad) ? ' ' + i.unidad : '';
+    return `${n(i.cantidad)}${unidad} × ${i.desc} · ${signo}${i.importe.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  });
+  const pie = [d.numero ? 'Nº ' + d.numero : '', d.plan, d.items.length ? 'importes sin IVA' : ''].filter(Boolean).join(' · ');
+  return renglones.concat(pie).join('\n');
+}
+
+function getCodigosCliente() {
+  try { return JSON.parse(localStorage.getItem(PR_CODIGOS_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+// Palabras del nombre sin puntos, tipo de sociedad ni orden
+function pdfClave(nombre) {
+  return normalizarBusqueda(nombre).replace(/\./g, '').split(/[^a-z0-9]+/)
+    .filter(p => p && !['sa', 'srl', 'sas', 'ltda', 'sh'].includes(p)).sort().join(' ');
+}
+function pdfBuscarCliente(d) {
+  const lista = prClientes();
+  // Cliente que ya elegiste antes para este mismo código del sistema
+  const guardado = d.codigo && getCodigosCliente()[d.codigo];
+  if (guardado && guardado.clave === pdfClave(d.nombre) && lista.includes(guardado.cliente)) return guardado.cliente;
+  const exacto = lista.find(n => normalizarBusqueda(n) === normalizarBusqueda(d.nombre));
+  if (exacto) return exacto;
+  const parecidos = lista.filter(n => pdfClave(n) === pdfClave(d.nombre));
+  return parecidos.length === 1 ? parecidos[0] : '';
+}
+
+function pdfLimpiar() {
+  prPdf = null;
+  document.getElementById('pr-detalle').style.height = '';
+  const a = document.getElementById('pr-pdf-aviso');
+  a.innerHTML = '';
+  a.style.display = 'none';
+}
+// Se llama cada vez que queda elegido un cliente en el formulario
+function pdfClienteElegido() {
+  if (!prPdf) return;
+  const tel = document.getElementById('pr-tel');
+  if (!tel.value && prPdf.telefono) tel.value = telefonoParaMostrar(prPdf.telefono);
+  const n = document.getElementById('pr-pdf-nuevo');
+  if (n) n.remove();
+}
+
+function pdfAplicar(d) {
+  const previo = d.numero ? getPresupuestos().find(p => p.numero === d.numero) : null;
+  if (previo && !confirm(`Ya cargaste el presupuesto Nº ${d.numero} (${previo.cliente}).\n¿Actualizarlo con este PDF?`)) return;
+  prAbrirForm(previo || null);
+  prPdf = d;
+  const val = (id, v) => { document.getElementById(id).value = v; };
+  const cliente = previo ? previo.cliente : pdfBuscarCliente(d);
+  if (cliente) {
+    prSeleccionar(escAttr(cliente));
+    if (previo && previo.zona) prElegirZona(previo.zona);
+  } else {
+    val('pr-cliente', d.nombre);
+    val('pr-tel', d.telefono ? telefonoParaMostrar(d.telefono) : '');
+    prFormZona = getZonaDeLocalidad(d.localidad) || '';
+    prZonaChips('pr-form-zonas', prFormZona, 'prElegirZona');
+  }
+  val('pr-detalle', pdfDetalle(d));
+  document.getElementById('pr-detalle').style.height = '190px';
+  val('pr-monto', d.total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  prMoneda(d.moneda);
+  const envio = d.fecha || prHoy();
+  val('pr-envio', envio);
+  val('pr-vence', d.dias ? prSumarDias(envio, d.dias) : '');
+  if (!previo) {
+    const prox = prSumarDias(envio, 2);
+    val('pr-prox', prox < prHoy() ? prHoy() : prox);
+  }
+  const aviso = document.getElementById('pr-pdf-aviso');
+  aviso.innerHTML = `<b>📄 Leído del PDF${d.numero ? ' · Nº ' + prEsc(d.numero) : ''}</b>
+    <div>Revisá los datos y tocá Guardar.</div>
+    ${cliente ? '' : `<div id="pr-pdf-nuevo"><div>⚠️ <b>${prEsc(d.nombre)}</b> no está en tu lista. Si figura con otro nombre, elegilo en el campo Cliente.</div>
+      <button type="button" class="export-btn" onclick="abrirNuevoCliente('pr','${escAttr(d.nombre)}')">➕ Cargarlo como cliente nuevo</button></div>`}
+    ${d.avisos.map(a => `<div>⚠️ ${prEsc(a)}</div>`).join('')}`;
+  aviso.style.display = '';
+  document.getElementById('pr-form').scrollIntoView({ block: 'start' });
+}
+
+async function prLeerPdf(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file || pdfLeyendo) return;
+  pdfLeyendo = true;
+  showToast('📄 Leyendo el PDF…');
+  try {
+    let lib;
+    try { lib = await pdfCargarLector(); }
+    catch (e) { console.error(e); alert('No se pudo cargar el lector de PDF. Revisá la conexión a internet y probá de nuevo.'); return; }
+    const tarea = lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false });
+    const lineas = [];
+    try {
+      const doc = await tarea.promise;
+      for (let n = 1; n <= Math.min(doc.numPages, 10); n++) {
+        const pagina = await doc.getPage(n);
+        lineas.push(...pdfLineas((await pagina.getTextContent()).items));
+      }
+    } finally { tarea.destroy(); }
+    if (!lineas.length) { alert('Este PDF no tiene texto para leer (parece una foto o un escaneo).'); return; }
+    const d = pdfInterpretar(lineas);
+    if (!d) { alert('No reconozco este PDF como un presupuesto del sistema. Cargalo a mano.'); return; }
+    pdfAplicar(d);
+  } catch (e) {
+    console.error(e);
+    alert('No se pudo leer el PDF. Probá de nuevo o cargá el presupuesto a mano.');
+  } finally {
+    pdfLeyendo = false;
+  }
+}
+
 // ===== INICIO =====
 migrarVisitasDelDiario();
 renderPresupuestos();
